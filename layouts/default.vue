@@ -1,0 +1,96 @@
+<template>
+  <div>
+    <div v-if="authUser">
+      <Navbar />
+      <div
+        v-if="
+          $route.name == 'profile-slug-id-overview' ||
+          $route.name == 'profile-slug-id-research' ||
+          $route.name == 'profile-slug-id-project' ||
+          $route.name == 'profile-slug-id-post'
+        "
+      >
+        <div class="container-fluid profile-header-bg">
+          <div class="container col-md-8 m-auto">
+            <div class="row">
+              <!-- first Card -->
+              <!--Suggested research-->
+              <div class="col-lg-5">
+                <profileHeader />
+              </div>
+
+              <!-- second Card -->
+              <div class="col-lg-7">
+                <ProfileNav />
+                <Nuxt />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else>
+        <Nuxt />
+      </div>
+    </div>
+    <div v-else>
+      <Navbar />
+      <Nuxt />
+      <BottomContainer v-if="isFooterShow == true" />
+    </div>
+  </div>
+</template>
+<script>
+import Navbar from "/components/navbar";
+import BottomContainer from "/components/footer";
+
+import profileHeader from "/components/profileHeader";
+import ProfileNav from "/components/profileNav";
+export default {
+  components: {
+    Navbar,
+    profileHeader,
+    ProfileNav,
+    BottomContainer,
+  },
+  data() {
+    return {
+      isHeaderShow: true,
+      isFooterShow: true,
+    };
+  },
+  methods: {
+    isHeaderShowChange() {
+      if (
+        this.$route.name == "login" ||
+        this.$route.name == "register" ||
+        this.$route.name == "index" ||
+        this.$route.name == "research" ||
+        this.$route.name == "department"
+      ) {
+        this.isHeaderShow = true;
+      } else this.isHeaderShow = false;
+    },
+    isFooterShowChange() {
+      if (
+        this.$route.name == "register" ||
+        this.$route.name == "login" ||
+        this.$route.name == "index"
+      ) {
+        this.isFooterShow = true;
+      } else this.isFooterShow = false;
+    },
+  },
+  watch: {
+    "$route.name": function (newVal, oldVal) {
+      // watch it
+
+      this.isHeaderShowChange();
+      this.isFooterShowChange();
+    },
+  },
+  // async created() {
+  //     console.log("auth", window.authUser);
+  //     await this.$store.commit("setUpdateUser", window.authUser);
+  // },
+};
+</script>

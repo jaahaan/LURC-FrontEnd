@@ -1,0 +1,47 @@
+// Add variables here
+@use "./mixins" as *;
+
+:root {
+  --nav-height: 80px;
+
+  @include breakpoint-max(767px) {
+    --nav-height: 65px;
+  }
+}
+
+// $titleRed: #bc5d5d;
+$inverseColor: #ffffff;
+$colorWhite: #ffffff;
+
+// $primaryColor: #474554;
+// $headerBg: #5c596d;
+// $secondaryColor: #34c5d9;
+// $btnHover: #19b4c9;
+// $linkActive: #7da2a9;
+
+// $primaryColor: #3a3a3a;
+// $headerBg: #3a3a3a;
+// $secondaryColor: #f2aa4cff;
+// $btnHover: rgb(236, 145, 26);
+
+// $primaryColor: #3a3a3a;
+// $headerBg: #494949;
+// $secondaryColor: #c3d136;
+// $btnHover: #b8c717;
+
+$primaryColor: #7da2a9;
+$headerBg: #a3babe;
+$secondaryColor: #7da2a9;
+$btnHover: #6aa5b1;
+$linkActive: #000000;
+$linkHover: #000000;
+$linkColor: #ffffff;
+
+$grayColor: #3a3a3a;
+$borderColor: #e3e3e3;
+$gray: #3d3b3b;
+$bgWhite: #ffffff;
+$info: #76cbd6;
+// $btnHover: #5a606d;
+$random: #444253;
+$hover: #cdcdcd;
