@@ -1,0 +1,1648 @@
+<template>
+  <div>
+    <div v-if="isLoading == false">
+      <div
+        class="mb-2 p-3"
+        v-if="
+          profileInfo.about == null &&
+          profileInfo.user_skills == '' &&
+          educationInfo == ''
+        "
+      >
+        <button
+          class="main-btn w-100"
+          v-on:click="showSidebar()"
+          v-if="authUser.slug == this.$route.params.slug"
+        >
+          No Information Found<br />
+          <i class="fa-solid fa-plus"></i> Add Your Information
+        </button>
+        <div class="_card"><h1>No Information Found</h1></div>
+      </div>
+      <div class="mb-4" v-else-if="authUser.slug == this.$route.params.slug">
+        <button class="main-btn m-0 w-100" v-on:click="showSidebar()">
+          <i class="fa-solid fa-plus"></i> Add New
+        </button>
+      </div>
+      <div
+        class="card mb-2 p-3"
+        v-else-if="
+          profileInfo.about == null &&
+          profileInfo.user_skills == null &&
+          educationInfo == null
+        "
+      >
+        <h2 class="Nothing_to_show_card text-center">No information to show</h2>
+      </div>
+      <!--**** about-section starts ****-->
+      <!-- about edit -->
+      <div>
+        <template v-if="about_id">
+          <div class="research-post--item">
+            <h5 class="post-title">
+              <div>Edit About</div>
+              <div class="btn-edit text-danger" @click="reset()">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <textarea
+              class="form-control"
+              v-model="editData.about"
+              rows="4"
+              placeholder="Write About You..."
+              :ref="`about${profileInfo.about}`"
+            ></textarea>
+            <div class="footer">
+              <div>
+                <button
+                  class="main-btn main-btn__border"
+                  @click="updateAbout()"
+                >
+                  <i class="fa-solid fa-floppy-disk"></i> Save
+                </button>
+                <button
+                  class="main-btn main-btn__border"
+                  @click="deleteAbout(profileInfo)"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- about -->
+        <template v-else>
+          <div class="research-post--item" v-if="profileInfo.about">
+            <h5 class="post-title">
+              <div>About</div>
+              <div
+                v-if="authUser.slug == this.$route.params.slug"
+                class="btn-edit"
+                @click="editAbout(profileInfo)"
+              >
+                <i class="lni lni-pencil"></i>
+              </div>
+            </h5>
+            <p>
+              {{ profileInfo.about.substring(0, 90) }}
+            </p>
+          </div>
+        </template>
+      </div>
+      <!--**** about-section ends ****-->
+
+      <!--**** education-section starts ****-->
+
+      <template>
+        <div class="research-post--item" v-if="educationInfo != ''">
+          <h5 class="post-title">
+            <div>Education</div>
+            <div
+              v-if="authUser.slug == this.$route.params.slug && !edit_education"
+              class="btn-edit"
+              @click="showEditAllEducation"
+            >
+              <i class="lni lni-pencil"></i>
+            </div>
+
+            <div @click="cancelEditEducation" v-else-if="edit_education">
+              <a class="main-btn main-btn__border">Finish editing</a>
+            </div>
+          </h5>
+          <div
+            v-for="(education, index) in educationInfo"
+            :key="index"
+            class="education__section"
+          >
+            <template v-if="editEducationData.id == education.id">
+              <div class="research-post--item">
+                <h5 class="post-title">
+                  <div>
+                    Edit <b>{{ editEducationData.institute }}</b>
+                  </div>
+                  <div class="btn-edit" @click="cancelEducationModal">
+                    <i class="fa-solid fa-xmark"></i>
+                  </div>
+                </h5>
+                <Form label-position="top">
+                  <FormItem label="Institute *">
+                    <Input
+                      v-model="editEducationData.institute"
+                      placeholder="Ex: Leading University"
+                    ></Input>
+                    <span class="text-danger" v-if="errors.institute">{{
+                      errors.institute[0]
+                    }}</span>
+                  </FormItem>
+                  <FormItem label="Degree">
+                    <Input
+                      v-model="editEducationData.degree"
+                      placeholder="Ex: Bachelor's"
+                    ></Input>
+                    <span class="text-danger" v-if="errors.degree">{{
+                      errors.degree[0]
+                    }}</span>
+                  </FormItem>
+                  <FormItem label="Field of study">
+                    <Input
+                      v-model="editEducationData.fieldOfStudy"
+                      placeholder="Ex: Computer Science"
+                    ></Input>
+                    <span class="text-danger" v-if="errors.fieldOfStudy">{{
+                      errors.fieldOfStudy[0]
+                    }}</span>
+                  </FormItem>
+
+                  <div class="row">
+                    <div class="col-6">
+                      <FormItem label="Start Date">
+                        <DatePicker
+                          type="month"
+                          v-model="editEducationData.start_date"
+                          placeholder="Start Date"
+                          class="d-block"
+                        ></DatePicker>
+                        <span class="text-danger" v-if="errors.start_date">{{
+                          errors.start_date[0]
+                        }}</span>
+                      </FormItem>
+                    </div>
+
+                    <div class="col-6">
+                      <FormItem label="End Date (or expected)">
+                        <DatePicker
+                          type="month"
+                          v-model="editEducationData.end_date"
+                          placeholder="End Date (or expected)"
+                          class="d-block"
+                        ></DatePicker>
+                        <span class="text-danger" v-if="errors.end_date">{{
+                          errors.end_date[0]
+                        }}</span>
+                      </FormItem>
+                    </div>
+                  </div>
+
+                  <FormItem label="Grade">
+                    <Input
+                      v-model="editEducationData.grade"
+                      placeholder="Grade"
+                    ></Input>
+                    <span class="text-danger" v-if="errors.grade">{{
+                      errors.grade[0]
+                    }}</span>
+                  </FormItem>
+                  <FormItem label="Activities">
+                    <Input
+                      v-model="editEducationData.activities"
+                      type="textarea"
+                      :autosize="{ minRows: 2, maxRows: 5 }"
+                      placeholder="Write activities..."
+                    ></Input>
+                    <span class="text-danger" v-if="errors.activities">{{
+                      errors.activities[0]
+                    }}</span>
+                  </FormItem>
+                </Form>
+
+                <div class="footer">
+                  <div>
+                    <button
+                      class="main-btn main-btn__border"
+                      @click="cancelEducationModal"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      class="main-btn main-btn__border"
+                      @click="updateEducation(index)"
+                    >
+                      <i class="fa-solid fa-floppy-disk"></i> Save
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="title">
+                <h6>{{ education.institute }}</h6>
+                <div v-if="edit_education">
+                  <i
+                    class="lni lni-pencil"
+                    @click="showEditSingleEducation(index)"
+                  ></i>
+                  <i
+                    class="lni lni-trash-can"
+                    @click="showEducationRemove(index)"
+                  ></i>
+                </div>
+              </div>
+              <p class="sub-title">
+                {{ education.degree }}, {{ education.fieldOfStudy }}
+              </p>
+              <p class="sub-title" v-if="education.end_date">
+                {{ education.start_date }} - {{ education.end_date }}
+              </p>
+              <p class="sub-title" v-else>
+                {{ education.start_date }} - Present
+              </p>
+            </template>
+          </div>
+          <button
+            class="main-btn main-btn__bg"
+            v-if="edit_education"
+            @click="showEducationModal"
+          >
+            Add new education
+          </button>
+        </div>
+      </template>
+      <!--**** education-section ends ****-->
+
+      <!--**** Skills-section starts ****-->
+      <!-- skills edit -->
+      <div>
+        <template v-if="skill_id">
+          <div class="research-post--item">
+            <h5 class="post-title">
+              <div>Edit Skills</div>
+              <div class="btn-edit text-danger" @click="reset()">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <Select
+              filterable
+              multiple
+              placeholder="Select Skills"
+              v-model="editData.skill_id"
+              :remote-method="getSkills"
+            >
+              <Option
+                v-for="(skill, index) in skills"
+                :value="skill.id"
+                :key="index"
+                >{{ skill.name }}</Option
+              >
+            </Select>
+            <div class="footer">
+              <div>
+                <button class="main-btn main-btn__border" @click="updateSkills">
+                  <i class="fa-solid fa-floppy-disk"></i> Save
+                </button>
+                <button
+                  class="main-btn main-btn__border"
+                  @click="deleteSkills(profileInfo)"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- skills -->
+        <template v-else>
+          <div class="research-post--item" v-if="profileInfo.user_skills != ''">
+            <h5 class="post-title">
+              <div>Skills</div>
+              <div
+                v-if="authUser.slug == this.$route.params.slug"
+                class="btn-edit mx-2 float-end"
+                @click="editSkills(profileInfo)"
+              >
+                <i class="lni lni-pencil"></i>
+              </div>
+            </h5>
+            <p>
+              <span v-for="(skill, index) in profileInfo.user_skills"
+                >{{ skill.name
+                }}<span
+                  class="dot"
+                  v-if="profileInfo.user_skills.length - 1 > index"
+                  >.</span
+                ></span
+              >
+            </p>
+          </div>
+        </template>
+      </div>
+      <!--**** Skills-section ends ****-->
+
+      <div>
+        <div
+          class="navbar-notification--wrapper"
+          v-bind:class="{ active: isSidebar }"
+        >
+          <div class="navbar-notification">
+            <div class="navbar-notification--head">
+              <!-- <a href="#"><img src="assets/images/logo.png" alt="Logo" /></a> -->
+              <h5 class="d-inline">Add Your Information</h5>
+              <button type="button" v-on:click="hideSidebar()">
+                <i class="lni lni-close"></i>
+              </button>
+            </div>
+            <ul class="navbar-notification--body">
+              <li class="nav-item" @click="showAboutModal(profileInfo)">
+                <a class="nav-link">About</a>
+              </li>
+
+              <li class="nav-item" @click="showEducationModal">
+                <a class="nav-link">Education</a>
+              </li>
+              <li class="nav-item" @click="showSkillsModal">
+                <a class="nav-link">Skills</a>
+              </li>
+              <li class="nav-item" @click="showInterestsModal(profileInfo)">
+                <a class="nav-link">Interests</a>
+              </li>
+            </ul>
+
+            <div class="navbar-notification--head">
+              <!-- <a href="#"><img src="assets/images/logo.png" alt="Logo" /></a> -->
+              <h5 class="d-inline">Add Your Research</h5>
+            </div>
+            <ul class="navbar-notification--body">
+              <li class="nav-item" @click="showProjectModal">
+                <a class="nav-link">Project</a>
+              </li>
+              <!-- <li class="nav-item" @click="showResearchModal()">
+                <a class="nav-link">Thesis Paper</a>
+              </li> -->
+              <li
+                class="nav-item"
+                @click="showResearchModal('Conference Paper')"
+              >
+                <a class="nav-link">Conference Paper</a>
+              </li>
+              <li class="nav-item" @click="showResearchModal('Article')">
+                <a class="nav-link">Article</a>
+              </li>
+              <li class="nav-item" @click="showResearchModal('Presentation')">
+                <a class="nav-link">Presentation</a>
+              </li>
+              <li class="nav-item" @click="showResearchModal('Preprint')">
+                <a class="nav-link">Preprint</a>
+              </li>
+              <li class="nav-item" @click="showResearchModal('Poster')">
+                <a class="nav-link">Poster</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- About modal -->
+        <Modal v-model="aboutModal" :closable="false">
+          <div class="research-post--item" id="modal">
+            <h5 class="post-title">
+              <div>About</div>
+              <div class="btn-edit text-danger" @click="closeModal">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <textarea
+              class="form-control"
+              v-model="editData.about"
+              rows="4"
+              placeholder="Write About You..."
+            ></textarea>
+          </div>
+          <div slot="footer">
+            <div>
+              <button class="main-btn main-btn__bg" @click="updateAbout()">
+                <i class="fa-solid fa-floppy-disk"></i> Save
+              </button>
+              <button
+                class="main-btn main-btn__border"
+                @click="deleteAbout(profileInfo)"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+
+        <!-- Education modal -->
+        <Modal v-model="educationModal" :closable="false">
+          <div class="research-post--item" id="modal">
+            <h5 class="post-title">
+              <div>Add Education</div>
+              <div class="btn-edit" @click="cancelEducationModal">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <Form label-position="top">
+              <FormItem label="Institute *">
+                <Input
+                  v-model="educationData.institute"
+                  placeholder="Ex: Leading University"
+                ></Input>
+                <span class="text-danger" v-if="errors.institute">{{
+                  errors.institute[0]
+                }}</span>
+              </FormItem>
+              <FormItem label="Degree">
+                <Input
+                  v-model="educationData.degree"
+                  placeholder="Ex: Bachelor's"
+                ></Input>
+                <span class="text-danger" v-if="errors.degree">{{
+                  errors.degree[0]
+                }}</span>
+              </FormItem>
+              <FormItem label="Field of study">
+                <Input
+                  v-model="educationData.fieldOfStudy"
+                  placeholder="Ex: Computer Science"
+                ></Input>
+                <span class="text-danger" v-if="errors.fieldOfStudy">{{
+                  errors.fieldOfStudy[0]
+                }}</span>
+              </FormItem>
+
+              <div class="row">
+                <div class="col-6">
+                  <FormItem label="Start Date">
+                    <DatePicker
+                      type="date"
+                      v-model="educationData.start_date"
+                      placeholder="Start Date"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.start_date">{{
+                      errors.start_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+
+                <div class="col-6">
+                  <FormItem label="End Date (or expected)">
+                    <DatePicker
+                      type="date"
+                      v-model="educationData.end_date"
+                      placeholder="End Date (or expected)"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.end_date">{{
+                      errors.end_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+              </div>
+              <FormItem label="Grade">
+                <Input
+                  v-model="educationData.grade"
+                  placeholder="Grade"
+                ></Input>
+                <span class="text-danger" v-if="errors.grade">{{
+                  errors.grade[0]
+                }}</span>
+              </FormItem>
+              <FormItem label="Activities">
+                <Input
+                  v-model="educationData.activities"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 5 }"
+                  placeholder="Write activities..."
+                ></Input>
+                <span class="text-danger" v-if="errors.activities">{{
+                  errors.activities[0]
+                }}</span>
+              </FormItem>
+            </Form>
+          </div>
+          <div slot="footer">
+            <button
+              class="main-btn main-btn__border"
+              @click="cancelEducationModal"
+            >
+              Cancel
+            </button>
+            <Button
+              class="main-btn main-btn__bg"
+              @click="saveEducation"
+              :disabled="isAdding"
+              :loading="isAdding"
+            >
+              <i class="fa-solid fa-floppy-disk"></i>
+              {{ isAdding ? "Saving.." : "Save" }}
+            </Button>
+          </div>
+        </Modal>
+
+        <!-- Skills modal -->
+        <Modal v-model="skillsModal" :closable="true">
+          <div class="research-post--item" id="modal">
+            <h5 class="post-title">
+              <div>Add Skills</div>
+              <!-- <div class="btn-edit text-danger" @click="closeModal">
+                <i class="fa-solid fa-xmark"></i>
+              </div> -->
+            </h5>
+            <div class="mb-2">
+              <Select
+                filterable
+                multiple
+                placeholder="Select Skills"
+                v-model="data.skill_id"
+                :remote-method="getSkills"
+              >
+                <Option
+                  v-for="(skill, index) in skills"
+                  :value="skill.id"
+                  :key="index"
+                  >{{ skill.name }}</Option
+                >
+              </Select>
+            </div>
+          </div>
+          <div slot="footer">
+            <div>
+              <button class="main-btn main-btn__border" @click="closeModal">
+                Cancel
+              </button>
+              <Button
+                class="main-btn main-btn__bg"
+                @click="saveSkills"
+                :disabled="isAdding"
+                :loading="isAdding"
+                >{{ isAdding ? "Saving.." : "Save" }}</Button
+              >
+            </div>
+          </div>
+        </Modal>
+
+        <!-- Research modal -->
+        <Modal v-model="researchModal" :mask-closable="false" :closable="false">
+          <div class="research-post--item" id="modal">
+            <h5 class="post-title">
+              <div v-if="researchData.type == ''">Add Research</div>
+              <div v-else>Add {{ researchData.type }}</div>
+
+              <div class="btn-edit text-danger" @click="closeModal">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <div class="card-body">
+              <div class="mb-2">
+                <label>Research Type *</label>
+                <Select v-model="researchData.type" placeholder="Select Type">
+                  <Option value="Article">Article</Option>
+                  <Option value="Conference Paper">Conference Paper</Option>
+                  <Option value="Data">Data</Option>
+                  <Option value="Research">Research</Option>
+                  <Option value="Presentation">Presentation</Option>
+                  <Option value="Preprint">Preprint</Option>
+                  <Option value="Poster">Poster</Option>
+                </Select>
+                <span class="text-danger" v-if="errors.type">{{
+                  errors.type[0]
+                }}</span>
+              </div>
+              <div v-if="researchData.type == 'Conference Paper'">
+                <div
+                  class="mb-2"
+                  v-if="researchData.type == 'Conference Paper'"
+                >
+                  <label>Conference *</label>
+                  <Input
+                    type="text"
+                    v-model="researchData.conference"
+                    placeholder="Conference"
+                  />
+                  <span class="text-danger" v-if="errors.conference">{{
+                    errors.conference[0]
+                  }}</span>
+                </div>
+                <div
+                  class="mb-2"
+                  v-if="researchData.type == 'Conference Paper'"
+                >
+                  <label>Publication Date</label>
+                  <input
+                    type="month"
+                    v-model="researchData.publication_date"
+                    placeholder="Publication Date"
+                    class="d-block w-100 p-1"
+                  />
+                  <span class="text-danger" v-if="errors.start_date">{{
+                    errors.start_date[0]
+                  }}</span>
+                </div>
+              </div>
+
+              <div class="mb-2">
+                <label>Title *</label>
+                <Input
+                  type="text"
+                  v-model="researchData.title"
+                  placeholder="Research Title"
+                />
+                <span class="text-danger" v-if="errors.title">{{
+                  errors.title[0]
+                }}</span>
+              </div>
+
+              <div class="mb-2">
+                <label>Abstract</label>
+                <textarea
+                  class="form-control form-outline"
+                  v-model="researchData.abstract"
+                  rows="4"
+                ></textarea>
+                <span class="text-danger" v-if="errors.abstract">{{
+                  errors.abstract[0]
+                }}</span>
+              </div>
+
+              <div class="mb-2">
+                <label>Authors</label>
+                <Select
+                  filterable
+                  multiple
+                  placeholder="Select Authors"
+                  v-model="researchData.author_id"
+                  :remote-method="getAuthors"
+                >
+                  <Option
+                    v-for="(user, index) in users"
+                    :value="user.id"
+                    :key="index"
+                    >{{ user.name }}</Option
+                  >
+                </Select>
+              </div>
+              <div class="mb-2">
+                <label>Affiliation</label>
+                <Input
+                  type="text"
+                  placeholder="Affiliation"
+                  v-model="researchData.affiliation"
+                />
+                <span class="text-danger" v-if="errors.affiliation">{{
+                  errors.affiliation[0]
+                }}</span>
+              </div>
+              <div class="mb-2">
+                <label>URL</label>
+                <Input
+                  type="url"
+                  v-model="researchData.url"
+                  placeholder="URL"
+                />
+                <span class="text-danger" v-if="errors.url">{{
+                  errors.url[0]
+                }}</span>
+              </div>
+              <div class="mb-2">
+                <label>Attachment</label>
+                <Upload
+                  ref="upload"
+                  :multiple="false"
+                  :show-upload-list="true"
+                  :on-success="handleSuccess"
+                  :format="[
+                    'jpg',
+                    'jpeg',
+                    'png',
+                    'pdf',
+                    'docx',
+                    'txt',
+                    'mp4',
+                    'mp3',
+                    'zip',
+                  ]"
+                  :max-size="21048"
+                  :on-format-error="handleFormatError"
+                  :on-exceeded-size="handleMaxSize"
+                  :on-remove="handleRemove"
+                  type="drag"
+                  action="http://localhost:8000/api/upload_attachment"
+                >
+                  <div class="profile-main-btn">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Upload Attachment
+                  </div>
+                </Upload>
+                <!-- <div v-if="this.attachmentName" class="attachmentName">
+                  <span class="c-pointer">{{ this.attachmentName }}</span>
+                  <span @click="deleteAttachment"
+                    ><i class="lni lni-trash-can c-pointer"></i
+                  ></span>
+                </div> -->
+                <span class="text-danger" v-if="errors.url">{{
+                  errors.url[0]
+                }}</span>
+              </div>
+            </div>
+          </div>
+          <div slot="footer">
+            <div>
+              <button class="main-btn main-btn__border" @click="closeModal">
+                Cancel
+              </button>
+              <Button
+                class="main-btn main-btn__bg"
+                @click="saveResearch"
+                :disabled="isAdding"
+                :loading="isAdding"
+                ><i class="fa-solid fa-floppy-disk"></i>
+                {{ isAdding ? "Saving..." : "Save" }}</Button
+              >
+            </div>
+          </div>
+        </Modal>
+
+        <!-- Peoject modal -->
+        <Modal v-model="projectModal" :closable="false"
+          ><div class="research-post--item" id="modal">
+            <h5 class="post-title">
+              <div>Add Project</div>
+              <div class="btn-edit text-danger" @click="closeModal">
+                <i class="fa-solid fa-xmark"></i>
+              </div>
+            </h5>
+            <Form label-position="top">
+              <FormItem label="Project Name *">
+                <Input
+                  v-model="researchData.title"
+                  placeholder="Project Name"
+                ></Input>
+                <span class="text-danger" v-if="errors.title">{{
+                  errors.title[0]
+                }}</span>
+              </FormItem>
+
+              <FormItem label="Description">
+                <Input
+                  v-model="researchData.abstract"
+                  type="textarea"
+                  :autosize="{ minRows: 2, maxRows: 5 }"
+                  placeholder="Write description..."
+                ></Input>
+                <span class="text-danger" v-if="errors.abstract">{{
+                  errors.abstract[0]
+                }}</span>
+              </FormItem>
+              <FormItem label="Team Member">
+                <Select
+                  filterable
+                  multiple
+                  placeholder="Select Authors"
+                  v-model="researchData.author_id"
+                  :remote-method="getAuthors"
+                >
+                  <Option
+                    v-for="(user, index) in users"
+                    :value="user.id"
+                    :key="index"
+                    >{{ user.name }}</Option
+                  >
+                </Select>
+              </FormItem>
+
+              <FormItem label="Affiliation">
+                <Input
+                  placeholder="Affiliation"
+                  v-model="researchData.affiliation"
+                />
+                <span class="text-danger" v-if="errors.affiliation">{{
+                  errors.affiliation[0]
+                }}</span>
+              </FormItem>
+              <FormItem label="Project URL">
+                <Input
+                  type="url"
+                  v-model="researchData.url"
+                  placeholder="Project URL"
+                />
+                <span class="text-danger" v-if="errors.url">{{
+                  errors.url[0]
+                }}</span>
+              </FormItem>
+
+              <div class="mb-4">
+                <label>Attachment</label>
+                <Upload
+                  :headers="{
+                    'x-csrf-token': token,
+                    'X-Requested-With': 'XMLHttpRequest',
+                  }"
+                  ref="upload"
+                  :multiple="false"
+                  :show-upload-list="true"
+                  :on-success="handleSuccess"
+                  :format="[
+                    'jpg',
+                    'jpeg',
+                    'png',
+                    'pdf',
+                    'docx',
+                    'txt',
+                    'mp4',
+                    'mp3',
+                    'zip',
+                  ]"
+                  :max-size="21048"
+                  :on-format-error="handleFormatError"
+                  :on-exceeded-size="handleMaxSize"
+                  :on-remove="handleRemove"
+                  type="drag"
+                  action="http://localhost:8000/api/upload_attachment"
+                >
+                  <div class="profile-main-btn">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    Upload Attachment
+                  </div>
+                </Upload>
+                <!-- <div v-if="this.attachmentName" class="attachmentName">
+                  <span class="c-pointer">{{ this.attachmentName }}</span>
+                  <span @click="deleteAttachment"
+                    ><i class="lni lni-trash-can c-pointer"></i
+                  ></span>
+                </div> -->
+                <span class="text-danger" v-if="errors.url">{{
+                  errors.url[0]
+                }}</span>
+              </div>
+
+              <div class="row">
+                <div class="col-6">
+                  <label>Start Date</label>
+                  <input
+                    type="month"
+                    v-model="researchData.start_date"
+                    placeholder="Start Date"
+                    class="d-block w-100 p-1"
+                  />
+                </div>
+
+                <div class="col-6">
+                  <label>End Date (or expected)</label>
+                  <input
+                    type="month"
+                    v-model="researchData.end_date"
+                    placeholder="End Date (or expected)"
+                    class="d-block w-100 p-1"
+                  />
+                </div>
+              </div>
+            </Form>
+          </div>
+          <div slot="footer">
+            <button class="main-btn main-btn__border" @click="closeModal">
+              Cancel
+            </button>
+            <Button
+              class="main-btn main-btn__bg"
+              @click="saveProject"
+              :disabled="isAdding"
+              :loading="isAdding"
+              ><i class="fa-solid fa-floppy-disk"></i>
+              {{ isAdding ? "Saving.." : "Save" }}</Button
+            >
+          </div>
+        </Modal>
+
+        <Modal v-model="deleteModal" width="360">
+          <p slot="header" style="color: #7da2a9; text-align: center">
+            <Icon type="close"></Icon>
+            <span>Delete Education</span>
+          </p>
+          <div style="text-align: center">
+            Are you sure you want to delete <b>{{ deleteValue.title }}</b> from
+            your education?
+          </div>
+          <div slot="footer">
+            <Button
+              style="color: #7da2a9"
+              size="large"
+              long
+              :loading="sending"
+              @click="educationRemove"
+            >
+              <span v-if="!sending">Delete</span>
+              <span v-else>Deleting...</span>
+            </Button>
+          </div>
+        </Modal>
+      </div>
+    </div>
+    <!--**** loader ****-->
+    <div v-if="isLoading == true">
+      <button class="main-btn--skeleton w-100 mb-4"></button>
+      <div class="research-post--skeleton--item">
+        <div class="post-title-skeleton">
+          <p></p>
+        </div>
+        <div class="post-sub-title-skeleton">
+          <p></p>
+        </div>
+      </div>
+      <div class="research-post--skeleton--item">
+        <div class="post-title-skeleton">
+          <p></p>
+        </div>
+        <div class="post-sub-title-skeleton">
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      isSidebar: false,
+      isLoading: true,
+      isAdding: false,
+      sending: false,
+      edit_education: false,
+      profileInfo: "",
+      skills: [],
+      users: [],
+      educationInfo: "",
+      user_slug: "",
+      about_id: "",
+      skill_id: "",
+      interests_id: "",
+      token: "",
+      data: {
+        about: "",
+        institute: "",
+        skill_id: [],
+        attachment: "",
+      },
+      editData: {
+        about: "",
+        skill_id: [],
+        interests: "",
+        id: "",
+      },
+      educationData: {
+        institute: "",
+        degree: "",
+        fieldOfStudy: "",
+        start_date: "",
+        end_date: "",
+        grade: "",
+        activities: "",
+      },
+      editEducationData: {
+        id: null,
+        index: -1,
+        institute: "",
+        degree: "",
+        fieldOfStudy: "",
+        start_date: "",
+        end_date: "",
+        grade: "",
+        activities: "",
+      },
+      index: -1,
+      attachmentName: "",
+      researchData: {
+        type: "",
+        conference: "",
+        conference_date: "",
+        title: "",
+        author_id: [],
+        attachment: "",
+        abstract: "",
+        url: "",
+        images: [],
+        start_date: "",
+        end_date: "",
+      },
+      deleteValue: {
+        id: null,
+        indexNumber: null,
+        title: "",
+      },
+      sectionModal: false,
+      aboutModal: false,
+      educationModal: false,
+      skillsModal: false,
+      interestsModal: false,
+      publicationsModal: false,
+      projectsModal: false,
+      researchModal: false,
+      awardsModal: false,
+      volunteerModal: false,
+      projectModal: false,
+      conferenceModal: false,
+      deleteModal: false,
+      errors: [],
+    };
+  },
+
+  methods: {
+    showSidebar() {
+      this.isSidebar = true;
+    },
+    hideSidebar() {
+      this.isSidebar = false;
+    },
+    // async deleteAttachment() {
+    //   let attachment = this.attachmentName;
+    //   this.$refs.upload.clearFiles();
+    //   this.attachmentName = "";
+    //   this.data.attachment = "";
+
+    //   const res = await this.callApi("post", "/api/delete_attachment", {
+    //     Name: attachment,
+    //   });
+    //   if (res.status != 200) {
+    //     this.data.attachment = attachment;
+    //     this.swr();
+    //   }
+    // },
+    async handleRemove(file, fileList) {
+      let attachment = this.attachmentName;
+      this.$refs.upload.clearFiles();
+      this.attachmentName = "";
+      this.researchData.attachment = "";
+
+      const res = await this.callApi("post", "/api/delete_attachment", {
+        Name: attachment,
+      });
+      if (res.status != 200) {
+        this.researchData.attachment = attachment;
+        this.swr();
+      }
+    },
+    handleSuccess(res, file) {
+      // res = `/attachments/${res}`;
+      // res1 = `${res}`;
+      // this.$refs.upload.clearFiles();
+      // if (this.isEditingItem) {
+      //     console.log("inside");
+      //     return (this.data.attachments = res);
+      // }
+      // console.log(res);
+      // this.data.attachment = `\\attachments\\${res}`;
+      console.log(this.researchData.attachment);
+      this.researchData.attachment = `${res}`;
+
+      this.attachmentName = `${res}`;
+    },
+
+    handleError(res, file) {
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc: `${
+          file.errors.file.length
+            ? file.errors.file[0]
+            : "Something went wrong!"
+        }`,
+      });
+    },
+
+    handleFormatError(file) {
+      this.$Notice.warning({
+        title: "The file format is incorrect",
+        desc:
+          "File format of " +
+          file.name +
+          " is incorrect, please select jpg or png.",
+      });
+    },
+    handleMaxSize(file) {
+      this.$Notice.warning({
+        title: "Exceeding file size limit",
+        desc: "File  " + file.name + " is too large, no more than 2M.",
+      });
+    },
+    //section modal
+    showSectionModal() {
+      this.sectionModal = true;
+    },
+
+    showAboutModal(profileInfo) {
+      // let obj = {
+      // 	id : tag.id,
+      // 	tagName : tag.tagName
+      // }
+      this.editData = profileInfo;
+      this.aboutModal = true;
+      this.isEditingItem = true;
+      this.sectionModal = false;
+      this.hideSidebar();
+    },
+
+    async saveAbout() {
+      if (this.editData.about.trim() == "") return this.e("required");
+      const res = await this.callApi("post", `/api/save_about`, this.editData);
+      if (res.status === 200) {
+        this.profileInfo.about = this.editData.about;
+        this.reset();
+        this.s("About has been updated successfully!");
+        this.aboutModal = false;
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors.about) {
+            this.e(res.data.errors.about[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+    },
+
+    //education
+    showEducationModal() {
+      this.educationModal = true;
+      this.hideSidebar();
+    },
+    async saveEducation() {
+      const res = await this.callApi(
+        "post",
+        "/api/save_education",
+        this.educationData
+      );
+      if (res.status === 201) {
+        // this.educationInfo.unshift(res.data);
+        this.s("Education has been added successfully!");
+        this.educationModal = false;
+        this.reset();
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors) {
+            this.e(res.data.errors[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+    },
+    showEditAllEducation() {
+      this.edit_education = true;
+    },
+    cancelEditEducation() {
+      this.edit_education = false;
+      this.editEducationData.id = "";
+      this.editEducationData.institute = "";
+      this.editEducationData.degree = "";
+      this.editEducationData.fieldOfStudy = "";
+      this.editEducationData.start_date = "";
+      this.editEducationData.end_date = "";
+      this.editEducationData.grade = "";
+      this.editEducationData.activities = "";
+    },
+    showEditSingleEducation(index) {
+      if (this.educationInfo[index].id) {
+        // this.editEducationData.index = index;
+        // this.editEducationData.id = this.educationInfo[index].id;
+        // this.editEducationData.email = this.educationInfo[index].email;
+        // this.editEducationData.designation =
+        //   this.educationInfo[index].designation;
+        // this.editEducationData.department =
+        //   this.educationInfo[index].department;
+        let obj = {
+          id: this.educationInfo[index].id,
+          institute: this.educationInfo[index].institute,
+          degree: this.educationInfo[index].degree,
+          fieldOfStudy: this.educationInfo[index].fieldOfStudy,
+          start_date: this.educationInfo[index].edit_start_date,
+          end_date: this.educationInfo[index].edit_end_date,
+          grade: this.educationInfo[index].grade,
+          activities: this.educationInfo[index].activities,
+        };
+        this.editEducationData = obj;
+        this.index = index;
+        this.$nextTick(() => {
+          if (this.$refs["institute" + this.educationInfo[index].id]) {
+            this.$refs["institute" + this.educationInfo[index].id][0].focus();
+          }
+        });
+      }
+    },
+    async updateEducation() {
+      // let validation = true;
+      // this.clearErrorMessage();
+      // if (this.editObj.email.trim() == "") {
+      //   this.editErrorMessages.email = "Email is required!";
+      //   validation = false;
+      // }
+      // if (validation == false) return this.$Message.error("Validation Failed!");
+      new Date("2020-12-28").toLocaleString("en-us", {
+        month: "short",
+        year: "numeric",
+      });
+      var startDate = this.editEducationData.start_date.toLocaleString(
+        "en-us",
+        { month: "short", year: "numeric" }
+      );
+      var endDate = this.editEducationData.end_date.toLocaleString("en-us", {
+        month: "short",
+        year: "numeric",
+      });
+
+      this.sending = true;
+      const res = await this.callApi(
+        "post",
+        "/api/update_education",
+        this.editEducationData
+      );
+      if (res.status === 200) {
+        // this.reset();
+        this.errors = [];
+        this.educationInfo[this.index].id = this.editEducationData.id;
+        this.educationInfo[this.index].institute =
+          this.editEducationData.institute;
+        this.educationInfo[this.index].degree = this.editEducationData.degree;
+        this.educationInfo[this.index].fieldOfStudy =
+          this.editEducationData.fieldOfStudy;
+        this.educationInfo[this.index].start_date = startDate;
+        this.educationInfo[this.index].end_date = endDate;
+        this.educationInfo[this.index].grade = this.editEducationData.grade;
+        this.educationInfo[this.index].activities =
+          this.editEducationData.activities;
+        this.cancelEditEducation();
+        this.s("Education Updated!!");
+      } else {
+        if (res.status == 422) {
+          for (let i in res.data.errors) {
+            this.errors = res.data.errors;
+            // this.e(res.data.errors[i][0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+      this.sending = false;
+    },
+    cancelEducationModal() {
+      this.editEducationData.id = "";
+      this.editEducationData.institute = "";
+      this.editEducationData.degree = "";
+      this.editEducationData.fieldOfStudy = "";
+      this.editEducationData.startDate = "";
+      this.editEducationData.endDate = "";
+      this.editEducationData.grade = "";
+      this.editEducationData.activities = "";
+
+      this.educationModal = false;
+    },
+    showEducationRemove(index) {
+      this.deleteValue.title = this.educationInfo[index].institute;
+      this.deleteValue.id = this.educationInfo[index].id;
+      console.log(this.deleteValue.id);
+      this.deleteValue.indexNumber = index;
+      this.deleteModal = true;
+    },
+    async educationRemove(index) {
+      let ob = {
+        id: this.deleteValue.id,
+      };
+      this.sending = true;
+      const response = await this.callApi("post", "/api/delete_education", ob);
+      if (response.status == 200) {
+        this.educationInfo.splice(this.deleteValue.indexNumber, 1);
+        this.s(this.deleteValue.title + " Deleted!!");
+        this.deleteModal = false;
+        this.sending = false;
+      } else {
+        this.sending = false;
+        this.deleteModal = false;
+        this.swr();
+      }
+    },
+    showSkillsModal() {
+      this.skillsModal = true;
+      this.hideSidebar();
+    },
+    async saveSkills() {
+      if (this.data.skill_id == "") return this.e("Skill Required");
+      this.isAdding = true;
+      const res = await this.callApi("post", "/api/save_skills", this.data);
+      if (res.status === 200) {
+        this.data.skill_id = [];
+        this.reset();
+        this.s("Skills has been updated successfully!");
+        this.skillsModal = false;
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors.skill_id) {
+            this.e(res.data.errors.skill_id[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+      this.isAdding = false;
+    },
+
+    showInterestsModal(profileInfo) {
+      this.editData = profileInfo;
+      this.interestsModal = true;
+      this.isEditingItem = true;
+      this.sectionModal = false;
+      this.hideSidebar();
+    },
+
+    editAbout(profileInfo) {
+      this.reset();
+      this.editData.about = profileInfo.about;
+      this.editData.id = profileInfo.id;
+      this.about_id = profileInfo.id;
+      // this.editData.skills = "";
+
+      if (this.profileInfo) {
+        this.$nextTick(() => {
+          if (this.$refs["about" + this.profileInfo.about]) {
+            this.$refs["about" + this.profileInfo.about].focus();
+          }
+        });
+      }
+    },
+    async updateAbout() {
+      if (this.editData.about.trim() == "") return this.e("required");
+      const res = await this.callApi("post", `/api/save_about`, this.editData);
+      if (res.status === 200) {
+        this.profileInfo.about = this.editData.about;
+        this.reset();
+        this.s("About has been updated successfully!");
+        this.errors = [];
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors.about) {
+            this.e(res.data.errors.about[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+    },
+
+    async deleteAbout(profileInfo) {
+      if (this.profileInfo.id) {
+        const res = await this.callApi(
+          "post",
+          `/api/delete_about/${this.profileInfo.id}`,
+          this.editData
+        );
+
+        if (res.status === 200) {
+          this.profileInfo.about = this.editData.about;
+          this.reset();
+          this.s("About has been deleted successfully!");
+        } else {
+          this.swe();
+        }
+      }
+    },
+
+    async editSkills(profileInfo) {
+      this.reset();
+      // this.data.skill_id = profileInfo.user_skills;
+      this.editData.id = profileInfo.id;
+      this.skill_id = profileInfo.id;
+      this.editData.about = "";
+      this.user_slug = this.$route.params.slug;
+
+      const [user, user_skills] = await Promise.all([
+        this.callApi("get", `/api/get_profile_info/${this.user_slug}`),
+        this.callApi("get", "/api/search_skills"),
+      ]);
+      if (user.status == 200) {
+        console.log(user.data);
+        // this.skills = user_skills.data;
+        for (let t of user.data.user_skills) {
+          console.log(t);
+          let obj = {
+            skill_id: parseInt(t.id),
+          };
+          this.editData.skill_id = parseInt(t.id);
+          // this.editData.skill_id.push(t);
+        }
+      } else {
+        this.swr();
+      }
+      // if (this.profileInfo) {
+      //     this.$nextTick(() => {
+      //         if (this.$refs["todo" + this.todos[index].id]) {
+      //             this.$refs["todo" + this.todos[index].id][0].focus();
+      //         }
+      //     });
+      // }
+    },
+    async updateSkills() {
+      if (this.editData.skills.trim() == "") return this.e("required");
+      const res = await this.callApi("post", `/api/save_skills`, this.editData);
+      if (res.status === 200) {
+        this.profileInfo.skills = this.editData.skills;
+        this.reset();
+        this.s("Skills has been updated successfully!");
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors.about) {
+            this.e(res.data.errors.about[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+    },
+
+    showProjectModal() {
+      this.projectModal = true;
+      this.hideSidebar();
+    },
+    async saveProject() {
+      // if (this.researchData.project_name.trim() == "")
+      //     return this.e("Project Name is required");
+      // if (this.researchData.project_type.trim() == "")
+      //     return this.e("Project type is required");
+      // if (this.researchData.start_date.trim() == "")
+      //     return this.e("Start date is required");
+      this.researchData.type = "Project";
+      const res = await this.callApi(
+        "post",
+        "/api/save_post",
+        this.researchData
+      );
+      this.isLoading = true;
+      if (res.status === 200) {
+        this.s(res.data.msg);
+        // this.msg = res.researchData.msg;
+        this.closeModal();
+        this.reset();
+      } else {
+        if (res.status == 422) {
+          console.log(this.$route.params.id);
+
+          for (let i in res.data.errors) {
+            this.errors = res.data.errors;
+          }
+        } else {
+          this.swr();
+        }
+      }
+      this.isLoading = false;
+    },
+    showResearchModal(type) {
+      this.researchData.type = type;
+      this.researchModal = true;
+      this.hideSidebar();
+    },
+    async saveResearch() {
+      // if (this.data.project_name.trim() == "")
+      //     return this.e("Project Name is required");
+      // if (this.data.project_type.trim() == "")
+      //     return this.e("Project type is required");
+      // if (this.data.start_date.trim() == "")
+      //     return this.e("Start date is required");
+
+      const res = await this.callApi(
+        "post",
+        "/api/save_post",
+        this.researchData
+      );
+      this.isLoading = true;
+      if (res.status === 200) {
+        this.s(res.data.msg);
+        // this.msg = res.data.msg;
+        this.closeModal();
+        this.reset();
+        // this.clearErrorMessage();
+      } else {
+        if (res.status == 422) {
+          console.log(this.$route.params.id);
+
+          for (let i in res.data.errors) {
+            this.errors = res.data.errors;
+          }
+        } else {
+          this.swr();
+        }
+      }
+      this.isLoading = false;
+    },
+    async getSkills(query) {
+      // console.log(query);
+      const response = await this.callApi(
+        "get",
+        `/api/search_skills?keyword=${query}`
+      );
+      if (response.status == 200) {
+        this.skills = response.data;
+      }
+    },
+    async getAuthors(query) {
+      console.log(query);
+      const response = await this.callApi(
+        "get",
+        `/api/search?keyword=${query}`
+      );
+      if (response.status == 200) {
+        this.users = response.data;
+      }
+    },
+
+    closeModal() {
+      this.aboutModal = false;
+      this.skillsModal = false;
+      this.projectModal = false;
+      this.researchModal = false;
+      // this.user_id = "";
+      // this.editData.about = "";
+      // this.about_id = "";
+      // this.editData.skills = "";
+      // this.skills_id = "";
+      this.researchData.type = "";
+      this.researchData.title = "";
+      this.researchData.author_id = "";
+      this.researchData.attachment = "";
+      this.researchData.abstract = "";
+      this.researchData.start_date = "";
+      this.researchData.end_date = "";
+      this.researchData.url = "";
+      this.attachmentName = "";
+    },
+    async reset() {
+      this.user_slug = "";
+      this.editData.about = "";
+      this.about_id = "";
+      this.editData.skill_id = "";
+      this.skill_id = "";
+      this.aboutModal = false;
+      this.skillsModal = false;
+      this.projectModal = false;
+      this.researchModal = false;
+
+      //   this.token = window.Laravel.csrfToken;
+
+      this.user_slug = this.$route.params.slug;
+      const res = await this.callApi(
+        "get",
+        `/api/get_profile_info/${this.user_slug}`
+      );
+
+      if (res.status == 200) {
+        this.profileInfo = res.data.user;
+        this.educationInfo = res.data.education;
+      } else {
+        this.swr();
+      }
+      this.isLoading = false;
+    },
+  },
+  watch: {
+    "$route.params"(oldValue, newValue) {
+      if (oldValue != newValue) {
+        console.log("route is changing!");
+        this.reset();
+      }
+    },
+  },
+  async created() {
+    // this.token = window.Laravel.csrfToken;
+
+    this.user_slug = this.$route.params.slug;
+    if (this.authUser) {
+      const res = await this.callApi(
+        "get",
+        `/api/get_profile_info/${this.user_slug}`
+      );
+
+      if (res.status == 200) {
+        this.profileInfo = res.data.user;
+        this.educationInfo = res.data.education;
+      } else {
+        this.swr();
+      }
+    } else {
+      window.location = "/";
+      // this.$router.push("/");
+    }
+
+    this.isLoading = false;
+  },
+};
+</script>
+
+<style scoped>
+.card-bg {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.card {
+  border: 1px solid #cdcdcd;
+}
+
+.profile-info-skeleton h5 {
+  width: 60%;
+  height: 24px;
+  display: block;
+  background-color: #c0c0c0;
+  margin: 0.25rem;
+}
+.profile-info-skeleton p {
+  width: 95%;
+  height: 16px;
+  margin: 0.25rem;
+  background-color: #c0c0c0;
+}
+</style>

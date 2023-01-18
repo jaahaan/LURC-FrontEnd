@@ -4,29 +4,23 @@
       <Navbar />
       <div
         v-if="
-          $route.name == 'profile-slug-id-overview' ||
-          $route.name == 'profile-slug-id-research' ||
-          $route.name == 'profile-slug-id-project' ||
-          $route.name == 'profile-slug-id-post'
+          $route.name == 'profile-slug-overview' ||
+          $route.name == 'profile-slug-research' ||
+          $route.name == 'profile-slug-project' ||
+          $route.name == 'profile-slug-post'
         "
       >
         <div class="container-fluid profile-header-bg">
-          <div class="container col-md-8 m-auto">
-            <div class="row">
-              <!-- first Card -->
-              <!--Suggested research-->
-              <div class="col-lg-5">
-                <profileHeader />
-              </div>
-
-              <!-- second Card -->
-              <div class="col-lg-7">
-                <ProfileNav />
-                <Nuxt />
-              </div>
-            </div>
-          </div>
+          <profileHeader />
         </div>
+      </div>
+      <div
+        v-else-if="
+          $route.name == 'description-slug-overview' ||
+          $route.name == 'description-slug-comments'
+        "
+      >
+        <postHeader />
       </div>
       <div v-else>
         <Nuxt />
@@ -42,15 +36,17 @@
 <script>
 import Navbar from "/components/navbar";
 import BottomContainer from "/components/footer";
-
 import profileHeader from "/components/profileHeader";
 import ProfileNav from "/components/profileNav";
+import postHeader from "/components/postHeader";
+
 export default {
   components: {
     Navbar,
     profileHeader,
     ProfileNav,
     BottomContainer,
+    postHeader,
   },
   data() {
     return {
@@ -89,8 +85,9 @@ export default {
     },
   },
   // async created() {
-  //     console.log("auth", window.authUser);
-  //     await this.$store.commit("setUpdateUser", window.authUser);
+  //   // if (this.authUser) this.getNotificationItemsServer();
+  //   // console.log("auth", window.authUser);
+  //   // await this.$store.commit("setUpdateUser", window.authUser);
   // },
 };
 </script>

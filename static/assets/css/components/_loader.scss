@@ -1,0 +1,9 @@
+@use "../abstracts/variables" as *;
+@use "../abstracts/mixins" as *;
+
+.loader {
+  text-align: center;
+  margin: 20px 0px;
+  font-size: 70px;
+  color: #0c0c0c;
+}

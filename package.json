@@ -10,17 +10,18 @@
     "serve": "nuxt serve"
   },
   "dependencies": {
-    "core-js": "^3.25.3",
-    "nuxt": "^2.15.8",
-    "vue": "^2.7.10",
-    "vue-server-renderer": "^2.7.10",
-    "vue-template-compiler": "^2.7.10",
     "@nuxtjs/axios": "^5.11.0",
     "cookie": "^0.4.0",
+    "core-js": "^3.25.3",
     "hooper": "^0.3.4",
     "iview": "^3.5.4",
     "lodash": "^4.17.21",
-    "universal-cookie": "^4.0.4"
+    "moment": "^2.29.4",
+    "nuxt": "^2.15.8",
+    "universal-cookie": "^4.0.4",
+    "vue": "^2.7.10",
+    "vue-server-renderer": "^2.7.10",
+    "vue-template-compiler": "^2.7.10"
   },
   "devDependencies": {
     "sass": "^1.55.0",

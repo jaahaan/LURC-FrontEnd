@@ -1,167 +1,84 @@
 <template>
-  <div class="mt-2">
-    <!--****** Add Project box ******-->
+  <div>
+    <!--****** Add Research box ******-->
 
     <template
-      v-if="isLoading == false && showProjectForm == false && projects == ''"
+      v-if="isLoading == false && showResearchForm == false && researches == ''"
     >
-      <div class="card mb-2 p-3" v-if="authUser.id == this.$route.params.id">
+      <div class="card mb-2 p-3" v-if="authUser.slug == route_slug">
         <button class="add_new_card" v-on:click="showForm()">
-          <i class="lni lni-folder"></i> Add Your Project
+          <i class="lni lni-folder"></i> Add Your Research
         </button>
       </div>
     </template>
 
-    <!--****** Add Project form ******-->
-    <template v-if="showProjectForm == true">
+    <!--****** Add Research form ******-->
+    <template v-if="showResearchForm == true">
       <div class="research-post--item">
         <h5 class="post-title">
-          <div>Add Project</div>
-          <div class="btn-edit text-danger" @click="reset()">
+          <div v-if="data.type == ''">Add Research</div>
+          <div v-else>Add {{ data.type }}</div>
+
+          <div class="btn-edit text-danger" @click="reset">
             <i class="fa-solid fa-xmark"></i>
           </div>
         </h5>
-        <Form label-position="top">
-          <FormItem label="Project Name *">
-            <Input v-model="data.title" placeholder="Project Name"></Input>
-            <span class="text-danger" v-if="errors.title">{{
-              errors.title[0]
-            }}</span>
-          </FormItem>
-
-          <FormItem label="Description">
-            <Input
-              v-model="data.abstract"
-              type="textarea"
-              :autosize="{ minRows: 2, maxRows: 5 }"
-              placeholder="Write description..."
-            ></Input>
-            <span class="text-danger" v-if="errors.abstract">{{
-              errors.abstract[0]
-            }}</span>
-          </FormItem>
-          <FormItem label="Team Member">
-            <Select
-              filterable
-              multiple
-              placeholder="Select Authors"
-              v-model="data.author_id"
-              :remote-method="getAuthors"
-            >
-              <Option
-                v-for="(user, index) in users"
-                :value="user.id"
-                :key="index"
-                >{{ user.name }}</Option
-              >
+        <div class="card-body">
+          <div class="mb-2">
+            <label>Research Type *</label>
+            <Select v-model="data.type" placeholder="Select Type">
+              <Option value="Article">Article</Option>
+              <Option value="Conference Paper">Conference Paper</Option>
+              <Option value="Data">Data</Option>
+              <Option value="Research">Research</Option>
+              <Option value="Presentation">Presentation</Option>
+              <Option value="Preprint">Preprint</Option>
+              <Option value="Poster">Poster</Option>
             </Select>
-          </FormItem>
-
-          <FormItem label="Affiliation">
-            <Input placeholder="Affiliation" v-model="data.affiliation" />
-            <span class="text-danger" v-if="errors.affiliation">{{
-              errors.affiliation[0]
+            <span class="text-danger" v-if="errors.type">{{
+              errors.type[0]
             }}</span>
-          </FormItem>
-          <FormItem label="Project URL">
-            <Input type="url" v-model="data.url" placeholder="Project URL" />
-            <span class="text-danger" v-if="errors.url">{{
-              errors.url[0]
-            }}</span>
-          </FormItem>
+          </div>
 
-          <FormItem label="Attachment">
-            <Upload
-              :headers="{
-                'x-csrf-token': token,
-                'X-Requested-With': 'XMLHttpRequest',
-              }"
-              ref="upload"
-              :multiple="true"
-              :show-upload-list="true"
-              :on-success="handleSuccess"
-              :format="[
-                'jpg',
-                'jpeg',
-                'png',
-                'pdf',
-                'docx',
-                'txt',
-                'mp4',
-                'mp3',
-                'zip',
-              ]"
-              :max-size="21048"
-              :on-format-error="handleFormatError"
-              :on-exceeded-size="handleMaxSize"
-              :on-remove="deleteAttachment"
-              type="drag"
-              action="/api/upload_attachment"
-            >
-              <div class="profile-main-btn">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                Upload Attachment
-              </div>
-            </Upload>
-            <div v-if="this.attachmentName" class="attachmentName">
-              <span class="c-pointer">{{ this.attachmentName }}</span>
-              <span @click="deleteAttachment"
-                ><i class="lni lni-trash-can c-pointer"></i
-              ></span>
+          <div v-if="data.type == 'Conference Paper'">
+            <div class="mb-2" v-if="data.type == 'Conference Paper'">
+              <label>Conference *</label>
+              <Input
+                type="text"
+                v-model="data.conference"
+                placeholder="Conference"
+              />
+              <span class="text-danger" v-if="errors.conference">{{
+                errors.conference[0]
+              }}</span>
             </div>
-            <span class="text-danger" v-if="errors.url">{{
-              errors.url[0]
-            }}</span>
-          </FormItem>
-          <FormItem label="Project URL">
-            <Input type="url" v-model="data.url" placeholder="Project URL" />
-            <span class="text-danger" v-if="errors.url">{{
-              errors.url[0]
-            }}</span>
-          </FormItem>
-          <div class="row">
-            <div class="col-6">
-              <FormItem label="Start Date">
-                <DatePicker
-                  type="date"
-                  v-model="data.start_date"
-                  placeholder="Start Date"
-                ></DatePicker>
-                <span class="text-danger" v-if="errors.start_date">{{
-                  errors.start_date[0]
-                }}</span>
-              </FormItem>
-            </div>
-
-            <div class="col-6">
-              <FormItem label="End Date (or expected)">
-                <DatePicker
-                  type="date"
-                  v-model="data.end_date"
-                  placeholder="End Date (or expected)"
-                ></DatePicker>
-                <span class="text-danger" v-if="errors.end_date">{{
-                  errors.end_date[0]
-                }}</span>
-              </FormItem>
+            <div class="mb-2" v-if="data.type == 'Conference Paper'">
+              <label>Publication Date</label>
+              <input
+                type="month"
+                v-model="data.publication_date"
+                placeholder="Publication Date"
+                class="d-block w-100 p-1"
+              />
+              <span class="text-danger" v-if="errors.start_date">{{
+                errors.start_date[0]
+              }}</span>
             </div>
           </div>
-        </Form>
-        <!-- <div>
           <div class="mb-2">
-            <label>Project Name *</label>
-
+            <label>Title *</label>
             <Input
               type="text"
               v-model="data.title"
-              placeholder="Project Name"
+              placeholder="Research Title"
             />
             <span class="text-danger" v-if="errors.title">{{
               errors.title[0]
             }}</span>
           </div>
+
           <div class="mb-2">
-            <label>Description</label>
+            <label>Abstract</label>
             <textarea
               class="form-control form-outline"
               v-model="data.abstract"
@@ -171,14 +88,15 @@
               errors.abstract[0]
             }}</span>
           </div>
-          <div class="mb-2">
-            <label>Team Member</label>
 
+          <div class="mb-2">
+            <label>Authors</label>
             <Select
               filterable
               multiple
               placeholder="Select Authors"
               v-model="data.author_id"
+              :remote-method="getAuthors"
             >
               <Option
                 v-for="(user, index) in users"
@@ -200,8 +118,8 @@
             }}</span>
           </div>
           <div class="mb-2">
-            <label>Project URL</label>
-            <Input type="url" v-model="data.url" placeholder="Project URL" />
+            <label>URL</label>
+            <Input type="url" v-model="data.url" placeholder="URL" />
             <span class="text-danger" v-if="errors.url">{{
               errors.url[0]
             }}</span>
@@ -209,10 +127,6 @@
           <div class="mb-2">
             <label>Attachment</label>
             <Upload
-              :headers="{
-                'x-csrf-token': token,
-                'X-Requested-With': 'XMLHttpRequest',
-              }"
               ref="upload"
               :multiple="true"
               :show-upload-list="true"
@@ -233,62 +147,30 @@
               :on-exceeded-size="handleMaxSize"
               :on-remove="deleteAttachment"
               type="drag"
-              action="/api/upload_attachment"
+              action="http://localhost:8000/api/upload_attachment"
             >
               <div class="profile-main-btn">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
                 Upload Attachment
               </div>
             </Upload>
-            <div v-if="this.attachmentName" class="attachmentName">
+            <!-- <div v-if="this.attachmentName" class="attachmentName">
               <span class="c-pointer">{{ this.attachmentName }}</span>
               <span @click="deleteAttachment"
                 ><i class="lni lni-trash-can c-pointer"></i
               ></span>
-            </div>
+            </div> -->
             <span class="text-danger" v-if="errors.url">{{
               errors.url[0]
             }}</span>
           </div>
-          <div class="mb-2">
-            <div class="row">
-              <div class="col-6">
-                <label>Start Date</label>
-                <input
-                  type="month"
-                  v-model="data.start_date"
-                  placeholder="Start Date"
-                  class="d-block w-100 p-1"
-                />
-                <span class="text-danger" v-if="errors.start_date">{{
-                  errors.start_date[0]
-                }}</span>
-              </div>
-
-              <div class="col-6">
-                <label>End Date (or expected)</label>
-                <input
-                  type="month"
-                  v-model="data.end_date"
-                  placeholder="End Date (or expected)"
-                  class="d-block w-100 p-1"
-                />
-                <span class="text-danger" v-if="errors.end_date">{{
-                  errors.url[0]
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div> -->
+        </div>
         <div class="footer">
           <div>
-            <button class="main-btn main-btn__border" @click="save()">
+            <button class="main-btn main-btn__bg" @click="save">
               <i class="fa-solid fa-floppy-disk"></i> Save
             </button>
-            <button
-              class="main-btn main-btn__border"
-              @click="reset(profileInfo)"
-            >
+            <button class="main-btn main-btn__border" @click="reset()">
               Cancel
             </button>
           </div>
@@ -296,19 +178,18 @@
       </div>
     </template>
 
-    <!--**** Projects ****-->
-
+    <!--**** Researches ****-->
     <template
-      v-if="projects != '' && isLoading == false && showProjectForm == false"
+      v-if="researches != '' && isLoading == false && showResearchForm == false"
     >
       <div>
         <div>
           <div class="section-header">
             <div>
-              <h3>Projects</h3>
+              <h3>Research Items</h3>
             </div>
             <div
-              v-if="authUser.id == route_id && editData.id == ''"
+              v-if="authUser.slug == route_slug && editData.id == ''"
               class="btn-edit"
               @click="showForm()"
             >
@@ -318,33 +199,56 @@
         </div>
         <div
           class="research-post--item"
-          v-for="(research, index) in projects"
+          v-for="(research, index) in researches"
           :key="index"
         >
           <h5 class="post-title">
-            <router-link :to="`/description/${research.slug}`">{{
-              research.title
-            }}</router-link>
+            <router-link :to="`/description/${research.slug}/overview`"
+              ><h5>{{ research.title }}</h5></router-link
+            >
             <div
-              v-if="authUser.id == route_id && editData.id == ''"
+              v-if="authUser.slug == route_slug && editData.id == ''"
               class="btn-edit"
               @click="showEdit()"
             >
               <i class="lni lni-pencil"></i>
             </div>
           </h5>
-          <div class="mt-2 mb-2">
+
+          <!-- <div class="post-sub-title">
+            <p v-if="research.end_date">
+              {{ research.start_date }} -
+              {{ research.end_date }}
+            </p>
+            <p v-else>{{ research.start_date }} - Ongoing</p>
+          </div> -->
+          <div class="post-sub-title" v-if="research.affiliation">
+            <p>
+              <i class="fa-solid fa-graduation-cap"></i> Associated with
+              {{ research.affiliation }}
+            </p>
+          </div>
+
+          <p class="my-3">
             <router-link
-              :to="`/description/${research.slug}`"
-              class="main-btn main-btn__border d-inline-block text-center"
+              :to="`/description/${research.slug}/overview`"
+              class="py-2 px-4 alert alert-secondary text-center"
             >
               {{ research.type }}</router-link
             >
+          </p>
+          <div class="post-sub-title" v-if="research.conference">
+            <div>
+              <p>
+                {{ research.publication_date }}
+              </p>
+              <p>Conference: {{ research.conference }}</p>
+            </div>
           </div>
           <p v-if="research.abstract != null">
-            {{ research.abstract.substring(0, 190) }}
+            {{ research.abstract.substring(0, 90) }}
             ...
-            <router-link :to="`/description/${research.slug}`"
+            <router-link :to="`/description/${research.slug}/overview`"
               >See more</router-link
             >
           </p>
@@ -358,7 +262,7 @@
               <span v-for="author in research.authors">
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -375,7 +279,7 @@
               <span v-for="author in research.authors">
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -392,7 +296,7 @@
               <span v-for="author in research.authors">
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -409,7 +313,7 @@
               <span v-for="author in research.authors">
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -428,7 +332,7 @@
               >
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -443,7 +347,7 @@
               >
                 <router-link
                   v-if="authUser"
-                  :to="`/profile/${author.slug}/${author.id}`"
+                  :to="`/profile/${author.slug}/overview`"
                   class="authors"
                   >{{ author.name }}
                 </router-link>
@@ -453,8 +357,6 @@
           </div>
           <div class="post-sub-title">
             <p>
-              {{ research.created_at }}
-              .
               <a v-if="research.read_count > 1"
                 >{{ research.read_count }} Reads</a
               ><a v-else-if="research.read_count <= 1"
@@ -472,16 +374,16 @@
                 v-if="research.attachment && authUser"
                 class="main-btn main-btn__bg"
                 :href="`http://localhost:8000/api/download_attachment/${research.attachment}`"
-                >Download</a
-              >
+                >Download <i class="fa-solid fa-download"
+              /></a>
               <a
                 class="main-btn main-btn__bg px-5"
                 :href="`${research.url}`"
                 v-if="research.url"
                 target="_blank"
               >
-                Link
-              </a>
+                Link <i class="fa-solid fa-arrow-up-right-from-square"></i
+              ></a>
             </p>
 
             <p v-if="authUser">
@@ -503,8 +405,12 @@
       </div>
     </template>
     <!--**** loader ****-->
-    <template v-if="isLoading == true">
-      <div class="research-post--skeleton">
+    <div v-if="isLoading == true">
+      <div class="section-header__skeleton">
+        <h3></h3>
+        <i></i>
+      </div>
+      <div class="research-post--skeleton--item">
         <div class="post-title-skeleton">
           <p></p>
         </div>
@@ -516,7 +422,7 @@
           <a> </a>
         </div>
       </div>
-      <div class="research-post--skeleton">
+      <div class="research-post--skeleton--item">
         <div class="post-title-skeleton">
           <p></p>
         </div>
@@ -528,19 +434,7 @@
           <a> </a>
         </div>
       </div>
-      <div class="research-post--skeleton">
-        <div class="post-title-skeleton">
-          <p></p>
-        </div>
-        <div class="post-sub-title-skeleton">
-          <p></p>
-        </div>
-        <div class="footer">
-          <a> </a>
-          <a> </a>
-        </div>
-      </div>
-    </template>
+    </div>
   </div>
 </template>
 
@@ -549,17 +443,20 @@ export default {
   components: {},
   data() {
     return {
-      showProjectForm: false,
+      showResearchForm: false,
       isLoading: true,
+      loading1: false,
       errors: [],
-      projects: [],
+      researches: [],
       users: [],
       user_id: -1,
       user_slug: "",
-      route_id: this.$route.params.id,
-      attachmentName: "",
+
+      route_slug: this.$route.params.slug,
       data: {
         type: "",
+        conference: "",
+        conference_date: "",
         title: "",
         author_id: [],
         attachment: "",
@@ -567,8 +464,6 @@ export default {
         url: "",
         images: [],
         pdf: "",
-        start_date: "",
-        end_date: "",
       },
       editData: {
         user_id: "",
@@ -587,10 +482,14 @@ export default {
         id: "",
         index: "",
       },
+      isEditingItem: false,
+      attachmentName: "",
     };
   },
-
   methods: {
+    clearErrorMessage() {
+      this.errors = [];
+    },
     async deleteAttachment() {
       let attachment = this.attachmentName;
       this.$refs.upload.clearFiles();
@@ -608,7 +507,7 @@ export default {
     handleSuccess(res, file) {
       // res = `/attachments/${res}`;
       // res1 = `${res}`;
-      this.$refs.upload.clearFiles();
+      // this.$refs.upload.clearFiles();
       // if (this.isEditingItem) {
       //     console.log("inside");
       //     return (this.data.attachments = res);
@@ -648,14 +547,16 @@ export default {
       });
     },
     showForm() {
-      this.showProjectForm = true;
+      this.showResearchForm = true;
     },
     async reset() {
-      this.showProjectForm = false;
+      this.showResearchForm = false;
       this.editData.id = "";
       this.user_id = this.$route.params.id;
       this.data = {
         type: "",
+        conference: "",
+        conference_date: "",
         title: "",
         author_id: [],
         attachment: "",
@@ -663,8 +564,6 @@ export default {
         url: "",
         images: [],
         pdf: "",
-        start_date: "",
-        end_date: "",
       };
       // const res = await this.callApi(
       //     "get",
@@ -679,6 +578,7 @@ export default {
 
       this.isLoading = false;
     },
+
     async save() {
       // if (this.data.project_name.trim() == "")
       //     return this.e("Project Name is required");
@@ -686,28 +586,16 @@ export default {
       //     return this.e("Project type is required");
       // if (this.data.start_date.trim() == "")
       //     return this.e("Start date is required");
+
       this.user_id = this.$route.params.id;
-      this.data.type = "Project";
       console.log(this.user_id);
-      const res = await this.callApi(
-        "post",
-        `/api/save_post/${this.user_id}`,
-        this.data
-      );
+      const res = await this.callApi("post", `/api/save_post`, this.data);
       this.isLoading = true;
       if (res.status === 200) {
         this.s(res.data.msg);
         // this.msg = res.data.msg;
-        this.data.type = "";
-        this.data.title = "";
-        this.data.author_id = "";
-        this.data.attachment = "";
-        this.data.abstract = "";
-        this.data.start_date = "";
-        this.data.end_date = "";
-        this.data.url = "";
-        this.attachmentName = "";
         this.reset();
+        this.clearErrorMessage();
       } else {
         if (res.status == 422) {
           console.log(this.$route.params.id);
@@ -721,7 +609,8 @@ export default {
       }
       this.isLoading = false;
     },
-    editProject(index) {
+
+    edit(index) {
       if (this.projects[index].id) {
         this.editData.user_id = this.projects[index].user_id;
         this.editData.project_name = this.projects[index].project_name;
@@ -741,32 +630,26 @@ export default {
       }
     },
 
-    async updateProject() {
-      // if (this.data.project_name.trim() == "")
-      //     return this.e("Project Name is required");
-      // if (this.data.project_type.trim() == "")
-      //     return this.e("Project type is required");
-      // if (this.data.start_date.trim() == "")
-      //     return this.e("Start date is required");
-      this.user_id = this.$route.params.id;
+    async update() {
+      // if (this.data.email.trim() == "")
+      //     return this.e("Email is required");
+      // if (this.data.designation.trim() == "")
+      //     return this.e("Designation is required");
+      // if (this.data.department.trim() == "")
+      //     return this.e("Department is required");
       this.isLoading = true;
 
-      const res = await this.callApi(
-        "post",
-        "/api/update_project",
-        this.editData
-      );
+      const res = await this.callApi("post", "/api/update_post", this.editData);
+
       if (res.status === 200) {
-        this.s(res.data.msg);
-        // this.msg = res.data.msg;
-        this.errors = "";
+        this.msg = res.data.msg;
         this.reset();
+        this.errors = [];
       } else {
         if (res.status == 422) {
-          console.log(this.$route.params.id);
-
           for (let i in res.data.errors) {
             this.errors = res.data.errors;
+            // this.e(res.data.errors[i][0]);
           }
         } else {
           this.swr();
@@ -774,25 +657,22 @@ export default {
       }
       this.isLoading = false;
     },
-
-    async deleteProject() {
+    async delete() {
       this.isLoading = true;
 
       const res = await this.callApi(
         "post",
-        `/api/delete_project/${this.editData.id}`
+        `/api/delete_post/${this.editData.id}`
       );
 
       if (res.status === 200) {
         this.s(res.data.msg);
-        // this.reset();
-        this.projects.splice(this.editData.index, 1);
+        this.reset();
       } else {
         this.swr();
       }
       this.isLoading = false;
     },
-
     async getAuthors(query) {
       console.log(query);
       const response = await this.callApi(
@@ -804,25 +684,17 @@ export default {
       }
     },
   },
-
-  // watch: {
-  //   "$route.params"(oldValue, newValue) {
-  //     if (oldValue != newValue) {
-  //       console.log("route is changing!");
-  //       this.reset();
-  //     }
-  //   },
-  // },
-
   async created() {
     // this.token = window.Laravel.csrfToken;
     this.user_slug = this.$route.params.slug;
     const res = await this.callApi(
       "get",
-      `/api/get_user_project/${this.user_slug}`
+      `/api/get_user_research/${this.user_slug}`
     );
     if (res.status == 200) {
-      this.projects = res.data.data;
+      this.researches = res.data.data;
+      console.log(this.user_id);
+      console.log(res.data.data);
     } else {
       this.swr();
     }
@@ -830,26 +702,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.card-header-border {
-  border-bottom: 1px solid #34c5d9;
-}
-p {
-  color: #333;
-}
-
-.profile-info-skeleton h5 {
-  width: 60%;
-  height: 24px;
-  display: block;
-  background-color: #c0c0c0;
-  margin: 0.25rem;
-}
-.profile-info-skeleton p {
-  width: 95%;
-  height: 16px;
-  margin: 0.25rem;
-  background-color: #c0c0c0;
-}
-</style>

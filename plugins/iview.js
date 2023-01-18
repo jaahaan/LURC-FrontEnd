@@ -49,6 +49,15 @@ Vue.mixin({
                 desc: 'Something went wrong, please try again later'
             });
         },
+        async getNotificationItemsServer(){
+            const res = await this.callApi('get','/api/get_notification')
+            if(res.status == 200){
+                this.$store.dispatch('updateNotification', res.data.allNotifications)
+            }
+            else {
+                this.swr();
+            }
+        },
         async addToCartServer(p,qu=1){
             console.log('Quantity',qu);
             console.log('product',p);

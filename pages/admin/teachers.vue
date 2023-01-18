@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="isloading == false">
+    <div v-if="isDataLoading == false">
       <section class="container">
         <div class="teacher-section">
           <div class="teacher-section--table">
@@ -98,87 +98,83 @@
         </div>
       </section>
 
-      <Modal v-model="addTeacherModal" width="400">
-        <p slot="header" style="color: #369; text-align: center">
-          <Icon type="plus"></Icon>
-          <span> Add New Faculty Member</span>
-        </p>
-        <div style="">
+      <Modal v-model="addTeacherModal" :closable="false">
+        <div class="research-post--item" id="modal">
+          <h5 class="post-title">
+            <div>Add New Faculty Member</div>
+            <div class="btn-edit text-danger" @click="closeModal">
+              <i class="fa-solid fa-xmark"></i>
+            </div>
+          </h5>
           <Form>
-            <Row :gutter="24">
-              <Col span="24">
-                <FormItem
-                  label="Email"
-                  :error="errorMessages.email"
-                  :required="true"
-                >
-                  <Input
-                    type="text"
-                    placeholder="email"
-                    v-model="formValue.email"
-                  ></Input>
-                </FormItem>
-              </Col>
-              <Col span="24">
-                <FormItem
-                  label="Designation"
-                  :error="errorMessages.designation"
-                  :required="true"
-                >
-                  <Select
-                    v-model="formValue.designation"
-                    placeholder="Select Designation"
-                  >
-                    <Option value="Head">Head</Option>
-                    <Option value="Professor">Professor</Option>
-                    <Option value="Associate Professor"
-                      >Associate Professor</Option
-                    >
-                    <Option value="Assistant Professor"
-                      >Assistant Professor</Option
-                    >
-                    <Option value="Lecturer">Lecturer</Option>
-                  </Select>
-                  <!-- <span
-                                    class="text-danger"
-                                    v-if="errors.designation"
-                                    >{{ errors.designation[0] }}</span
-                                > -->
-                </FormItem>
-              </Col>
-              <Col span="24">
-                <FormItem
-                  label="Department"
-                  :error="errorMessages.department"
-                  :required="true"
-                >
-                  <Select
-                    v-model="formValue.department"
-                    placeholder="Department"
-                  >
-                    <Option value="CSE">CSE</Option>
-                    <Option value="EEE">EEE</Option>
-                    <Option value="ARCH">ARCH</Option>
-                    <Option value="CE">CE</Option>
-                    <Option value="BuA">BuA</Option>
-                    <Option value="ENG">ENG</Option>
-                  </Select>
-                  <!-- <span
-                                    class="text-danger"
-                                    v-if="errors.department"
-                                    >{{ errors.department[0] }}</span
-                                > -->
-                </FormItem>
-              </Col>
-            </Row>
+            <FormItem
+              label="Email"
+              :error="errorMessages.email"
+              :required="true"
+            >
+              <Input
+                type="text"
+                placeholder="email"
+                v-model="formValue.email"
+              ></Input>
+              <span class="text-danger" v-if="errors.email">{{
+                errors.email[0]
+              }}</span>
+            </FormItem>
+
+            <FormItem
+              label="Designation"
+              :error="errorMessages.designation"
+              :required="true"
+            >
+              <Select
+                v-model="formValue.designation"
+                placeholder="Select Designation"
+              >
+                <Option value="Head">Head</Option>
+                <Option value="Professor">Professor</Option>
+                <Option value="Associate Professor">Associate Professor</Option>
+                <Option value="Assistant Professor">Assistant Professor</Option>
+                <Option value="Lecturer">Lecturer</Option>
+              </Select>
+              <span class="text-danger" v-if="errors.designation">{{
+                errors.designation[0]
+              }}</span>
+            </FormItem>
+
+            <FormItem
+              label="Department"
+              :error="errorMessages.department"
+              :required="true"
+            >
+              <Select v-model="formValue.department" placeholder="Department">
+                <Option value="CSE">CSE</Option>
+                <Option value="EEE">EEE</Option>
+                <Option value="ARCH">ARCH</Option>
+                <Option value="CE">CE</Option>
+                <Option value="BuA">BuA</Option>
+                <Option value="ENG">ENG</Option>
+              </Select>
+              <span class="text-danger" v-if="errors.department">{{
+                errors.department[0]
+              }}</span>
+            </FormItem>
           </Form>
         </div>
         <div slot="footer">
-          <Button @click="addTeacherModal = false"> Cancel</Button>
-          <Button type="primary" :loading="loading" @click="addTeacher">
-            <span v-if="!loading">Add</span>
-            <span v-else>Adding...</span>
-          </Button>
+          <div>
+            <Button class="main-btn main-btn__border" @click="closeModal">
+              Cancel</Button
+            >
+            <Button
+              class="main-btn main-btn__bg"
+              @click="addTeacher"
+              :disabled="isAdding"
+              :loading="isAdding"
+            >
+              {{ isAdding ? "Adding..." : "Add" }}</Button
+            >
+          </div>
         </div>
       </Modal>
 
@@ -198,7 +194,7 @@
             :loading="sending"
             @click="remove"
           >
-            <span v-if="!loading">Delete</span>
+            <span v-if="!sending">Delete</span>
             <span v-else>Deleting...</span>
           </Button>
         </div>
@@ -287,7 +283,8 @@ export default {
       search: "",
       addTeacherModal: false,
       editModal: false,
-      isloading: false,
+      isDataLoading: true,
+      isAdding: false,
       sending: false,
       teachersInfo: [],
       formValue: {
@@ -332,6 +329,19 @@ export default {
     addTeacherButton() {
       this.addTeacherModal = true;
     },
+    async closeModal() {
+      this.addTeacherModal = false;
+      const res = await this.callApi("get", "/api/get_teachers");
+      if (res.status == 200) {
+        this.teachersInfo = res.data.data;
+      } else {
+        this.swr();
+      }
+      this.formValue.email = "";
+      this.formValue.designation = "";
+      this.formValue.department = "";
+      this.clearErrorMessage();
+    },
     clearErrorMessage() {
       (this.editErrorMessages = {
         id: null,
@@ -348,7 +358,6 @@ export default {
     async addTeacher() {
       let validation = true;
       this.clearErrorMessage();
-
       if (this.formValue.email.trim() == "") {
         this.errorMessages.email = "Email is required!";
         validation = false;
@@ -357,24 +366,22 @@ export default {
         this.errorMessages.designation = "Designation is required!";
         validation = false;
       }
+      if (this.formValue.department.trim() == "") {
+        this.errorMessages.department = "Department is required!";
+        validation = false;
+      }
       if (validation == false) return this.$Message.error("Validation Failed!");
       console.log("Failed");
-      this.isloading = true;
       console.log(this.formValue);
+      this.isAdding = true;
       const res = await this.callApi(
         "post",
         "/api/add_teacher",
         this.formValue
       );
-
       if (res.status === 201) {
-        this.reset();
-        this.addTeacherModal = false;
         this.s("Email Added!!");
-        this.formValue.email = "";
-        this.formValue.designation = "";
-        this.formValue.department = "";
-        this.errors = [];
+        this.closeModal();
       } else {
         if (res.status == 422) {
           for (let i in res.data.errors) {
@@ -385,13 +392,12 @@ export default {
           this.swr();
         }
       }
-      this.isloading = false;
+      this.isAdding = false;
     },
     showEdit(index) {
       if (this.teachersInfo[index].id) {
         this.UpdateValue.indexNumber = index;
         this.editObj.id = this.teachersInfo[index].id;
-
         this.editObj.email = this.teachersInfo[index].email;
         this.editObj.designation = this.teachersInfo[index].designation;
         this.editObj.department = this.teachersInfo[index].department;
@@ -452,7 +458,6 @@ export default {
       let ob = {
         id: this.deleteValue.id,
       };
-
       this.sending = true;
       const response = await this.callApi("post", "/api/teachers_del", ob);
       if (response.status == 200) {
@@ -469,14 +474,14 @@ export default {
     },
 
     async getTeachers() {
-      this.isloading = true;
+      this.isDataLoading = true;
       const res = await this.callApi("get", "/api/get_teachers");
       if (res.status == 200) {
         this.teachersInfo = res.data.data;
       } else {
         this.swr();
       }
-      this.isloading = false;
+      this.isDataLoading = false;
     },
     async reset() {
       this.editObj.id = "";

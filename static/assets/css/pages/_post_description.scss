@@ -95,197 +95,197 @@
       padding-bottom: 15px;
       margin-bottom: 17px;
     }
-    .comment {
-      width: 100%;
+  }
+  .comment {
+    width: 100%;
 
-      &-box {
-        display: flex;
-        // padding-bottom: 1rem;
-        // border-bottom: 1px solid $borderColor;
-        width: 100%;
-        img {
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-        }
-        textarea {
-          border-radius: 20px;
-          overflow: hidden;
-          margin: 0rem 0.5rem !important;
-        }
-        i {
-          border-radius: 50%;
-          background-color: $secondaryColor;
-          font-size: 2em;
-          padding: 5px 8px;
-          color: #fff;
-          width: 40px;
-          height: 40px;
-          cursor: pointer;
-        }
-      }
-
-      &-section {
-        display: flex;
-        padding-top: 1rem;
-        width: 100%;
-        img {
-          border-radius: 50%;
-          width: 40px;
-          height: 40px;
-        }
-        &-content {
-          margin-left: 0.5rem !important;
-          &-main {
-            background-color: $borderColor;
-            padding: 0.5rem 1rem;
-            border-radius: 15px;
-            width: fit-content;
-            a {
-              color: #000000;
-              font-size: 1.1em;
-              font-weight: 500;
-              &:hover {
-                color: $grayColor;
-                text-decoration: underline;
-              }
-            }
-            p {
-              color: $gray;
-              line-height: 1.5;
-              margin-top: 0.25rem;
-            }
-          }
-
-          &-like {
-            display: flex;
-            padding: 0rem 0.5rem;
-            justify-content: space-between;
-            a {
-              color: $grayColor;
-              font-size: 0.95em;
-              margin-right: 1rem;
-
-              &:hover {
-                text-decoration: underline;
-              }
-            }
-            i {
-              color: $btnHover;
-              cursor: pointer;
-            }
-            .active {
-              color: $btnHover;
-              font-weight: bolder;
-            }
-          }
-        }
-      }
-    }
-
-    .comment-reply {
-      margin-left: 3.5rem;
-      &-box {
-        display: flex;
-        width: 100%;
-        margin-top: 0.5rem;
-        img {
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-        }
-        textarea {
-          border-radius: 20px;
-          overflow: hidden;
-          margin: 0rem 0.5rem !important;
-          min-height: 30px !important;
-          padding: 0.25rem 1rem;
-          width: 100%;
-          ::placeholder {
-            font-size: 0.1em;
-          }
-        }
-        i {
-          border-radius: 50%;
-          background-color: $secondaryColor;
-          font-size: 1em;
-          padding: 8px 8px;
-          color: #fff;
-          width: 30px;
-          height: 30px;
-          cursor: pointer;
-        }
-      }
-
-      &-section {
-        display: flex;
-        padding-top: 1rem;
-        width: 100%;
-        img {
-          border-radius: 50%;
-          width: 30px;
-          height: 30px;
-        }
-        &-content {
-          margin-left: 0.5rem !important;
-          &-main {
-            background-color: $borderColor;
-            padding: 0.5rem 1rem;
-            border-radius: 15px;
-            width: fit-content;
-            a {
-              color: #000000;
-              font-size: 1.1em;
-              font-weight: 500;
-              &:hover {
-                color: $grayColor;
-                text-decoration: underline;
-              }
-            }
-            p {
-              color: $gray;
-              line-height: 1.4;
-              margin-top: 0.25rem;
-            }
-          }
-          &-like {
-            display: flex;
-            padding: 0rem 0.5rem;
-            justify-content: space-between;
-            a {
-              color: $grayColor;
-              font-size: 0.95em;
-              margin-right: 1rem;
-
-              &:hover {
-                text-decoration: underline;
-              }
-            }
-            i {
-              color: $btnHover;
-              cursor: pointer;
-            }
-            .active {
-              color: $btnHover;
-              font-weight: bolder;
-            }
-          }
-        }
-      }
-    }
-    .reply {
-      padding: 0.25rem 0.5rem;
+    &-box {
       display: flex;
-      margin-left: 3rem;
-      &-item {
-        display: flex;
-        &-count {
-          font-weight: 600;
-          line-height: 1rem;
-          margin-left: 0.5rem;
-          color: #3e3e3e;
-          font-size: 0.9375rem;
+      // padding-bottom: 1rem;
+      // border-bottom: 1px solid $borderColor;
+      width: 100%;
+      img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+      }
+      textarea {
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 0rem 0.5rem !important;
+      }
+      i {
+        border-radius: 50%;
+        background-color: $secondaryColor;
+        font-size: 2em;
+        padding: 5px 8px;
+        color: #fff;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+      }
+    }
+
+    &-section {
+      display: flex;
+      padding-top: 1rem;
+      width: 100%;
+      img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+      }
+      &-content {
+        margin-left: 0.5rem !important;
+        &-main {
+          background-color: $borderColor;
+          padding: 0.5rem 1rem;
+          border-radius: 15px;
+          width: fit-content;
+          a {
+            color: #000000;
+            font-size: 1.1em;
+            font-weight: 500;
+            &:hover {
+              color: $grayColor;
+              text-decoration: underline;
+            }
+          }
+          p {
+            color: $gray;
+            line-height: 1.5;
+            margin-top: 0.25rem;
+          }
         }
+
+        &-like {
+          display: flex;
+          padding: 0rem 0.5rem;
+          justify-content: space-between;
+          a {
+            color: $grayColor;
+            font-size: 0.95em;
+            margin-right: 1rem;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+          i {
+            color: $btnHover;
+            cursor: pointer;
+          }
+          .active {
+            color: $btnHover;
+            font-weight: bolder;
+          }
+        }
+      }
+    }
+  }
+
+  .comment-reply {
+    margin-left: 3.5rem;
+    &-box {
+      display: flex;
+      width: 100%;
+      margin-top: 0.5rem;
+      img {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+      }
+      textarea {
+        border-radius: 20px;
+        overflow: hidden;
+        margin: 0rem 0.5rem !important;
+        min-height: 30px !important;
+        padding: 0.25rem 1rem;
+        width: 100%;
+        ::placeholder {
+          font-size: 0.1em;
+        }
+      }
+      i {
+        border-radius: 50%;
+        background-color: $secondaryColor;
+        font-size: 1em;
+        padding: 8px 8px;
+        color: #fff;
+        width: 30px;
+        height: 30px;
+        cursor: pointer;
+      }
+    }
+
+    &-section {
+      display: flex;
+      padding-top: 1rem;
+      width: 100%;
+      img {
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+      }
+      &-content {
+        margin-left: 0.5rem !important;
+        &-main {
+          background-color: $borderColor;
+          padding: 0.5rem 1rem;
+          border-radius: 15px;
+          width: fit-content;
+          a {
+            color: #000000;
+            font-size: 1.1em;
+            font-weight: 500;
+            &:hover {
+              color: $grayColor;
+              text-decoration: underline;
+            }
+          }
+          p {
+            color: $gray;
+            line-height: 1.4;
+            margin-top: 0.25rem;
+          }
+        }
+        &-like {
+          display: flex;
+          padding: 0rem 0.5rem;
+          justify-content: space-between;
+          a {
+            color: $grayColor;
+            font-size: 0.95em;
+            margin-right: 1rem;
+
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+          i {
+            color: $btnHover;
+            cursor: pointer;
+          }
+          .active {
+            color: $btnHover;
+            font-weight: bolder;
+          }
+        }
+      }
+    }
+  }
+  .reply {
+    padding: 0.25rem 0.5rem;
+    display: flex;
+    margin-left: 3rem;
+    &-item {
+      display: flex;
+      &-count {
+        font-weight: 600;
+        line-height: 1rem;
+        margin-left: 0.5rem;
+        color: #3e3e3e;
+        font-size: 0.9375rem;
       }
     }
   }
@@ -316,6 +316,15 @@
     font-weight: 500;
     margin-bottom: 60px;
   }
+  .nuxt-link-exact-active:not(.lurc) {
+    background-color: $primaryColor;
+    i {
+      color: $inverseColor;
+    }
+    h4 {
+      color: $inverseColor;
+    }
+  }
   &--list {
     &---item {
       .menu-link {
@@ -324,6 +333,15 @@
         align-items: center;
         padding: 25px 45px;
         &:hover {
+          background-color: $primaryColor;
+          i {
+            color: $inverseColor;
+          }
+          h4 {
+            color: $inverseColor;
+          }
+        }
+        &:active {
           background-color: $primaryColor;
           i {
             color: $inverseColor;

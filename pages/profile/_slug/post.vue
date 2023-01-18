@@ -5,7 +5,10 @@
     <template
       v-if="isLoading == false && showResearchForm == false && researches == ''"
     >
-      <div class="card mb-2 p-3" v-if="authUser.id == this.$route.params.id">
+      <div
+        class="card mb-2 p-3"
+        v-if="authUser.slug == this.$route.params.slug"
+      >
         <button class="add_new_card" v-on:click="showForm()">
           <i class="lni lni-folder"></i> What's on your mind?
         </button>

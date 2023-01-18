@@ -156,9 +156,19 @@ export default {
         this.$store.dispatch("setAuthInfo", res.data.user);
         this.$store.dispatch("setToken", res.data.token);
         this.setCookie("token", res.data.token);
-        this.$router.push("/home");
+        window.location = "/home";
         this.s("You are logged In");
-
+        this.getNotificationItemsServer();
+        if (this.callNotificationOb) {
+          let notification = this.callNotificationOb;
+          let quantity = notification.quantity;
+          delete notification.quantity;
+          this.addToCartServer(this.callNotificationOb, quantity);
+          this.$store.commit("setCallNotificationOb", null);
+          // this.$router.push("/cart");
+          // window.location='/cart'
+          return;
+        }
         if (this.$route.query.callback)
           return this.$router.push(this.$route.query.callback);
         // window.location = "/";

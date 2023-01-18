@@ -1,6 +1,6 @@
 <template>
   <div>
-    <section class="container research" v-if="isDataLoading == false">
+    <section class="container research">
       <div class="row">
         <div class="research-post col-lg-10 m-auto">
           <div class="dept-header">
@@ -9,15 +9,15 @@
               {{ this.$route.params.slug }}
             </h2>
           </div>
+          <div v-if="isDataLoading == false">
+            <div class="research-post--display">
+              <div class="research-post--display--icon">
+                <button v-on:click="showSearchbar()" ref="searchBoxSource">
+                  <i class="lni lni-search-alt"> </i>
+                </button>
+              </div>
 
-          <div class="research-post--display">
-            <div class="research-post--display--icon">
-              <button v-on:click="showSearchbar()" ref="searchBoxSource">
-                <i class="lni lni-search-alt"> </i>
-              </button>
-            </div>
-
-            <!-- <div
+              <!-- <div
                             class="research-post--display--body d-none d-lg-block"
                             v-if="isSearchbar == false"
                         >
@@ -30,315 +30,330 @@
                             </p>
                         </div> -->
 
-            <!-- ****SearchBox**** -->
-            <div
-              class="research-post--display--body research-search"
-              v-bind:class="{ active: isSearchbar }"
-              ref="searchBox"
-            >
-              <div class="research-search-input">
-                <input
-                  type="search"
-                  placeholder="Search..."
-                  v-model="search"
-                  v-on:keyup="filterPosts"
-                />
-                <button type="button" class="search-button">
-                  <i class="lni lni-search-alt"></i>
-                </button>
-              </div>
+              <!-- ****SearchBox**** -->
+              <div
+                class="research-post--display--search"
+                v-bind:class="{ active: isSearchbar }"
+                ref="searchBox"
+              >
+                <div class="research-post--display--search-input">
+                  <input
+                    type="search"
+                    placeholder="Search..."
+                    v-model="search"
+                    v-on:keyup="filterPosts"
+                  />
+                  <button type="button" class="search-button">
+                    <i class="lni lni-search-alt"></i>
+                  </button>
+                </div>
 
-              <div class="research-search-cancel">
-                <button
-                  type="button"
-                  class="cancel-button"
-                  v-on:click="cancelSearchBar"
-                >
-                  <i>
-                    <i class="lni lni-close"></i>
-                  </i>
-                </button>
+                <div class="research-post--display--search-cancel">
+                  <button
+                    type="button"
+                    class="cancel-button"
+                    v-on:click="cancelSearchBar"
+                  >
+                    <i>
+                      <i class="lni lni-close"></i>
+                    </i>
+                  </button>
+                </div>
+              </div>
+              <div class="research-post--display--default">
+                <div v-if="isSearchbar == false">
+                  <Dropdown trigger="hover">
+                    <span
+                      ><span v-if="search == ''"> Type </span>
+                      <span else>{{ search }}</span></span
+                    >
+                    <i class="lni lni-chevron-down"></i>
+                    <DropdownMenu slot="list">
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Article')">
+                          Article
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Conference Paper')">
+                          Conference Paper
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Data')">
+                          Data
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Resaerch')">
+                          Resaerch
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Project')">
+                          Project
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Presentation')">
+                          Presentation
+                        </p></DropdownItem
+                      >
+                      <DropdownItem
+                        ><p @click="addToFilterSearch('Preprint')">
+                          Preprint
+                        </p></DropdownItem
+                      >
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+
+                <div>
+                  <Dropdown trigger="hover" v-if="isSearchbar == false">
+                    <!-- <span >sort by</span> -->
+                    <span>
+                      <span v-if="filter.default == 'id'"> Newest </span>
+                      <span
+                        v-else-if="
+                          filter.default == 'title' && filter.order == 'asc'
+                        "
+                      >
+                        Ascending [A-Z]
+                      </span>
+                      <span
+                        v-else-if="
+                          filter.default == 'title' && filter.order == 'desc'
+                        "
+                      >
+                        Descending [Z-A]
+                      </span>
+                      <span v-else>Default Sort</span>
+                    </span>
+                    <i class="lni lni-chevron-down"></i>
+                    <DropdownMenu slot="list">
+                      <DropdownItem
+                        ><span @click="removeFromSelectedFilterAll"
+                          >Default Sort</span
+                        ></DropdownItem
+                      >
+
+                      <DropdownItem
+                        ><span @click="sortData(['id', 'desc'])"
+                          >Newest</span
+                        ></DropdownItem
+                      >
+                      <DropdownItem
+                        ><span @click="sortData(['title', 'asc'])"
+                          >Ascending [A-Z]</span
+                        ></DropdownItem
+                      >
+                      <DropdownItem
+                        ><span @click="sortData(['title', 'desc'])"
+                          >Descending [Z-A]</span
+                        ></DropdownItem
+                      >
+                      <DropdownItem><span>Top Research</span></DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
               </div>
             </div>
-            <div class="research-post--display--default">
-              <div v-if="isSearchbar == false" class="mx-3">
-                <Dropdown trigger="hover">
-                  <span
-                    ><span v-if="search == ''"> Type </span>
-                    <span else>{{ search }}</span></span
+            <!-- post description -->
+            <div v-if="isLoading == false && posts.length">
+              <div
+                class="research-post--item"
+                v-for="(post, index) in posts"
+                :key="index"
+              >
+                <h5 class="post-title">
+                  <router-link :to="`/description/${post.slug}/overview`"
+                    ><h5>{{ post.title }}</h5></router-link
                   >
-                  <i class="lni lni-chevron-down"></i>
-                  <DropdownMenu slot="list">
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Article')">
-                        Article
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Conference Paper')">
-                        Conference Paper
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Data')">
-                        Data
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Resaerch')">
-                        Resaerch
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Project')">
-                        Project
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Presentation')">
-                        Presentation
-                      </p></DropdownItem
-                    >
-                    <DropdownItem
-                      ><p @click="addToFilterSearch('Preprint')">
-                        Preprint
-                      </p></DropdownItem
-                    >
-                  </DropdownMenu>
-                </Dropdown>
-              </div>
+                </h5>
+                <div class="mt-2 mb-2">
+                  <router-link
+                    :to="`/description/${post.slug}/overview`"
+                    class="main-btn main-btn__border d-inline-block text-center"
+                  >
+                    {{ post.type }}</router-link
+                  >
+                </div>
+                <p v-if="post.abstract != null">
+                  {{ post.abstract.substring(0, 190) }}
+                  ...
+                  <router-link :to="`/description/${post.slug}/overview`"
+                    >See more</router-link
+                  >
+                </p>
 
-              <div class="mx-3">
-                <Dropdown trigger="hover">
-                  <!-- <span >sort by</span> -->
-                  <span>
-                    <span v-if="filter.default == 'id'"> Newest </span>
-                    <span
-                      v-else-if="
-                        filter.default == 'title' && filter.order == 'asc'
-                      "
-                    >
-                      Ascending [A-Z]
+                <div v-if="post.authors.length">
+                  <p
+                    v-if="post.authors.length > 1 && post.type != 'Project'"
+                    class="mt-2"
+                  >
+                    Authors:
+                    <span v-for="author in post.authors">
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
                     </span>
-                    <span
-                      v-else-if="
-                        filter.default == 'title' && filter.order == 'desc'
-                      "
-                    >
-                      Descending [Z-A]
+                  </p>
+                  <p
+                    v-else-if="
+                      post.authors.length > 1 && post.type == 'Project'
+                    "
+                    class="mt-2"
+                  >
+                    Team Members:
+                    <span v-for="author in post.authors">
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
                     </span>
-                    <span v-else>Default Sort</span>
-                  </span>
-                  <i class="lni lni-chevron-down"></i>
-                  <DropdownMenu slot="list">
-                    <DropdownItem
-                      ><span @click="removeFromSelectedFilterAll"
-                        >Default Sort</span
-                      ></DropdownItem
+                  </p>
+                  <p
+                    class="mt-2"
+                    v-else-if="
+                      post.authors.length == 1 && post.type == 'Project'
+                    "
+                  >
+                    Team Member:
+                    <span v-for="author in post.authors">
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
+                    </span>
+                  </p>
+                  <p
+                    class="mt-2"
+                    v-else-if="
+                      post.authors.length == 1 && post.type != 'Project'
+                    "
+                  >
+                    Author:
+                    <span v-for="author in post.authors">
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
+                    </span>
+                  </p>
+                </div>
+                <div v-else-if="post.authors.length && post.type == 'Project'">
+                  <p v-if="post.authors.length > 1" class="mt-2">
+                    Team Members:
+                    <span
+                      v-for="author in post.authors"
+                      v-if="post.authors.length"
                     >
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
+                    </span>
+                  </p>
+                  <p class="mt-2" v-else>
+                    Team Member:
+                    <span
+                      v-for="author in post.authors"
+                      v-if="post.authors.length"
+                    >
+                      <router-link
+                        v-if="authUser"
+                        :to="`/profile/${author.slug}/overview`"
+                        class="authors"
+                        >{{ author.name }}
+                      </router-link>
+                      <span v-else> {{ author.name }} . </span>
+                    </span>
+                  </p>
+                </div>
+                <div class="post-sub-title">
+                  <p>
+                    {{ post.created_at }}
+                    .
+                    <a v-if="post.read_count > 1">{{ post.read_count }} Reads</a
+                    ><a v-else-if="post.read_count <= 1"
+                      >{{ post.read_count }} Read</a
+                    >
+                    .
+                    <a>{{ post.upVote }} UpVote</a>
+                    .
+                    <a>{{ post.downVote }} DownVote</a>
+                  </p>
+                </div>
+                <div class="footer">
+                  <p>
+                    <a
+                      v-if="post.attachment && authUser"
+                      class="main-btn main-btn__bg"
+                      :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
+                      >Download <i class="fa-solid fa-download"></i
+                    ></a>
+                    <a
+                      class="main-btn main-btn__border px-lg-5"
+                      :href="`${post.url}`"
+                      v-if="post.url"
+                      target="_blank"
+                    >
+                      Link
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </a>
+                  </p>
+                  <p v-if="authUser">
+                    <a v-if="post.like_count" @click="getLikedUser(index)">
+                      {{ post.like_count }}
+                    </a>
 
-                    <DropdownItem
-                      ><span @click="sortData(['id', 'desc'])"
-                        >Newest</span
-                      ></DropdownItem
+                    <a
+                      v-on:click="like(index)"
+                      v-bind:class="{
+                        active: post.authUserLike == 'yes',
+                      }"
                     >
-                    <DropdownItem
-                      ><span @click="sortData(['title', 'asc'])"
-                        >Ascending [A-Z]</span
-                      ></DropdownItem
-                    >
-                    <DropdownItem
-                      ><span @click="sortData(['title', 'desc'])"
-                        >Descending [Z-A]</span
-                      ></DropdownItem
-                    >
-                    <DropdownItem><span>Top Research</span></DropdownItem>
-                  </DropdownMenu>
-                </Dropdown>
+                      <i class="fa-solid fa-thumbs-up"></i>
+                    </a>
+                  </p>
+                </div>
               </div>
+            </div>
+            <div v-else-if="isLoading == false && posts.length == 0">
+              <h2 class="text-center pt-50">No Data Found!!</h2>
             </div>
           </div>
-          <!-- post description -->
-          <div v-if="isLoading == false && posts.length">
-            <div
-              class="research-post--item"
-              v-for="(post, index) in posts"
-              :key="index"
-            >
-              <h5 class="post-title">
-                <router-link :to="`/description/${post.slug}`">{{
-                  post.title
-                }}</router-link>
-              </h5>
-              <div class="mt-2 mb-2">
-                <router-link
-                  :to="`/description/${post.slug}`"
-                  class="main-btn main-btn__border d-inline-block text-center"
-                >
-                  {{ post.type }}</router-link
-                >
-              </div>
-              <p v-if="post.abstract != null">
-                {{ post.abstract.substring(0, 190) }}
-                ...
-                <router-link :to="`/description/${post.slug}`"
-                  >See more</router-link
-                >
-              </p>
-
-              <div v-if="post.authors.length">
-                <p
-                  v-if="post.authors.length > 1 && post.type != 'Project'"
-                  class="mt-2"
-                >
-                  Authors:
-                  <span v-for="author in post.authors">
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-                <p
-                  v-else-if="post.authors.length > 1 && post.type == 'Project'"
-                  class="mt-2"
-                >
-                  Team Members:
-                  <span v-for="author in post.authors">
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-                <p
-                  class="mt-2"
-                  v-else-if="post.authors.length == 1 && post.type == 'Project'"
-                >
-                  Team Member:
-                  <span v-for="author in post.authors">
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-                <p
-                  class="mt-2"
-                  v-else-if="post.authors.length == 1 && post.type != 'Project'"
-                >
-                  Author:
-                  <span v-for="author in post.authors">
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-              </div>
-              <div v-else-if="post.authors.length && post.type == 'Project'">
-                <p v-if="post.authors.length > 1" class="mt-2">
-                  Team Members:
-                  <span
-                    v-for="author in post.authors"
-                    v-if="post.authors.length"
-                  >
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-                <p class="mt-2" v-else>
-                  Team Member:
-                  <span
-                    v-for="author in post.authors"
-                    v-if="post.authors.length"
-                  >
-                    <router-link
-                      v-if="authUser"
-                      :to="`/profile/${author.slug}/${author.id}`"
-                      class="authors"
-                      >{{ author.name }}
-                    </router-link>
-                    <span v-else> {{ author.name }} . </span>
-                  </span>
-                </p>
-              </div>
-              <div class="post-sub-title">
-                <p>
-                  {{ post.created_at }}
-                  .
-                  <a v-if="post.read_count > 1">{{ post.read_count }} Reads</a
-                  ><a v-else-if="post.read_count <= 1"
-                    >{{ post.read_count }} Read</a
-                  >
-                  .
-                  <a>{{ post.upVote }} UpVote</a>
-                  .
-                  <a>{{ post.downVote }} DownVote</a>
-                </p>
-              </div>
-              <div class="footer">
-                <p>
-                  <a
-                    v-if="post.attachment && authUser"
-                    class="main-btn main-btn__bg"
-                    :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
-                    >Download <i class="fa-solid fa-download"></i
-                  ></a>
-                  <a
-                    class="main-btn main-btn__bg px-lg-5"
-                    :href="`${post.url}`"
-                    v-if="post.url"
-                    target="_blank"
-                  >
-                    Link <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                  </a>
-                </p>
-                <p v-if="authUser">
-                  <a v-if="post.like_count" @click="getLikedUser(index)">
-                    {{ post.like_count }}
-                  </a>
-
-                  <a
-                    v-on:click="like(index)"
-                    v-bind:class="{
-                      active: post.authUserLike == 'yes',
-                    }"
-                  >
-                    <i class="fa-solid fa-thumbs-up"></i>
-                  </a>
-                </p>
-              </div>
+          <div
+            class="research-post--skeleton--display"
+            v-if="isDataLoading == true"
+          >
+            <div class="research-post--skeleton--display--icon">
+              <p></p>
             </div>
-          </div>
-          <!-- <div
-                        v-else-if="isLoading == true"
-                        style="text-align: center; margin: 20px"
-                    >
-                        <h3>Pasts Loading...</h3>
-                    </div> -->
-          <div v-else-if="isLoading == false && posts.length == 0">
-            <h2 class="text-center pt-50">No Data Found!!</h2>
+
+            <div class="research-post--skeleton--display--default">
+              <p></p>
+              <p></p>
+            </div>
           </div>
           <div v-if="isLoading == true">
-            <div class="research-post--skeleton">
+            <div class="research-post--skeleton--item">
               <div class="post-title-skeleton">
                 <p></p>
               </div>
@@ -350,7 +365,7 @@
                 <a> </a>
               </div>
             </div>
-            <div class="research-post--skeleton">
+            <div class="research-post--skeleton--item">
               <div class="post-title-skeleton">
                 <p></p>
               </div>
@@ -362,7 +377,21 @@
                 <a> </a>
               </div>
             </div>
-            <div class="research-post--skeleton">
+            <div class="research-post--skeleton--item">
+              <div class="post-title-skeleton">
+                <p></p>
+              </div>
+              <div class="post-sub-title-skeleton">
+                <p></p>
+              </div>
+              <div class="footer">
+                <a> </a>
+                <a> </a>
+              </div>
+            </div>
+          </div>
+          <div v-if="loadMoreLoading && !noResearchRemaining">
+            <div class="research-post--skeleton--item">
               <div class="post-title-skeleton">
                 <p></p>
               </div>
@@ -394,29 +423,26 @@
       </div>
       <div slot="footer"></div>
     </Modal>
-    <div v-if="isDataLoading == true">
-      <h2 class="text-center pt-50">Loading...</h2>
-    </div>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
-  components: {
-    return: {},
-  },
   // Properties returned from data() become reactive state
   // and will be exposed on `this`.
   data() {
     return {
       isSearchbar: false,
-      isFilter: false,
-      mobileDropdownIndex: -1,
       likedUserModal: false,
-      isLoading: false,
+      loadMoreLoading: false,
+      noResearchRemaining: false,
+      limit: 4,
+      // isLoading: false,
       isDataLoading: true,
       users: [],
-      posts: [],
+      // posts: [],
       departments: [],
       likedUser: [],
       url: "",
@@ -424,6 +450,7 @@ export default {
       id: "",
       like_count: 0,
       authUserLike: "",
+      page: 1,
       filter: {
         department: "",
         default: "",
@@ -434,23 +461,16 @@ export default {
       type: "",
     };
   },
-  // watch: {
-  //     // search(after, before) {
-  //     //     this.filterPosts();
-  //     // },
-  // },
-  // computed: {
-  //     isAllFilterClear() {
-  //         let flag = true;
-  //         if (this.filter.department.length > 0) flag = false;
-  //         if (this.filter.default.length > 0) flag = false;
-  //         if (this.filter.order.length > 0) flag = false;
-  //         return flag;
-  //     },
-  // },
+  computed: {
+    ...mapGetters({
+      posts: "getAllGlobalResearch",
+      isLoading: "getGlobalResearchLoading",
+    }),
+  },
   methods: {
     showSearchbar() {
       this.isSearchbar = true;
+      this.search = "";
     },
     cancelSearchBar() {
       this.isSearchbar = false;
@@ -466,6 +486,7 @@ export default {
 
         if (!source.contains(target) && !container.contains(target)) {
           this.isSearchbar = false;
+          this.search = "";
         }
       }
     },
@@ -625,7 +646,7 @@ export default {
       this.filterPosts();
     },
     removeFromSelectedFilterAll() {
-      this.filter.department = "";
+      // this.filter.department = "";
       this.filter.default = "";
       this.filter.order = "";
       this.search = "";
@@ -633,77 +654,95 @@ export default {
       this.filterPosts();
     },
     async filterPosts() {
-      this.isLoading = true;
-      // const response = await this.callApi("get", `/api/get_all_research`);
+      window.history.pushState(
+        {},
+        null,
+        `${this.$route.path}?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}`
+      );
+      this.$store.commit("setGlobalResearchLoading", true);
       const response = await this.callApi(
         "get",
-        `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}`
+        `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}&limit=${this.limit}`
       );
+      if (response.status == 200) {
+        this.$store.commit("setAllGlobalResearch", response.data.data);
+      } else this.e("Oops!", "Something went wrong, please try again!");
+      this.$store.commit("setGlobalResearchLoading", false);
+    },
+    async loadMore(more) {
+      console.log("Load more is calling! length", this.posts.length);
 
-      if (response.status == 200) {
-        this.posts = response.data.data;
-      } else this.swr();
-      this.isLoading = false;
-    },
-    async filterDefault(d) {
-      this.isLoading = true;
-      // const response = await this.callApi("get", `/api/get_all_research`);
-      const response = await this.callApi(
+      if (this.noResearchRemaining) return;
+
+      this.limit = this.limit + more;
+      this.loadMoreLoading = true;
+      const res = await this.callApi(
         "get",
-        `/api/get_all_research?default=${d}`
+        `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}&limit=${this.limit}`
       );
-      if (response.status == 200) {
-        this.posts = response.data.data;
-      } else this.swr();
-      this.isLoading = false;
-    },
-    async reset() {
-      const res2 = await this.callApi("get", `/api/get_all_post`);
-      if (res2.status == 200) {
-        this.posts = res2.data;
-      } else {
-        this.swr();
+      if (res.status == 200) {
+        let prevLength = this.posts.length;
+        if (this.posts.length == res.data.data.length) {
+          this.noResearchRemaining = true;
+        }
+        for (let i in res.data.data) {
+          console.log("pushing data");
+          let d = res.data.data[i];
+          if (i >= prevLength) {
+            this.$store.commit("pushAllGlobalResearch", d);
+          }
+        }
       }
+      this.loadMoreLoading = false;
+      console.log("Load more is finished! length", this.posts.length);
     },
   },
 
   watch: {
-    "$route.params"(oldValue, newValue) {
-      if (oldValue != newValue) {
-        console.log("route is changing!");
-        this.filterPosts();
-      }
+    "$route.fullPath": function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      window.scrollTo(0, 0);
+
+      this.page = this.$route.query.page ? this.$route.query.page : 1;
+
+      this.filterPosts();
     },
   },
-  async asyncData({ app, store, redirect, params }) {
-    try {
-      let [res] = await Promise.all([
-        app.$axios.get(
-          `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}`
-        ),
-      ]);
-      return {
-        posts: res.data.data,
-      };
-    } catch (error) {
-      console.log("error from asyncData server");
-      console.log(error);
-      //   return redirect("/");
-    }
-  },
   async created() {
-    await this.filterPosts();
-    // const [resDepartments] = await Promise.all([
-    //   this.callApi(
-    //     "get",
-    //     `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}`
-    //   ),
-    //   this.callApi("get", "/api/get_departments"),
-    // ]);
-    // if (resDepartments.status == 200) {
-    //   this.departments = resDepartments.data.data;
-    // } else this.e("Oops!", "Something went wrong, please try again!");
+    this.page = this.$route.query.page ? this.$route.query.page : 1;
+    this.$store.commit("setGlobalResearchLoading", true);
+    const response = await this.callApi(
+      "get",
+      `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
+    );
+    if (response.status == 200) {
+      // this.posts = response.data.data;
+      this.$store.commit("setAllGlobalResearch", response.data.data);
+      this.$store.commit("setGlobalResearchLoading", false);
+    } else this.e("Oops!", "Something went wrong, please try again!");
+    this.$store.commit("setGlobalResearchLoading", false);
     this.isDataLoading = false;
+    // this.getDepartments();
+  },
+
+  mounted() {
+    document.addEventListener("click", this.hideSearchbar);
+    window.onscroll = () => {
+      this.bottomOfWindow =
+        window.pageYOffset + window.innerHeight >
+        document.body.scrollHeight - 100;
+
+      if (this.bottomOfWindow) {
+        if (!this.loadMoreLoading) {
+          this.loadMore(4);
+        }
+      }
+    };
+  },
+
+  beforeDestroy() {
+    document.removeEventListener("click", this.hideSearchbar);
   },
 };
 </script>

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div v-if="isLoading == false">
-      <section class="container pt-4 pb-4 col-lg-8">
+    <div>
+      <div class="container pt-4 pb-4 col-lg-8">
+        <!-- post description -->
         <div class="home-post-section">
-          <!-- post description -->
           <div class="post-description menu-item">
             <div
               class="menu-item-box"
@@ -38,9 +38,7 @@
                 <div class="header">
                   <img :src="post.image" alt="img" />
                   <div class="header-content">
-                    <router-link
-                      :to="`/profile/${post.user_slug}/${post.user_id}/overview`"
-                    >
+                    <router-link :to="`/profile/${post.user_slug}/overview`">
                       {{ post.name }}
                     </router-link>
                     <!-- . {{ item.created_at }} -->
@@ -52,26 +50,26 @@
                   </div>
                 </div>
                 <h5 class="menu-item--title">
-                  <router-link :to="`/description/${post.slug}`">{{
+                  <router-link :to="`/description/${post.slug}/overview`">{{
                     post.title
                   }}</router-link>
                 </h5>
+
+                <p v-if="post.abstract != null">
+                  {{ post.abstract.substring(0, 190) }}
+                  ...
+                  <router-link :to="`/description/${post.slug}/overview`"
+                    >See more</router-link
+                  >
+                </p>
                 <div class="mt-2 mb-2">
                   <router-link
-                    :to="`/description/${post.slug}`"
+                    :to="`/description/${post.slug}/overview`"
                     class="main-btn main-btn__border d-inline-block text-center"
                   >
                     {{ post.type }}</router-link
                   >
                 </div>
-                <p v-if="post.abstract != null">
-                  {{ post.abstract.substring(0, 190) }}
-                  ...
-                  <router-link :to="`/description/${post.slug}`"
-                    >See more</router-link
-                  >
-                </p>
-
                 <div v-if="post.authors.length">
                   <p
                     v-if="post.authors.length > 1 && post.type != 'Project'"
@@ -80,7 +78,7 @@
                     Authors:
                     <span v-for="author in post.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -95,7 +93,7 @@
                     Team Members:
                     <span v-for="author in post.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -110,7 +108,7 @@
                     Team Member:
                     <span v-for="author in post.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -125,7 +123,7 @@
                     Author:
                     <span v-for="author in post.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -140,7 +138,7 @@
                       v-if="post.authors.length"
                     >
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -153,7 +151,7 @@
                       v-if="post.authors.length"
                     >
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -162,14 +160,14 @@
                 </div>
                 <div class="sub-title">
                   <p>
-                    {{ post.created_at }}
-                    .
-                    <a v-if="post.read_count > 1">{{ post.read_count }} Reads</a
+                    {{ post.formatedDateTime }}<span class="dot">.</span
+                    ><a v-if="post.read_count > 1"
+                      >{{ post.read_count }} Reads</a
                     ><a v-else-if="post.read_count <= 1"
                       >{{ post.read_count }} Read</a
-                    >
-                    . <a>{{ post.upVote }} UpVote</a> .
-                    <a>{{ post.downVote }} DownVote</a>
+                    ><span class="dot">.</span><a>{{ post.upVote }} UpVote</a
+                    ><span class="dot">.</span
+                    ><a>{{ post.downVote }} DownVote</a>
                   </p>
                 </div>
                 <div class="footer">
@@ -178,8 +176,8 @@
                       v-if="post.attachment && authUser"
                       class="main-btn main-btn__bg"
                       :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
-                      >Download</a
-                    >
+                      >Download <i class="fa-solid fa-download"
+                    /></a>
                     <a
                       class="main-btn main-btn__bg px-5"
                       :href="`${post.url}`"
@@ -187,6 +185,7 @@
                       target="_blank"
                     >
                       Link
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                   </p>
                   <p>
@@ -208,7 +207,53 @@
             </div>
           </div>
         </div>
-      </section>
+        <div v-if="loadMoreLoading && !noPostRemaining">
+          <div class="research-post--skeleton--item">
+            <div class="post-title-skeleton">
+              <p></p>
+            </div>
+            <div class="post-sub-title-skeleton">
+              <p></p>
+            </div>
+            <div class="footer">
+              <a> </a>
+              <a> </a>
+            </div>
+          </div>
+        </div>
+        <div v-if="isLoading == true">
+          <!-- <div class="research-post--skeleton--item">
+            <div class="post-title-skeleton">
+              <p></p>
+            </div>
+            <div class="post-sub-title-skeleton">
+              <p></p>
+            </div>
+            <div class="footer">
+              <a> </a>
+              <a> </a>
+            </div>
+          </div>
+          <div class="research-post--skeleton--item">
+            <div class="post-title-skeleton">
+              <p></p>
+            </div>
+            <div class="post-sub-title-skeleton">
+              <p></p>
+            </div>
+            <div class="footer">
+              <a> </a>
+              <a> </a>
+            </div>
+          </div> -->
+          <div style="text-align: center; margin: 30px 0px">
+            <h4>
+              <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+              <span>Loading Researches...</span>
+            </h4>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!--***** Liked User Modal *****-->
@@ -241,14 +286,52 @@
                 </router-link>
             </div>
         </Modal> -->
-
-    <div v-if="isLoading == true">
-      <h2 class="text-center pt-50">Loading...</h2>
+    <!-- <div v-if="loadMoreLoading && !noPostRemaining">
+      <div class="research-post--skeleton--item">
+        <div class="post-title-skeleton">
+          <p></p>
+        </div>
+        <div class="post-sub-title-skeleton">
+          <p></p>
+        </div>
+        <div class="footer">
+          <a> </a>
+          <a> </a>
+        </div>
+      </div>
     </div>
+    <div v-if="isLoading == true">
+      <div class="research-post--skeleton--item">
+        <div class="post-title-skeleton">
+          <p></p>
+        </div>
+        <div class="post-sub-title-skeleton">
+          <p></p>
+        </div>
+        <div class="footer">
+          <a> </a>
+          <a> </a>
+        </div>
+      </div>
+      <div class="research-post--skeleton--item">
+        <div class="post-title-skeleton">
+          <p></p>
+        </div>
+        <div class="post-sub-title-skeleton">
+          <p></p>
+        </div>
+        <div class="footer">
+          <a> </a>
+          <a> </a>
+        </div>
+      </div>
+    </div> -->
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "HOME",
   components: {
@@ -259,9 +342,10 @@ export default {
   data() {
     return {
       likedUserModal: false,
-      isLoading: true,
+      loadMoreLoading: false,
+      noPostRemaining: false,
+      limit: 4,
       users: [],
-      posts: [],
       departments: [],
       likedUser: [],
       url: "",
@@ -269,22 +353,16 @@ export default {
       id: "",
       like_count: 0,
       authUserLike: "",
-      filter: {
-        department: "",
-        search: "",
-        default: "",
-      },
+      page: 1,
     };
   },
+  computed: {
+    ...mapGetters({
+      posts: "getAllGlobalPost",
+      isLoading: "getGlobalPostLoading",
+    }),
+  },
   methods: {
-    getUser(user) {
-      this.user_id = user.id;
-      this.user_slug = user.slug;
-
-      this.$router.push(`/profile/${this.user_slug}/${this.user_id}`);
-      this.keyword = "";
-    },
-
     async upVote(index) {
       if (
         this.authUser.userType == "teacher" ||
@@ -370,21 +448,23 @@ export default {
     },
 
     async like(index) {
-      // if (this.posts[index].user_id != this.authUser.id) {
-      let obj = {
-        id: this.posts[index].id,
-      };
-      this.id = this.posts[index].id;
-      console.log(this.id);
-      const res = await this.callApi("post", "/api/like", obj);
-      if (res.status == 201) {
-        this.posts[index].like_count += 1;
-        this.posts[index].authUserLike = "yes";
+      if (this.posts[index].user_id != this.authUser.id) {
+        let obj = {
+          id: this.posts[index].id,
+        };
+        this.id = this.posts[index].id;
+        console.log(this.id);
+        const res = await this.callApi("post", "/api/like", obj);
+        if (res.status == 201) {
+          this.posts[index].like_count += 1;
+          this.posts[index].authUserLike = "yes";
+        } else {
+          this.posts[index].like_count -= 1;
+          this.posts[index].authUserLike = "no";
+        }
       } else {
-        this.posts[index].like_count -= 1;
-        this.posts[index].authUserLike = "no";
+        this.i("You can't like your own post!!");
       }
-      // }
     },
 
     async getLikedUser(index) {
@@ -421,60 +501,91 @@ export default {
     },
 
     async filterPosts() {
-      this.isLoading = true;
-      const response = await this.callApi("get", `/api/get_all_post`);
+      // window.history.pushState({}, null, `${this.$route.path}`);
+      // this.$store.commit("setGlobalPostLoading", true);
+      // const response = await this.callApi(
+      //   "get",
+      //   `/api/get_all_post?limit=${this.limit}`
+      // );
       if (response.status == 200) {
-        this.posts = response.data.data;
-      }
-      //else this.i();
-      this.isLoading = false;
-    },
-    async reset() {
-      const res2 = await this.callApi("get", `/api/get_all_post`);
-      if (res2.status == 200) {
-        this.posts = res2.data;
-      } else {
-        this.swr();
-      }
-    },
-  },
-
-  //Called after the instance has finished processing all state-related options.
-  // async created() {
-  //     this.token = window.Laravel.csrfToken;
-
-  //     const res1 = await this.callApi("get", "/api/get_all_user");
-
-  //     const res2 = await this.callApi("get", `/api/get_all_post`);
-  //     if (res1.status == 200) {
-  //         this.users = res1.data;
-  //     }
-  //     if (res2.status == 200) {
-  //         this.posts = res2.data.data;
-  //         this.like_count = this.posts.like_count;
-  //     } else {
-  //         this.swr();
-  //     }
-
-  //     this.isLoading = false;
-  // },
-  async created() {
-    if (this.authUser) {
-      await this.filterPosts();
-      const [resDepartments, resUsers] = await Promise.all([
-        this.callApi("get", "/api/get_departments"),
-        this.callApi("get", "/api/get_all_user"),
-      ]);
-      if (resDepartments.status == 200 && resUsers.status == 200) {
-        this.departments = resDepartments.data;
-        this.users = resUsers.data;
+        this.$store.commit("setAllGlobalPost", response.data.data);
       } else this.swr();
-      this.isLoading = false;
-    } else {
-      // window.location = "/";
-      this.$router.push("/");
-    }
+      this.$store.commit("setGlobalPostLoading", false);
+    },
+    async loadMore(more) {
+      console.log("Load more is calling! length", this.posts.length);
+
+      if (this.noPostRemaining) return;
+
+      this.limit = this.limit + more;
+      this.loadMoreLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_all_post?limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        let prevLength = this.posts.length;
+        if (this.posts.length == res.data.data.length) {
+          this.noPostRemaining = true;
+        }
+        for (let i in res.data.data) {
+          console.log("pushing data");
+          let d = res.data.data[i];
+          if (i >= prevLength) {
+            this.$store.commit("pushAllGlobalPost", d);
+          }
+        }
+      }
+      this.loadMoreLoading = false;
+      console.log("Load more is finished! length", this.posts.length);
+    },
   },
+
+  watch: {
+    "$route.fullPath": function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      window.scrollTo(0, 0);
+
+      this.page = this.$route.query.page ? this.$route.query.page : 1;
+
+      this.filterPosts();
+    },
+  },
+  async created() {
+    this.page = this.$route.query.page ? this.$route.query.page : 1;
+    this.$store.commit("setGlobalPostLoading", true);
+    const response = await this.callApi(
+      "get",
+      `/api/get_all_post?limit=${this.limit}`
+    );
+    if (response.status == 200) {
+      this.$store.commit("setAllGlobalPost", response.data.data);
+      // this.$store.commit("setGlobalPostLoading", false);
+    }
+    // else {
+    //   this.swr();
+    // }
+    this.$store.commit("setGlobalPostLoading", false);
+  },
+
+  mounted() {
+    // document.addEventListener("click", this.hideSearchbar);
+    window.onscroll = () => {
+      this.bottomOfWindow =
+        window.pageYOffset + window.innerHeight >
+        document.body.scrollHeight - 100;
+
+      if (this.bottomOfWindow) {
+        if (!this.loadMoreLoading) {
+          this.loadMore(4);
+        }
+      }
+    };
+  },
+  // beforeDestroy() {
+  //   document.removeEventListener("click", this.hideSearchbar);
+  // },
 };
 </script>
 <style scoped>

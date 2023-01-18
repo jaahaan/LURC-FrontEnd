@@ -5,34 +5,34 @@
         <ul class="navbar-nav">
           <li class="nav-item active">
             <nuxt-link
-              class="nav-link text"
-              :to="`/profile/${this.$route.params.slug}/${this.$route.params.id}/overview`"
+              class="nav-link profileNav"
+              :to="`/profile/${this.$route.params.slug}/overview`"
               >Profile
             </nuxt-link>
           </li>
           <li class="nav-item">
             <nuxt-link
-              class="nav-link text"
-              :to="`/profile/${this.$route.params.slug}/${this.$route.params.id}/research`"
+              class="nav-link profileNav"
+              :to="`/profile/${this.$route.params.slug}/research`"
               >Research</nuxt-link
             >
           </li>
           <li class="nav-item">
             <nuxt-link
-              class="nav-link text"
-              :to="`/profile/${this.$route.params.slug}/${this.$route.params.id}/project`"
+              class="nav-link profileNav"
+              :to="`/profile/${this.$route.params.slug}/project`"
               >Projects</nuxt-link
             >
           </li>
           <li class="nav-item me-2">
             <nuxt-link
-              class="nav-link text"
-              :to="`/profile/${this.$route.params.slug}/${this.$route.params.id}/post`"
+              class="nav-link profileNav"
+              :to="`/profile/${this.$route.params.slug}/post`"
               >Posts</nuxt-link
             >
           </li>
           <!-- <li class="nav-item">
-            <div v-if="authUser.id == this.$route.params.id">
+            <div v-if="authUser.slug == this.$route.params.slug">
               <button class="main-btn" v-on:click="showSidebar()">
                 <i class="fa-solid fa-plus"></i> Add New
               </button>

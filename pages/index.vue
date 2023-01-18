@@ -242,11 +242,16 @@ export default {
 
   async created() {
     console.log("index page");
-    const response = await this.callApi("get", "/api/banners");
-    if (response.status == 200) {
-      this.dataBanner = response.data.data;
-      console.log("index page");
-    } else this.e("Oops!", "Something went wrong, please try again!");
+    if (this.authUser) {
+      window.location = "/home";
+    } else {
+      const response = await this.callApi("get", "/api/banners");
+      if (response.status == 200) {
+        this.dataBanner = response.data.data;
+        console.log("index page");
+      } else this.e("Oops!", "Something went wrong, please try again!");
+    }
+
     this.isDataLoading = false;
   },
 };

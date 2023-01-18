@@ -35,6 +35,9 @@
 .hero {
   &-section {
     opacity: 0.9;
+    height: calc(100vh - var(--nav-height));
+    display: flex;
+
     .hooper {
       flex: 1;
     }
@@ -64,6 +67,8 @@
     }
     &__bg {
       background-size: cover;
+      display: flex;
+      align-items: center;
     }
   }
 }
@@ -186,17 +191,17 @@
     }
   }
 }
-@include breakpoint-and-orientation-min(992px) {
-  .hero {
-    &-section {
-      height: calc(100vh - var(--nav-height));
-      display: flex;
-      flex-direction: column;
-      &__bg {
-        height: 100%;
-        display: flex;
-        align-items: center;
-      }
-    }
-  }
-}
+// @include breakpoint-and-orientation-min(992px) {
+//   .hero {
+//     &-section {
+//       height: calc(100vh - var(--nav-height));
+//       display: flex;
+//       flex-direction: column;
+//       &__bg {
+//         height: 100%;
+//         display: flex;
+//         align-items: center;
+//       }
+//     }
+//   }
+// }

@@ -7,7 +7,7 @@
             <figure>
               <img :src="details.image" alt="" />
             </figure>
-            <router-link :to="`/profile/${details.slug}/${details.user_id}`">
+            <router-link :to="`/profile/${details.user_slug}/overview`">
               <h4 class="header">
                 {{ details.name }}
               </h4>
@@ -20,27 +20,21 @@
             </p>
             <ul class="post-menu--list">
               <li class="post-menu--list---item">
-                <a
+                <nuxt-link
                   class="menu-link"
                   aria-current="page"
-                  v-bind:class="{
-                    active: isPostInfoIndex === 1,
-                  }"
-                  v-on:click="showPostInfo(1)"
+                  :to="`/description/${details.slug}/overview`"
                 >
-                  <h4>Overview</h4></a
+                  <h4>Overview</h4></nuxt-link
                 >
               </li>
               <li class="post-menu--list---item" v-if="authUser">
-                <a
+                <nuxt-link
                   class="menu-link"
                   aria-current="page"
-                  v-bind:class="{
-                    active: isPostInfoIndex === 2,
-                  }"
-                  v-on:click="showPostInfo(2)"
+                  :to="`/description/${details.slug}/comments`"
                 >
-                  <h4>Comments</h4></a
+                  <h4>Comments</h4></nuxt-link
                 >
               </li>
             </ul>
@@ -71,7 +65,7 @@
                     Authors:
                     <span v-for="author in details.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -86,7 +80,7 @@
                     Team Members:
                     <span v-for="author in details.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -101,7 +95,7 @@
                     Team Member:
                     <span v-for="author in details.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -116,7 +110,7 @@
                     Author:
                     <span v-for="author in details.authors">
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -135,7 +129,7 @@
                       v-if="details.authors.length"
                     >
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -148,7 +142,7 @@
                       v-if="details.authors.length"
                     >
                       <router-link
-                        :to="`/profile/${author.slug}/${author.id}`"
+                        :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}</router-link
                       >
@@ -169,7 +163,7 @@
                                         Authors:
                                         <span>
                                             <router-link
-                                                :to="`/profile/${author.slug}/${author.id}`"
+                                                :to="`/profile/${author.slug}/overview`"
                                                 class="authors"
                                                 v-if="authUser"
                                                 >{{ author.name }}</router-link
@@ -187,7 +181,7 @@
                                         Team Members:
                                         <span>
                                             <router-link
-                                                :to="`/profile/${author.slug}/${author.id}`"
+                                                :to="`/profile/${author.slug}/overview`"
                                                 class="authors"
                                                 v-if="authUser"
                                                 >{{ author.name }}</router-link
@@ -205,7 +199,7 @@
                                         Team Member:
                                         <span>
                                             <router-link
-                                                :to="`/profile/${author.slug}/${author.id}`"
+                                                :to="`/profile/${author.slug}/overview`"
                                                 class="authors"
                                                 v-if="authUser"
                                                 >{{ author.name }}</router-link
@@ -223,7 +217,7 @@
                                         Author:
                                         <span>
                                             <router-link
-                                                :to="`/profile/${author.slug}/${author.id}`"
+                                                :to="`/profile/${author.slug}/overview`"
                                                 class="authors"
                                                 v-if="authUser"
                                                 >{{ author.name }}</router-link
@@ -243,46 +237,22 @@
                   . <a>{{ upVoteCount }} UpVote</a> .
                   <a>{{ downVoteCount }} DownVote</a>
                 </h6>
-                <!-- <div class="footer">
-                  <span>
-                    <button class="main-btn" v-if="details.attachment">
-                      Download
-                    </button>
-                    <a :href="`${details.url}`" v-if="details.url">
-                      <button class="main-btn ml-3">Link</button>
-                    </a>
-                  </span>
 
-                  <span>
-                    <a v-if="details.like_count" @click="getLikedUser(index)">
-                      {{ details.like_count }}
-                    </a>
-
-                    <a
-                      v-on:click="like(index)"
-                      v-bind:class="{
-                        active: details.authUserLike == 'yes',
-                      }"
-                    >
-                      <i class="fa-solid fa-thumbs-up"></i>
-                    </a>
-                  </span>
-                </div> -->
                 <div class="footer">
                   <p>
                     <a
                       v-if="details.attachment && authUser"
                       class="main-btn main-btn__bg"
                       :href="`http://localhost:8000/api/download_attachment/${details.attachment}`"
-                      >Download</a
-                    >
+                      >Download <i class="fa-solid fa-download"
+                    /></a>
                     <a
                       class="main-btn main-btn__bg px-5"
                       :href="`${details.url}`"
                       v-if="details.url"
                       target="_blank"
                     >
-                      Link
+                      Link <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                   </p>
                   <p>
@@ -327,182 +297,7 @@
             </div>
 
             <div class="menu-item-box">
-              <div v-if="isPostInfoIndex === 1">
-                <!-- <template v-if="details.abstract">
-                                        <div class="card mb-2 p-3">
-                                            <i class="lni lni-folder"></i>
-                                            Add Your Project
-                                        </div>
-                                    </template> -->
-                <h4 class="menu-item--title">
-                  {{ details.type != "Project" ? "Abstract" : "Description" }}
-                </h4>
-
-                <h4 class="sub-title" v-if="details.abstract">
-                  {{ details.abstract }}
-                </h4>
-                <h4 class="sub-title" v-else>
-                  {{
-                    details.type != "Project"
-                      ? "The abstract for this research item is not available."
-                      : "The description for this project is not available."
-                  }}
-                </h4>
-              </div>
-
-              <div v-if="isPostInfoIndex === 2" class="comment">
-                <h4 class="menu-item--title">Comments</h4>
-                <div class="comment-box">
-                  <img :src="authUser.image" alt="img" />
-                  <textarea
-                    v-model="data.comment"
-                    class="form-control form-outline"
-                    placeholder="Add a comment"
-                    ref="textarea"
-                    rows="1"
-                    @focus="resizeTextarea"
-                    @keyup="resizeTextarea"
-                    @click="showButton"
-                  ></textarea>
-                  <Icon
-                    type="md-send"
-                    v-if="showbtn == true"
-                    @click="addComment"
-                  />
-                </div>
-                <div v-for="(comment, index) in comments" :key="index">
-                  <div class="comment-section">
-                    <img :src="comment.image" alt="img" />
-                    <div class="comment-section-content">
-                      <div class="comment-section-content-main">
-                        <router-link
-                          :to="`/profile/${comment.slug}/${comment.user_id}`"
-                        >
-                          {{ comment.name }}
-                        </router-link>
-                        <!-- . {{ comment.created_at }} -->
-
-                        <p>
-                          {{ comment.comment }}
-                        </p>
-                      </div>
-                      <div class="comment-section-content-like">
-                        <div>
-                          <span>
-                            <a
-                              v-on:click="CommentLike(index)"
-                              v-bind:class="{
-                                active: comment.authUserCommentLike == 'yes',
-                              }"
-                            >
-                              Like
-                            </a>
-                          </span>
-                          <a v-on:click="showReplyBox(index)">Reply</a>
-                        </div>
-                        <div
-                          v-if="comment.comment_like_count"
-                          @click="getCommentLikedUser(index)"
-                        >
-                          {{ comment.comment_like_count }}
-                          <i class="fa-solid fa-thumbs-up"></i>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="reply"
-                    v-if="
-                      comment.comment_reply_count > 0 &&
-                      comment_id !== comment.id
-                    "
-                  >
-                    <span class="reply-item"
-                      ><i
-                        data-visualcompletion="css-img"
-                        class="x1b0d499 x1d69dk1"
-                        style="
-                          background-image: url('https://static.xx.fbcdn.net/rsrc.php/v3/y6/r/LuI9mMlkMfm.png?_nc_eui2=AeHodVwwG5T1njR17oQGXXcMMyVdDR0OFnwzJV0NHQ4WfDrFp5XeVake6Gk9eA4jRqS77wkkIlDeyGr5Id_cI0_d');
-                          background-position: 0px -672px;
-                          background-size: auto;
-                          width: 16px;
-                          height: 16px;
-                          background-repeat: no-repeat;
-                          display: inline-block;
-                        "
-                      ></i></span
-                    ><span class="reply-item"
-                      ><a
-                        class="reply-item-count"
-                        v-on:click="showCommentReplies(index)"
-                        >{{ comment.comment_reply_count }} Replies</a
-                      ></span
-                    >
-                  </div>
-                  <div class="comment-reply">
-                    <div
-                      class="comment-reply-box"
-                      v-if="showreplybox == true && commentindex == index"
-                    >
-                      <img :src="authUser.image" alt="img" />
-                      <textarea
-                        v-model="data.commentReply"
-                        class="form-outline"
-                        placeholder="Add a comment"
-                        ref="textarea"
-                        rows="1"
-                        @focus="resizeTextarea"
-                        @keyup="resizeTextarea"
-                      ></textarea>
-                      <Icon type="md-send" @click="addCommentReply(index)" />
-                    </div>
-                    <div
-                      class="comment-reply-section"
-                      v-for="(reply, index) in commentReplies"
-                      :key="index"
-                      v-if="
-                        comment.id == reply.comment_id &&
-                        showcommentreplies == true
-                      "
-                    >
-                      <img :src="reply.image" alt="img" />
-                      <div class="comment-reply-section-content">
-                        <div class="comment-reply-section-content-main">
-                          <router-link
-                            :to="`/profile/${reply.slug}/${reply.user_id}`"
-                          >
-                            {{ reply.name }}
-                          </router-link>
-                          <!-- . {{ comment.created_at }} -->
-
-                          <p>
-                            {{ reply.comment }}
-                          </p>
-                        </div>
-                        <div class="comment-reply-section-content-like">
-                          <div>
-                            <a
-                              v-on:click="CommentReplyLike(index)"
-                              v-bind:class="{
-                                active: reply.authUserReplyCommentLike == 'yes',
-                              }"
-                            >
-                              Like
-                            </a>
-                          </div>
-                          <div
-                            v-if="reply.comment_reply_like_count"
-                            @click="getCommentReplyLikedUser(index)"
-                          >
-                            {{ reply.comment_reply_like_count }}
-                            <i class="fa-solid fa-thumbs-up"></i>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Nuxt />
             </div>
           </div>
         </div>
@@ -738,6 +533,7 @@ export default {
     },
 
     async addComment() {
+      this.showreplybox = false;
       if (this.data.comment.trim() == "")
         return this.e("Comment field is empty!!!");
       let obj = {
@@ -758,18 +554,18 @@ export default {
       //     today.getMinutes() +
       //     ":" +
       //     today.getSeconds();
-      let data = {
-        id: this.details.id,
-        user_id: this.authUser.id,
-        comment: this.data.comment,
-        image: this.authUser.image,
-        name: this.authUser.name,
-        // created_at: date + " " + time,
-        comment_like_count: 0,
-      };
 
       const res = await this.callApi("post", "/api/add_comment", obj);
       if (res.status == 201) {
+        let data = {
+          id: res.data.id,
+          user_id: this.authUser.id,
+          comment: this.data.comment,
+          image: this.authUser.image,
+          name: this.authUser.name,
+          // created_at: date + " " + time,
+          comment_like_count: 0,
+        };
         this.comments.unshift(data);
         this.data.comment = "";
       } else {
@@ -833,18 +629,21 @@ export default {
         comment_id: this.comments[index].id,
         commentReply: this.data.commentReply,
       };
-      let data = {
-        id: this.details.id,
-        user_id: this.authUser.id,
-        commentReply: this.data.commentReply,
-        image: this.authUser.image,
-        name: this.authUser.name,
-        comment_reply_like_count: 0,
-      };
 
       const res = await this.callApi("post", "/api/add_comment_reply", obj);
       if (res.status == 201) {
+        let data = {
+          id: res.data.id,
+          user_id: this.authUser.id,
+          post_id: this.details.id,
+          comment_id: this.comments[index].id,
+          comment: this.data.commentReply,
+          image: this.authUser.image,
+          name: this.authUser.name,
+          comment_reply_like_count: 0,
+        };
         this.commentReplies.unshift(data);
+        this.showCommentReplies(index);
         this.data.commentReply = "";
       } else {
         this.swr();
@@ -895,6 +694,10 @@ export default {
       `/api/post_details/${this.post_slug}`
     );
     if (this.authUser) {
+      // const resR = await this.callApi("get", `/api/get_comment_replies`);
+      // if (resR.status == 200) {
+      //   this.commentReplies = resR.data.data;
+      // }
       const res1 = await this.callApi(
         "get",
         `/api/get_comments/${this.post_slug}`

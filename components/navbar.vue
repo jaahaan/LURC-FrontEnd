@@ -92,15 +92,34 @@
       >
         <div class="navbar-notification">
           <div class="navbar-notification--head">
-            <h4>Notification</h4>
+            <h5>Notification</h5>
             <button type="button" v-on:click="hideNotification()">
               <i class="lni lni-close"></i>
             </button>
           </div>
-          <div class="navbar-notification--body">
-            <i class="lni lni-alarm"></i>
-            <p>Notification Is Empty</p>
-          </div>
+          <ul
+            class="navbar-notification--body"
+            v-for="(notification, index) in notificationItem"
+          >
+            <nuxt-link
+              class="nav-item notify"
+              v-bind:class="{
+                active: notification.seen == 0,
+              }"
+              :to="`/description/${notification.post_slug}/overview`"
+            >
+              <li class="nav-link" @click="updateSeen(index)">
+                <img :src="notification.image" />
+                <div>
+                  <nuxt-link
+                    :to="`/profile/${notification.user_slug}/overview`"
+                    >{{ notification.user_name }}</nuxt-link
+                  >
+                  {{ notification.msg }}
+                </div>
+              </li>
+            </nuxt-link>
+          </ul>
         </div>
       </div>
       <!-- ****SearchBox**** -->
@@ -123,9 +142,7 @@
             class="cancel-button"
             v-on:click="cancelSearchBar()"
           >
-            <i>
-              <i class="lni lni-close"></i>
-            </i>
+            <i class="lni lni-close"></i>
           </button>
         </div>
         <div
@@ -137,9 +154,14 @@
               v-for="user in Users"
               v-if="authUser.id != user.id"
               :key="user.id"
-              v-text="user.name"
               @click="getSearchedUser(user)"
-            ></li>
+            >
+              <img :src="user.image" />
+              <div>
+                <h4>{{ user.name }}</h4>
+                <p>{{ user.designation }}</p>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -218,14 +240,16 @@
               <li>
                 <div v-on:click="showNotification()">
                   <i class="lni lni-alarm"></i>
-                  <span class="navbar-action__badge">3</span>
+                  <span
+                    class="navbar-action__badge"
+                    v-if="this.seenCount > 0"
+                    >{{ this.seenCount }}</span
+                  >
                 </div>
               </li>
               <Dropdown trigger="hover">
                 <span
-                  ><nuxt-link
-                    :to="`/profile/${authUser.slug}/${authUser.id}/overview`"
-                  >
+                  ><nuxt-link :to="`/profile/${authUser.slug}/overview`">
                     <img
                       :src="authUser.image"
                       alt="img"
@@ -240,7 +264,7 @@
                   <div>
                     <DropdownItem class="d-block">
                       <nuxt-link
-                        :to="`/profile/${authUser.slug}/${authUser.id}/overview`"
+                        :to="`/profile/${authUser.slug}/overview`"
                         style="color: #000"
                       >
                         Your Profile
@@ -312,6 +336,8 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   data() {
     return {
@@ -319,8 +345,7 @@ export default {
       isSearchbar: false,
       isNotification: false,
       isFilter: false,
-      mobileDropdownIndex: -1,
-      keyword: null,
+      keyword: "",
       Users: [],
       user_id: -1,
       user_slug: "",
@@ -331,6 +356,20 @@ export default {
     keyword(after, before) {
       this.getResults();
     },
+    "$route.params"(oldValue, newValue) {
+      if (oldValue != newValue) {
+        this.hideNotification();
+        this.hideSidebar();
+        this.hideSearchbar();
+      }
+    },
+  },
+
+  computed: {
+    ...mapGetters({
+      seenCount: "getSeenCount",
+      notificationItem: "getNotificationItem",
+    }),
   },
   methods: {
     showSidebar() {
@@ -350,29 +389,23 @@ export default {
 
         if (!source.contains(target) && !container.contains(target)) {
           this.isSearchbar = false;
+          this.keyword = "";
         }
       }
     },
-    showNotification() {
+    async showNotification() {
       this.isNotification = true;
+      if (this.seenCount > 0) {
+        const res = await this.callApi("post", "/api/update_seenCount");
+        if (res.status == 200) {
+          this.$store.dispatch("updateSeenCount", 0);
+        }
+      }
     },
     hideNotification() {
       this.isNotification = false;
     },
-    showFilter() {
-      this.isFilter = true;
-    },
-    hideFilter() {
-      this.isFilter = false;
-    },
 
-    mobileMenuDropdown(index) {
-      if (this.mobileDropdownIndex === index) {
-        this.mobileDropdownIndex = -1;
-      } else {
-        this.mobileDropdownIndex = index;
-      }
-    },
     cancelSearchBar() {
       this.isSearchbar = false;
       this.keyword = "";
@@ -385,11 +418,10 @@ export default {
       //     "get",
       //     `/api/get_profile_info/${this.user_id}`
       // );
-      this.user_id = user.id;
       this.user_slug = user.slug;
-
-      this.$router.push(`/profile/${this.user_slug}/${this.user_id}/overview`);
-      this.keyword = "";
+      this.hideSearchbar(user);
+      this.$router.push(`/profile/${this.user_slug}/overview`);
+      // this.keyword = "";
     },
     async getResults() {
       const res = await this.callApi(
@@ -425,7 +457,25 @@ export default {
         console.log(error);
       }
     },
-
+    async updateSeen(index) {
+      if (this.notificationItem[index].seen == 0) {
+        let id = this.notificationItem[index].id;
+        const res = await this.callApi("post", `/api/update_seen/${id}`);
+        // if (res.status == 200) {
+        //   const notification = await this.callApi(
+        //     "get",
+        //     "/api/get_notification"
+        //   );
+        //   if (notification.status == 200) {
+        //     console.log(notification.data.data);
+        //     this.$store.dispatch("updateNotification", res.data.notification);
+        //   }
+        // }
+      }
+      if (this.$route.params.slug == this.notificationItem[index].post_slug) {
+        this.hideNotification();
+      }
+    },
     async getDepartments() {
       const res = await this.callApi("get", "/api/get_departments");
       if (res.status == 200) {
@@ -455,6 +505,9 @@ export default {
   //   }
   // },
   async created() {
+    console.log(this.seenCount);
+    console.log(this.notificationItem);
+
     this.getDepartments();
   },
 };

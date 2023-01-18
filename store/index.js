@@ -6,43 +6,19 @@ import cookie from 'cookie'
 export const state = () => ({
     user : 'no user',
     authUser: false,
-    // callWishListOb:null,
-    // callCartOb:null,
-    // cart: [],
-    // order:{
-    //   billingCity:'',
-    //   shippingPrice:0,
-    //   coupon:'',
-    //   discountType:'',
-    //   discount:0,
-    //   postCode:'',
-    //   referralCode:'',
-    //   giftVoucherCode:'',
-    //   giftVoucherAmount:0,
-    //   isDGMoney:0,
-    //   dgAmount:0,
-    //   roundAmount:0,
-    //   refferalDiscount:0,
-    //   membershipDiscount:0,
-    //   promoDiscount:0,
-    //   refferalDiscountAmount:0,
-    //   membershipDiscountAmount:0,
-    //   promoDiscountAmount:0,
+    allGlobalResearch:[],
+    globalResearchLoading:true,
 
-    //   totalSellingPrice:0,
-    //   subTotal:0,
-    //   invoiceTotal:0,
-    //   grandTotal:0,
-    //   billingAddress:'',
-    //   paymentType:'',
-    //   name:'',
-    //   contact:'',
+    allGlobalPost:[],
+    globalPostLoading:true,
 
-
-    // },
+    callNotificationOb:null,
+    notification: [],
+    seenCount:0,
     token: '',
     passwordReset: { email: "" },
     unauthorizedCredential: { contact: "",  password: ""},
+    
 
 })
 // common getters
@@ -56,8 +32,11 @@ export const getters = {
   getToken (state) {
     return state.token
   },
-  getCallCartOb (state) {
-    return state.callCartOb
+  getSeenCount (state) {
+    return state.seenCount
+  },
+  getCallNotificationOb (state) {
+    return state.callNotificationOb
   },
   unauthorizedCredential(state) {
     return state.unauthorizedCredential;
@@ -65,15 +44,24 @@ export const getters = {
   passwordReset(state) {
     return state.passwordReset;
   },
-  getCallWishListOb (state) {
-    return state.callWishListOb
+  
+  getNotificationItem (state) {
+    return state.notification
   },
-  order (state) {
-    return state.order;
+  getAllGlobalResearch (state) {
+    return state.allGlobalResearch
   },
-  getCartItem (state) {
-    return state.cart
+  getGlobalResearchLoading (state) {
+    return state.globalResearchLoading
   },
+
+  getAllGlobalPost (state) {
+    return state.allGlobalPost
+  },
+  getGlobalPostLoading (state) {
+    return state.globalPostLoading
+  },
+
 }
 //mutations for changing data from action
 export const mutations = {
@@ -83,30 +71,52 @@ export const mutations = {
   setAuthInfo(state, data) {
     state.authUser = data
   },
-  updateNotification (state, data) {
-    state.cart = data
-  },
   setToken(state, data) {
     state.token = data
   },
-  removeItem (state, i) {
-    state.cart.splice(i,1)
+
+  updateSeenCount(state, data) {
+    state.seenCount = data
   },
-  setCallCartOb (state, data) {
-    state.callCartOb = data
+  removeNotificationItem (state, i) {
+    state.Notification.splice(i,1)
+  },
+  
+  updateNotification (state, data) {
+    state.notification = data
+  },
+  
+  setCallNotificationOb (state, data) {
+    state.callNotificationOb = data
   },
   setUnauthorizedCredential(state, data)  {
     state.unauthorizedCredential = data;
   },
   setPasswordReset(state, data) {
     state.passwordReset = data;
-},
-  setCallWishListOb (state, data) {
-    state.callWishListOb = data
   },
-  order (state, data) {
-    state.order = data
+  //research
+  setAllGlobalResearch (state, data) {
+    state.allGlobalResearch = data
   },
+  setGlobalResearchLoading (state, data) {
+    state.globalResearchLoading = data
+  },
+  pushAllGlobalResearch (state, data) {
+    state.allGlobalResearch.push(data)
+  },
+
+  //post
+  setAllGlobalPost (state, data) {
+    state.allGlobalPost = data
+  },
+  setGlobalPostLoading (state, data) {
+    state.globalPostLoading = data
+  },
+  pushAllGlobalPost (state, data) {
+    state.allGlobalPost.push(data)
+  },
+  
 }
 // actionns for commiting mutations
 export const actions = {
@@ -119,11 +129,13 @@ export const actions = {
       const res  = await $axios.get('/api/auth_user')
       console.log(res.data)
       commit('setAuthInfo', res.data)
-      // const cart = await $axios.get(`/app/get_cart`)
-      // if(cart.status == 200){
-      //   // console.log(cart.data);
-      //   commit('updateNotification', cart.data.data)
-      // }
+      const notification = await $axios.get('/api/get_notification')
+      if(notification.status == 200){
+      console.log(notification.data.data)
+      state.seenCount = notification.data.seenCount
+      // commit('updateSeenCount', notification.data.seenCount)
+        commit('updateNotification', notification.data.data)
+      }
     } catch (e) {
         console.log('nuxt server error ')
     }
@@ -135,6 +147,9 @@ export const actions = {
   },
   updateNotification ({ commit }, data) {
     commit('updateNotification', data)
+  },
+  updateSeenCount ({ commit }, data) {
+    commit('updateSeenCount', data)
   },
   setAuthInfo ({ commit }, data) {
     commit('setAuthInfo', data)
