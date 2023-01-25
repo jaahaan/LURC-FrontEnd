@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="navbar navbar-expand justify-content-center">
+    <nav class="navbar navbar-expand">
       <div>
         <ul class="navbar-nav">
           <li class="nav-item active">

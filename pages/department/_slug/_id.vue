@@ -2,7 +2,7 @@
   <div>
     <section class="container research">
       <div class="row">
-        <div class="research-post col-lg-10 m-auto">
+        <div class="col-lg-9 research-post m-auto">
           <div class="dept-header">
             <h2>
               Department of
@@ -40,6 +40,7 @@
                   <input
                     type="search"
                     placeholder="Search..."
+                    :ref="`search${search}`"
                     v-model="search"
                     v-on:keyup="filterPosts"
                   />
@@ -108,9 +109,8 @@
                   </Dropdown>
                 </div>
 
-                <div>
-                  <Dropdown trigger="hover" v-if="isSearchbar == false">
-                    <!-- <span >sort by</span> -->
+                <div v-if="isSearchbar == false">
+                  <Dropdown trigger="hover">
                     <span>
                       <span v-if="filter.default == 'id'"> Newest </span>
                       <span
@@ -127,32 +127,43 @@
                       >
                         Descending [Z-A]
                       </span>
+                      <span
+                        v-else-if="
+                          filter.default == 'count' && filter.order == 'desc'
+                        "
+                      >
+                        Top Research
+                      </span>
                       <span v-else>Default Sort</span>
                     </span>
                     <i class="lni lni-chevron-down"></i>
                     <DropdownMenu slot="list">
                       <DropdownItem
-                        ><span @click="removeFromSelectedFilterAll"
-                          >Default Sort</span
-                        ></DropdownItem
+                        ><p @click="removeFromSelectedFilterAll">
+                          Default Sort
+                        </p></DropdownItem
                       >
 
                       <DropdownItem
-                        ><span @click="sortData(['id', 'desc'])"
-                          >Newest</span
-                        ></DropdownItem
+                        ><p @click="sortData(['id', 'desc'])">
+                          Newest
+                        </p></DropdownItem
                       >
                       <DropdownItem
-                        ><span @click="sortData(['title', 'asc'])"
-                          >Ascending [A-Z]</span
-                        ></DropdownItem
+                        ><p @click="sortData(['title', 'asc'])">
+                          Ascending [A-Z]
+                        </p></DropdownItem
                       >
                       <DropdownItem
-                        ><span @click="sortData(['title', 'desc'])"
-                          >Descending [Z-A]</span
-                        ></DropdownItem
+                        ><p @click="sortData(['title', 'desc'])">
+                          Descending [Z-A]
+                        </p></DropdownItem
                       >
-                      <DropdownItem><span>Top Research</span></DropdownItem>
+                      <DropdownItem
+                        ><p @click="sortData(['count', 'desc'])">
+                          Top Research
+                        </p></DropdownItem
+                      >
                     </DropdownMenu>
                   </Dropdown>
                 </div>
@@ -173,7 +184,7 @@
                 <div class="mt-2 mb-2">
                   <router-link
                     :to="`/description/${post.slug}/overview`"
-                    class="main-btn main-btn__border d-inline-block text-center"
+                    class="main-btn main-btn__type d-inline-block text-center"
                   >
                     {{ post.type }}</router-link
                   >
@@ -404,6 +415,31 @@
               </div>
             </div>
           </div>
+          <!-- <div v-else-if="noResearchRemaining">
+            <div style="text-align: center; margin: 30px 0px">
+              <h4>No More Research Found...</h4>
+            </div>
+          </div> -->
+        </div>
+
+        <div class="col-lg-3 d-none d-lg-block research-people" v-if="authUser">
+          <div class="research-post--item">
+            <h5 class="post-title">People you may know</h5>
+            <ul>
+              <li v-for="(user, index) in peopleYouMayKnow">
+                <img :src="user.image" alt="img" />
+                <div>
+                  <nuxt-link :to="`/profile/${user.slug}/overview`">
+                    {{ user.name }}
+                  </nuxt-link>
+                  <p>
+                    {{ user.designation }}<span class="dot">.</span
+                    >{{ user.department.department_name }}
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </section>
@@ -417,7 +453,7 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+        <router-link :to="`/profile/${user.slug}/overview`">
           {{ user.name }}
         </router-link>
       </div>
@@ -463,6 +499,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      peopleYouMayKnow: "getPeopleYouMayKnow",
       posts: "getAllGlobalResearch",
       isLoading: "getGlobalResearchLoading",
     }),
@@ -471,6 +508,11 @@ export default {
     showSearchbar() {
       this.isSearchbar = true;
       this.search = "";
+      this.$nextTick(() => {
+        if (this.$refs["search" + this.search]) {
+          this.$refs["search" + this.search].focus();
+        }
+      });
     },
     cancelSearchBar() {
       this.isSearchbar = false;
@@ -583,7 +625,7 @@ export default {
     },
 
     async like(index) {
-      // if (this.posts[index].user_id != this.authUser.id) {
+      if (this.posts[index].user_id != this.authUser.id) {
       let obj = {
         id: this.posts[index].id,
       };
@@ -597,7 +639,9 @@ export default {
         this.posts[index].like_count -= 1;
         this.posts[index].authUserLike = "no";
       }
-      // }
+      } else {
+        this.i("You can't like your own post!!");
+      }
     },
 
     async getLikedUser(index) {
@@ -712,15 +756,31 @@ export default {
   async created() {
     this.page = this.$route.query.page ? this.$route.query.page : 1;
     this.$store.commit("setGlobalResearchLoading", true);
-    const response = await this.callApi(
-      "get",
-      `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
-    );
-    if (response.status == 200) {
-      // this.posts = response.data.data;
-      this.$store.commit("setAllGlobalResearch", response.data.data);
-      this.$store.commit("setGlobalResearchLoading", false);
-    } else this.e("Oops!", "Something went wrong, please try again!");
+
+    if (this.authUser) {
+      const [res, res1] = await Promise.all([
+        this.callApi(
+          "get",
+          `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
+        ),
+        this.callApi("get", "/api/get_people_you_may_know"),
+      ]);
+
+      if (res.status == 200 && res1.status == 200) {
+        this.$store.commit("setAllGlobalResearch", res.data.data);
+        this.$store.dispatch("updatePeopleYouMayKnow", res1.data.data);
+        this.$store.commit("setGlobalResearchLoading", false);
+      }
+    } else {
+      const res = await this.callApi(
+        "get",
+        `/api/get_all_research?department=${this.$route.params.id}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        this.$store.commit("setAllGlobalResearch", res.data.data);
+        this.$store.commit("setGlobalResearchLoading", false);
+      }
+    }
     this.$store.commit("setGlobalResearchLoading", false);
     this.isDataLoading = false;
     // this.getDepartments();

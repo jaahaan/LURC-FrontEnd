@@ -1,6 +1,11 @@
 <template>
   <div>
     <div v-if="isLoading == false">
+      <div class="mb-4" v-if="authUser.slug == this.$route.params.slug">
+        <button class="main-btn m-0 w-100" v-on:click="showSidebar()">
+          <i class="fa-solid fa-plus"></i> Add New
+        </button>
+      </div>
       <div
         class="mb-2 p-3"
         v-if="
@@ -9,30 +14,7 @@
           educationInfo == ''
         "
       >
-        <button
-          class="main-btn w-100"
-          v-on:click="showSidebar()"
-          v-if="authUser.slug == this.$route.params.slug"
-        >
-          No Information Found<br />
-          <i class="fa-solid fa-plus"></i> Add Your Information
-        </button>
         <div class="_card"><h1>No Information Found</h1></div>
-      </div>
-      <div class="mb-4" v-else-if="authUser.slug == this.$route.params.slug">
-        <button class="main-btn m-0 w-100" v-on:click="showSidebar()">
-          <i class="fa-solid fa-plus"></i> Add New
-        </button>
-      </div>
-      <div
-        class="card mb-2 p-3"
-        v-else-if="
-          profileInfo.about == null &&
-          profileInfo.user_skills == null &&
-          educationInfo == null
-        "
-      >
-        <h2 class="Nothing_to_show_card text-center">No information to show</h2>
       </div>
       <!--**** about-section starts ****-->
       <!-- about edit -->
@@ -53,6 +35,7 @@
               :ref="`about${profileInfo.about}`"
             ></textarea>
             <div class="footer">
+              <div></div>
               <div>
                 <button
                   class="main-btn main-btn__border"
@@ -130,6 +113,7 @@
                     <Input
                       v-model="editEducationData.institute"
                       placeholder="Ex: Leading University"
+                      :ref="`institute${education.id}`" 
                     ></Input>
                     <span class="text-danger" v-if="errors.institute">{{
                       errors.institute[0]
@@ -207,6 +191,7 @@
                 </Form>
 
                 <div class="footer">
+                  <div></div>
                   <div>
                     <button
                       class="main-btn main-btn__border"
@@ -278,14 +263,13 @@
               v-model="editData.skill_id"
               :remote-method="getSkills"
             >
-              <Option
-                v-for="(skill, index) in skills"
-                :value="skill.id"
-                :key="index"
-                >{{ skill.name }}</Option
-              >
+              <Option v-for="(skill, i) in skills" :value="skill.id" :key="i">{{
+                skill.name
+              }}</Option>
             </Select>
+
             <div class="footer">
+              <div></div>
               <div>
                 <button class="main-btn main-btn__border" @click="updateSkills">
                   <i class="fa-solid fa-floppy-disk"></i> Save
@@ -309,7 +293,7 @@
               <div
                 v-if="authUser.slug == this.$route.params.slug"
                 class="btn-edit mx-2 float-end"
-                @click="editSkills(profileInfo)"
+                @click="showEditSkills"
               >
                 <i class="lni lni-pencil"></i>
               </div>
@@ -343,7 +327,7 @@
               </button>
             </div>
             <ul class="navbar-notification--body">
-              <li class="nav-item" @click="showAboutModal(profileInfo)">
+              <li class="nav-item" @click="showAboutModal">
                 <a class="nav-link">About</a>
               </li>
 
@@ -408,6 +392,7 @@
             ></textarea>
           </div>
           <div slot="footer">
+            <div></div>
             <div>
               <button class="main-btn main-btn__bg" @click="updateAbout()">
                 <i class="fa-solid fa-floppy-disk"></i> Save
@@ -895,7 +880,7 @@
             </button>
             <Button
               class="main-btn main-btn__bg"
-              @click="saveProject"
+              @click="saveResearch"
               :disabled="isAdding"
               :loading="isAdding"
               ><i class="fa-solid fa-floppy-disk"></i>
@@ -929,9 +914,9 @@
       </div>
     </div>
     <!--**** loader ****-->
-    <div v-if="isLoading == true">
-      <button class="main-btn--skeleton w-100 mb-4"></button>
-      <div class="research-post--skeleton--item">
+    <div v-if="isLoading == true" class="mt-5">
+      <!-- <button class="main-btn--skeleton w-100 mb-4"></button> -->
+      <div class="research-post--skeleton--item mt-5">
         <div class="post-title-skeleton">
           <p></p>
         </div>
@@ -1021,7 +1006,6 @@ export default {
         indexNumber: null,
         title: "",
       },
-      sectionModal: false,
       aboutModal: false,
       educationModal: false,
       skillsModal: false,
@@ -1115,29 +1099,23 @@ export default {
         desc: "File  " + file.name + " is too large, no more than 2M.",
       });
     },
-    //section modal
-    showSectionModal() {
-      this.sectionModal = true;
-    },
 
-    showAboutModal(profileInfo) {
-      // let obj = {
-      // 	id : tag.id,
-      // 	tagName : tag.tagName
-      // }
-      this.editData = profileInfo;
+    showAboutModal() {
+      let obj = {
+        id: this.profileInfo.id,
+        about: this.profileInfo.about,
+      };
+      this.editData = obj;
       this.aboutModal = true;
       this.isEditingItem = true;
-      this.sectionModal = false;
       this.hideSidebar();
     },
-
     async saveAbout() {
       if (this.editData.about.trim() == "") return this.e("required");
       const res = await this.callApi("post", `/api/save_about`, this.editData);
       if (res.status === 200) {
         this.profileInfo.about = this.editData.about;
-        this.reset();
+        // this.reset();
         this.s("About has been updated successfully!");
         this.aboutModal = false;
       } else {
@@ -1147,6 +1125,56 @@ export default {
           }
         } else {
           this.swr();
+        }
+      }
+    },
+    editAbout(profileInfo) {
+      this.reset();
+      this.editData.about = profileInfo.about;
+      this.editData.id = profileInfo.id;
+      this.about_id = profileInfo.id;
+      // this.editData.skills = "";
+
+      if (this.profileInfo) {
+        this.$nextTick(() => {
+          if (this.$refs["about" + this.profileInfo.about]) {
+            this.$refs["about" + this.profileInfo.about].focus();
+          }
+        });
+      }
+    },
+    async updateAbout() {
+      if (this.editData.about.trim() == "") return this.e("required");
+      const res = await this.callApi("post", `/api/save_about`, this.editData);
+      if (res.status === 200) {
+        this.profileInfo.about = this.editData.about;
+        this.reset();
+        this.s("About has been updated successfully!");
+        this.errors = [];
+      } else {
+        if (res.status == 422) {
+          if (res.data.errors.about) {
+            this.e(res.data.errors.about[0]);
+          }
+        } else {
+          this.swr();
+        }
+      }
+    },
+    async deleteAbout(profileInfo) {
+      if (this.profileInfo.id) {
+        const res = await this.callApi(
+          "post",
+          `/api/delete_about/${this.profileInfo.id}`,
+          this.editData
+        );
+
+        if (res.status === 200) {
+          this.profileInfo.about = this.editData.about;
+          this.reset();
+          this.s("About has been deleted successfully!");
+        } else {
+          this.swe();
         }
       }
     },
@@ -1227,10 +1255,10 @@ export default {
       //   validation = false;
       // }
       // if (validation == false) return this.$Message.error("Validation Failed!");
-      new Date("2020-12-28").toLocaleString("en-us", {
-        month: "short",
-        year: "numeric",
-      });
+      // new Date("2020-12-28").toLocaleString("en-us", {
+      //   month: "short",
+      //   year: "numeric",
+      // });
       var startDate = this.editEducationData.start_date.toLocaleString(
         "en-us",
         { month: "short", year: "numeric" }
@@ -1315,7 +1343,7 @@ export default {
       this.hideSidebar();
     },
     async saveSkills() {
-      if (this.data.skill_id == "") return this.e("Skill Required");
+      if (this.data.skill_id == []) return this.e("Skill Required");
       this.isAdding = true;
       const res = await this.callApi("post", "/api/save_skills", this.data);
       if (res.status === 200) {
@@ -1335,92 +1363,21 @@ export default {
       this.isAdding = false;
     },
 
-    showInterestsModal(profileInfo) {
-      this.editData = profileInfo;
-      this.interestsModal = true;
-      this.isEditingItem = true;
-      this.sectionModal = false;
-      this.hideSidebar();
-    },
-
-    editAbout(profileInfo) {
-      this.reset();
-      this.editData.about = profileInfo.about;
-      this.editData.id = profileInfo.id;
-      this.about_id = profileInfo.id;
-      // this.editData.skills = "";
-
-      if (this.profileInfo) {
-        this.$nextTick(() => {
-          if (this.$refs["about" + this.profileInfo.about]) {
-            this.$refs["about" + this.profileInfo.about].focus();
-          }
-        });
-      }
-    },
-    async updateAbout() {
-      if (this.editData.about.trim() == "") return this.e("required");
-      const res = await this.callApi("post", `/api/save_about`, this.editData);
-      if (res.status === 200) {
-        this.profileInfo.about = this.editData.about;
-        this.reset();
-        this.s("About has been updated successfully!");
-        this.errors = [];
-      } else {
-        if (res.status == 422) {
-          if (res.data.errors.about) {
-            this.e(res.data.errors.about[0]);
-          }
-        } else {
-          this.swr();
-        }
-      }
-    },
-
-    async deleteAbout(profileInfo) {
-      if (this.profileInfo.id) {
-        const res = await this.callApi(
-          "post",
-          `/api/delete_about/${this.profileInfo.id}`,
-          this.editData
-        );
-
-        if (res.status === 200) {
-          this.profileInfo.about = this.editData.about;
-          this.reset();
-          this.s("About has been deleted successfully!");
-        } else {
-          this.swe();
-        }
-      }
-    },
-
-    async editSkills(profileInfo) {
+    async showEditSkills() {
       this.reset();
       // this.data.skill_id = profileInfo.user_skills;
-      this.editData.id = profileInfo.id;
-      this.skill_id = profileInfo.id;
+      this.editData.id = this.profileInfo.id;
+      this.skill_id = this.profileInfo.id;
       this.editData.about = "";
       this.user_slug = this.$route.params.slug;
-
-      const [user, user_skills] = await Promise.all([
-        this.callApi("get", `/api/get_profile_info/${this.user_slug}`),
-        this.callApi("get", "/api/search_skills"),
-      ]);
-      if (user.status == 200) {
-        console.log(user.data);
-        // this.skills = user_skills.data;
-        for (let t of user.data.user_skills) {
-          console.log(t);
-          let obj = {
-            skill_id: parseInt(t.id),
-          };
-          this.editData.skill_id = parseInt(t.id);
-          // this.editData.skill_id.push(t);
-        }
-      } else {
-        this.swr();
+      const response = await this.callApi("get", `/api/get_skills`);
+      if (response.status == 200) {
+        this.skills = response.data;
       }
+      for (let t of this.profileInfo.user_skills) {
+        this.editData.skill_id.push(parseInt(t.id));
+      }
+
       // if (this.profileInfo) {
       //     this.$nextTick(() => {
       //         if (this.$refs["todo" + this.todos[index].id]) {
@@ -1430,10 +1387,17 @@ export default {
       // }
     },
     async updateSkills() {
-      if (this.editData.skills.trim() == "") return this.e("required");
-      const res = await this.callApi("post", `/api/save_skills`, this.editData);
+      if (this.editData.skill_id == []) return this.e("required");
+      const res = await this.callApi(
+        "post",
+        `/api/update_skills`,
+        this.editData
+      );
       if (res.status === 200) {
-        this.profileInfo.skills = this.editData.skills;
+        // for (let t of this.editData.skill_id) {
+        //   this.profileInfo.user_skills.push(parseInt(t.id));
+        // }
+        // this.profileInfo.skills = this.editData.skills;
         this.reset();
         this.s("Skills has been updated successfully!");
       } else {
@@ -1448,43 +1412,47 @@ export default {
     },
 
     showProjectModal() {
+      this.researchData.type = "Project";
       this.projectModal = true;
       this.hideSidebar();
     },
-    async saveProject() {
-      // if (this.researchData.project_name.trim() == "")
-      //     return this.e("Project Name is required");
-      // if (this.researchData.project_type.trim() == "")
-      //     return this.e("Project type is required");
-      // if (this.researchData.start_date.trim() == "")
-      //     return this.e("Start date is required");
-      this.researchData.type = "Project";
-      const res = await this.callApi(
-        "post",
-        "/api/save_post",
-        this.researchData
-      );
-      this.isLoading = true;
-      if (res.status === 200) {
-        this.s(res.data.msg);
-        // this.msg = res.researchData.msg;
-        this.closeModal();
-        this.reset();
-      } else {
-        if (res.status == 422) {
-          console.log(this.$route.params.id);
+    // async saveProject() {
+    //   // if (this.researchData.project_name.trim() == "")
+    //   //     return this.e("Project Name is required");
+    //   // if (this.researchData.project_type.trim() == "")
+    //   //     return this.e("Project type is required");
+    //   // if (this.researchData.start_date.trim() == "")
+    //   //     return this.e("Start date is required");
+    //   this.researchData.type = "Project";
+    //   const res = await this.callApi(
+    //     "post",
+    //     "/api/save_post",
+    //     this.researchData
+    //   );
+    //   this.isLoading = true;
+    //   if (res.status === 200) {
+    //     this.s(res.data.msg);
+    //     // this.msg = res.researchData.msg;
+    //     this.closeModal();
+    //     this.reset();
+    //   } else {
+    //     if (res.status == 422) {
+    //       console.log(this.$route.params.id);
 
-          for (let i in res.data.errors) {
-            this.errors = res.data.errors;
-          }
-        } else {
-          this.swr();
-        }
-      }
-      this.isLoading = false;
-    },
-    showResearchModal(type) {
+    //       for (let i in res.data.errors) {
+    //         this.errors = res.data.errors;
+    //       }
+    //     } else {
+    //       this.swr();
+    //     }
+    //   }
+    //   this.isLoading = false;
+    // },
+    async showResearchModal(type) {
       this.researchData.type = type;
+      this.getAuthors(this.authUser.name);
+
+      this.researchData.author_id.push(this.authUser.id);
       this.researchModal = true;
       this.hideSidebar();
     },
@@ -1554,7 +1522,7 @@ export default {
       // this.skills_id = "";
       this.researchData.type = "";
       this.researchData.title = "";
-      this.researchData.author_id = "";
+      this.researchData.author_id = [];
       this.researchData.attachment = "";
       this.researchData.abstract = "";
       this.researchData.start_date = "";
@@ -1566,7 +1534,7 @@ export default {
       this.user_slug = "";
       this.editData.about = "";
       this.about_id = "";
-      this.editData.skill_id = "";
+      this.editData.skill_id = [];
       this.skill_id = "";
       this.aboutModal = false;
       this.skillsModal = false;

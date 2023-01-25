@@ -3,7 +3,7 @@
 @use "../abstracts/mixins" as *;
 
 .research {
-  padding: 2rem 8rem !important;
+  padding: 2rem 6rem !important;
   margin: auto;
   &-post {
     &--display {
@@ -11,7 +11,7 @@
       justify-content: space-between;
       align-items: center;
       color: #3e3e3e;
-      margin: 15px;
+      margin-bottom: 15px;
       padding-bottom: 15px;
       border-bottom: 1px solid $secondaryColor;
       &--icon {
@@ -95,12 +95,10 @@
         }
       }
     }
-
     &--item {
       background-color: #fff;
-
       &:not(#modal) {
-        box-shadow: 0px 0px 3px #e2e2e2;
+        box-shadow: 0px 0px 3px #cdcdcd;
         // border: 1px solid $borderColor;
         border-radius: 5px;
         padding: 20px;
@@ -123,7 +121,7 @@
           text-align: center;
         }
         h5 {
-          font-size: 24px;
+          font-size: 22px;
         }
       }
       .post-sub-title {
@@ -152,6 +150,8 @@
               margin-left: 0.25em !important;
               font-size: 1.25em;
               font-weight: 500;
+              color: $gray;
+
               img {
                 width: 1em;
               }
@@ -164,6 +164,7 @@
             }
           }
         }
+
         .active {
           color: $btnHover !important;
           font-weight: bolder;
@@ -176,7 +177,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin: 15px;
+        margin-bottom: 15px;
         padding-bottom: 15px;
         border-bottom: 1px solid #c0c0c0;
         &--icon {
@@ -264,7 +265,34 @@
       }
     }
   }
+  &-people {
+    &:not(#home) {
+      margin-top: 3.5rem;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      img {
+        max-width: 40px;
+        max-height: 40px;
+        margin-right: 0.75rem;
+        border-radius: 50%;
+      }
+      &:not(:last-child) {
+        margin-bottom: 17px;
+      }
 
+      h4 {
+        font-size: 16px;
+        color: #000;
+      }
+      p {
+        font-size: 13px;
+        color: $gray;
+      }
+    }
+  }
   &-search {
     display: flex;
     justify-content: center;
@@ -323,7 +351,7 @@
   }
 }
 
-@include breakpoint-max(991px) {
+@include breakpoint-max(1200px) {
   .research {
     padding: 1.5rem 1rem !important;
     &-post {

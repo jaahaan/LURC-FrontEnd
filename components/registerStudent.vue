@@ -107,7 +107,12 @@ export default {
       const res = await this.callApi("post", "/api/register_s", this.data);
       if (res.status === 201) {
         this.msg = res.data.msg;
-        this.$router.push(`/emailVerifyOtp?email=${this.data.email}`);
+        let emailPassword = {
+          email: this.data.email,
+          password: this.data.password,
+        };
+        this.$store.commit("setUnauthorizedCredential", emailPassword);
+        this.$router.push(`/auth/account-activation`);
 
         this.data.name = "";
         this.data.email = "";

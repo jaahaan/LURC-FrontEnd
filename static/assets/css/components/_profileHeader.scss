@@ -6,7 +6,6 @@
     width: 200px;
     height: 200px;
     text-align: center;
-    line-height: 150px;
     border: 1px solid transparent;
     overflow: hidden;
     background: $bgWhite;
@@ -25,6 +24,7 @@
       left: 0;
       right: 0;
       background: rgba(0, 0, 0, 0.6);
+      padding-top: 70px;
       i {
         color: #fff;
         font-size: 40px;
@@ -188,6 +188,7 @@
     $bgWhite 100%
   );
   border-radius: 5px;
+
   figure {
     text-align: center;
     margin-bottom: 20px;
@@ -209,6 +210,12 @@
     font-weight: 500;
     line-height: 25px;
   }
+  .footer {
+    display: flex;
+    justify-content: center;
+    align-items: baseline;
+    margin: 5px 0;
+  }
   .nuxt-link-exact-active:not(.profileNav) {
     background-color: $primaryColor;
     i {
@@ -220,6 +227,7 @@
   }
   &--list {
     margin-top: 20px;
+    border-top: 1px solid #cdcdcd;
 
     &---item {
       .menu-link {

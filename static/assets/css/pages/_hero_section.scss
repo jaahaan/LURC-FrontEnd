@@ -18,16 +18,7 @@
     }
   }
 }
-.bg {
-  /*background-image: linear-gradient(angle, color-stop1, color-stop2);*/
-  background: linear-gradient(
-    90deg,
-    #ffffff 0%,
-    #ffffff 30%,
-    #a3babe 30%,
-    #a3babe 100%
-  );
-}
+
 /*************** Home CSS ***************/
 
 //------------------Hero----------------\\
@@ -37,7 +28,6 @@
     opacity: 0.9;
     height: calc(100vh - var(--nav-height));
     display: flex;
-
     .hooper {
       flex: 1;
     }
@@ -48,6 +38,7 @@
       padding-top: 60px;
       padding-bottom: 90px;
       text-align: center;
+
       h4 {
         color: #cdcdcd;
         font-size: 1.5em;
@@ -75,10 +66,8 @@
 
 .header-info {
   background-color: #f2f2f2;
-
   &-content {
     display: flex;
-
     &-item {
       padding-top: 15px;
       padding-bottom: 15px;

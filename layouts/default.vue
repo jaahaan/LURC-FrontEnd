@@ -10,7 +10,7 @@
           $route.name == 'profile-slug-post'
         "
       >
-        <div class="container-fluid profile-header-bg">
+        <div class="container-fluid profile-header-bg main">
           <profileHeader />
         </div>
       </div>
@@ -19,16 +19,17 @@
           $route.name == 'description-slug-overview' ||
           $route.name == 'description-slug-comments'
         "
+        class="main"
       >
         <postHeader />
       </div>
-      <div v-else>
+      <div v-else class="main">
         <Nuxt />
       </div>
     </div>
     <div v-else>
       <Navbar />
-      <Nuxt />
+      <Nuxt class="main" />
       <BottomContainer v-if="isFooterShow == true" />
     </div>
   </div>

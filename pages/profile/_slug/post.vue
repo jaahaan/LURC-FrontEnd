@@ -91,7 +91,7 @@ export default {
       errors: [],
       researches: [],
       users: [],
-      user_id: -1,
+      user_slug: -1,
       route_id: this.$route.params.id,
       config: {},
       initData: null,
@@ -112,9 +112,9 @@ export default {
     async reset() {
       this.showResearchForm = false;
       this.editData.id = "";
-      this.user_id = this.$route.params.id;
+      this.user_slug = this.$route.params.slug;
 
-      const res = await this.callApi("get", `/api/get_post/${this.user_id}`);
+      const res = await this.callApi("get", `/api/get_post/${this.user_slug}`);
       if (res.status == 200) {
         this.projects = res.data;
         this.errors = [];
@@ -213,11 +213,11 @@ export default {
       //     return this.e("Project type is required");
       // if (this.data.start_date.trim() == "")
       //     return this.e("Start date is required");
-      this.user_id = this.$route.params.id;
-      console.log(this.user_id);
+      this.user_slug = this.$route.params.slug;
+      console.log(this.user_slug);
       const res = await this.callApi(
         "post",
-        `/api/save_post/${this.user_id}`,
+        `/api/save_post/${this.user_slug}`,
         this.data
       );
       this.isLoading = true;
@@ -250,9 +250,9 @@ export default {
   },
   async created() {
     // this.token = window.Laravel.csrfToken;
-    this.user_id = this.$route.params.id;
+    this.user_slug = this.$route.params.slug;
 
-    const res = await this.callApi("get", `/api/get_post/${this.user_id}`);
+    const res = await this.callApi("get", `/api/get_post/${this.user_slug}`);
     const resuser = await this.callApi("get", `/api/get_all_user`);
     if (resuser.status == 200) {
       this.users = resuser.data;

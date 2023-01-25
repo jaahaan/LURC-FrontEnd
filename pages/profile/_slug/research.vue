@@ -3,7 +3,7 @@
     <!--****** Add Research box ******-->
 
     <template
-      v-if="isLoading == false && showResearchForm == false && researches == ''"
+      v-if="isLoading == false && showResearchForm == false && posts == ''"
     >
       <div class="card mb-2 p-3" v-if="authUser.slug == route_slug">
         <button class="add_new_card" v-on:click="showForm()">
@@ -166,12 +166,13 @@
           </div>
         </div>
         <div class="footer">
+          <div></div>
           <div>
-            <button class="main-btn main-btn__bg" @click="save">
-              <i class="fa-solid fa-floppy-disk"></i> Save
-            </button>
             <button class="main-btn main-btn__border" @click="reset()">
               Cancel
+            </button>
+            <button class="main-btn main-btn__bg" @click="save">
+              <i class="fa-solid fa-floppy-disk"></i> Save
             </button>
           </div>
         </div>
@@ -180,7 +181,7 @@
 
     <!--**** Researches ****-->
     <template
-      v-if="researches != '' && isLoading == false && showResearchForm == false"
+      v-if="posts != '' && isLoading == false && showResearchForm == false"
     >
       <div>
         <div>
@@ -199,7 +200,7 @@
         </div>
         <div
           class="research-post--item"
-          v-for="(research, index) in researches"
+          v-for="(research, index) in posts"
           :key="index"
         >
           <h5 class="post-title">
@@ -435,6 +436,20 @@
         </div>
       </div>
     </div>
+    <Modal
+      v-model="likedUserModal"
+      title="People Who Liked"
+      :mask-closable="true"
+      :closable="true"
+    >
+      <div class="comment-liked" v-for="user in likedUser">
+        <img :src="user.image" alt="img" />
+        <router-link :to="`/profile/${user.slug}/overview`">
+          {{ user.name }}
+        </router-link>
+      </div>
+      <div slot="footer"></div>
+    </Modal>
   </div>
 </template>
 
@@ -444,14 +459,15 @@ export default {
   data() {
     return {
       showResearchForm: false,
+      likedUserModal: false,
       isLoading: true,
       loading1: false,
       errors: [],
-      researches: [],
+      posts: [],
       users: [],
+      likedUser: [],
       user_id: -1,
       user_slug: "",
-
       route_slug: this.$route.params.slug,
       data: {
         type: "",
@@ -552,7 +568,7 @@ export default {
     async reset() {
       this.showResearchForm = false;
       this.editData.id = "";
-      this.user_id = this.$route.params.id;
+      this.user_slug = this.$route.params.slug;
       this.data = {
         type: "",
         conference: "",
@@ -565,18 +581,17 @@ export default {
         images: [],
         pdf: "",
       };
-      // const res = await this.callApi(
-      //     "get",
-      //     `/api/get_research/${this.user_id}`
-      // );
-      // if (res.status == 200) {
-      //     this.researches = res.data;
-      //     this.errors = [];
-      // } else {
-      //     this.swr();
-      // }
-
-      this.isLoading = false;
+      const res = await this.callApi(
+        "get",
+        `/api/get_user_research/${this.user_slug}`
+      );
+      if (res.status == 200) {
+        this.posts = res.data.data;
+        console.log(this.user_id);
+        console.log(res.data.data);
+      } else {
+        this.swr();
+      }
     },
 
     async save() {
@@ -587,7 +602,6 @@ export default {
       // if (this.data.start_date.trim() == "")
       //     return this.e("Start date is required");
 
-      this.user_id = this.$route.params.id;
       console.log(this.user_id);
       const res = await this.callApi("post", `/api/save_post`, this.data);
       this.isLoading = true;
@@ -673,6 +687,41 @@ export default {
       }
       this.isLoading = false;
     },
+
+    async like(index) {
+      if (this.posts[index].user_id != this.authUser.id) {
+        let obj = {
+          id: this.posts[index].id,
+        };
+        this.id = this.posts[index].id;
+        console.log(this.id);
+        const res = await this.callApi("post", "/api/like", obj);
+        if (res.status == 201) {
+          this.posts[index].like_count += 1;
+          this.posts[index].authUserLike = "yes";
+        } else {
+          this.posts[index].like_count -= 1;
+          this.posts[index].authUserLike = "no";
+        }
+      }
+    },
+
+    async getLikedUser(index) {
+      let obj = {
+        id: this.posts[index].id,
+      };
+      console.log(this.posts[index].id);
+      const res = await this.callApi(
+        "get",
+        `/api/get_liked_user?id=${this.posts[index].id}`
+      );
+      if (res.status == 200) {
+        this.likedUser = res.data.data;
+        this.likedUserModal = true;
+      } else {
+        this.swr();
+      }
+    },
     async getAuthors(query) {
       console.log(query);
       const response = await this.callApi(
@@ -692,7 +741,7 @@ export default {
       `/api/get_user_research/${this.user_slug}`
     );
     if (res.status == 200) {
-      this.researches = res.data.data;
+      this.posts = res.data.data;
       console.log(this.user_id);
       console.log(res.data.data);
     } else {

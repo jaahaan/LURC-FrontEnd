@@ -2,10 +2,10 @@
 @use "./mixins" as *;
 
 :root {
-  --nav-height: 80px;
+  --nav-height: 60px;
 
   @include breakpoint-max(767px) {
-    --nav-height: 65px;
+    --nav-height: 60px;
   }
 }
 
@@ -28,7 +28,7 @@ $colorWhite: #ffffff;
 // $headerBg: #494949;
 // $secondaryColor: #c3d136;
 // $btnHover: #b8c717;
-
+$link: #58a6ff;
 $primaryColor: #7da2a9;
 $headerBg: #a3babe;
 $secondaryColor: #7da2a9;
@@ -45,3 +45,5 @@ $info: #76cbd6;
 // $btnHover: #5a606d;
 $random: #444253;
 $hover: #cdcdcd;
+$upVote: #4caf50;
+$downVote: #ed2939;

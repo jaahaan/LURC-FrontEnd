@@ -14,12 +14,12 @@ export const state = () => ({
 
     callNotificationOb:null,
     notification: [],
+    peopleYouMayKnow:[],
     seenCount:0,
     token: '',
-    passwordReset: { email: "" },
-    unauthorizedCredential: { contact: "",  password: ""},
+    passwordReset: { email: "" , token: ""},
+    unauthorizedCredential: { email: "",  password: ""},
     
-
 })
 // common getters
 export const getters = {
@@ -48,6 +48,11 @@ export const getters = {
   getNotificationItem (state) {
     return state.notification
   },
+
+  getPeopleYouMayKnow (state) {
+    return state.peopleYouMayKnow
+  },
+
   getAllGlobalResearch (state) {
     return state.allGlobalResearch
   },
@@ -84,6 +89,9 @@ export const mutations = {
   
   updateNotification (state, data) {
     state.notification = data
+  },
+  updatePeopleYouMayKnow (state, data) {
+    state.peopleYouMayKnow = data
   },
   
   setCallNotificationOb (state, data) {
@@ -129,12 +137,17 @@ export const actions = {
       const res  = await $axios.get('/api/auth_user')
       console.log(res.data)
       commit('setAuthInfo', res.data)
-      const notification = await $axios.get('/api/get_notification')
-      if(notification.status == 200){
-      console.log(notification.data.data)
-      state.seenCount = notification.data.seenCount
-      // commit('updateSeenCount', notification.data.seenCount)
+      // const notification = await $axios.get('/api/get_notification')
+      const [notification, peopleYouMayKnow] = await Promise.all([
+        this.callApi("get", '/api/get_notification'),
+        this.callApi("get", "/api/get_people_you_may_know"),
+      ]);
+      if(notification.status == 200 && peopleYouMayKnow.status==200){
+        console.log(notification.data.data)
+        state.seenCount = notification.data.count
         commit('updateNotification', notification.data.data)
+        commit('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
+
       }
     } catch (e) {
         console.log('nuxt server error ')
@@ -147,6 +160,9 @@ export const actions = {
   },
   updateNotification ({ commit }, data) {
     commit('updateNotification', data)
+  },
+  updatePeopleYouMayKnow({commit}, data){
+    commit('updatePeopleYouMayKnow', data)
   },
   updateSeenCount ({ commit }, data) {
     commit('updateSeenCount', data)

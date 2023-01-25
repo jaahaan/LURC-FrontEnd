@@ -28,10 +28,15 @@ button {
   &__bg {
     background-color: $secondaryColor;
     color: $bgWhite;
+    i {
+      color: $bgWhite;
+    }
   }
-  &__dark-bg {
-    color: $bgWhite;
-    border: 1px solid $bgWhite;
+  &__type {
+    border-radius: 6px;
+    padding: 0.25em 1.5em;
+    // background-color: #c2c2c2;
+    // color:$gray;
   }
   &:hover {
     // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7);

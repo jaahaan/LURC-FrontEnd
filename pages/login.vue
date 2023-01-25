@@ -161,12 +161,7 @@ export default {
         this.getNotificationItemsServer();
         if (this.callNotificationOb) {
           let notification = this.callNotificationOb;
-          let quantity = notification.quantity;
-          delete notification.quantity;
-          this.addToCartServer(this.callNotificationOb, quantity);
-          this.$store.commit("setCallNotificationOb", null);
-          // this.$router.push("/cart");
-          // window.location='/cart'
+
           return;
         }
         if (this.$route.query.callback)
@@ -193,7 +188,7 @@ export default {
           };
           this.$store.commit("setUnauthorizedCredential", emailPassword);
           this.e(res.data.msg);
-          this.$router.push(`/auth/verify-email`);
+          this.$router.push(`/auth/account-activation`);
         } else {
           this.swr();
         }
@@ -202,7 +197,6 @@ export default {
     },
 
     async submit() {
-      // if (this.data.otp.trim() == "") return this.e("OTP is required");
       this.isSubmitting = true;
       const res = await this.callApi(
         "post",

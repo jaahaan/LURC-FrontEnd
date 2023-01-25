@@ -86,7 +86,7 @@ export default {
         email: "",
         password: "",
         password_confirmation: "",
-        otp: "",
+        token: "",
       },
       isSubmitting: false,
       errors: [],
@@ -102,7 +102,7 @@ export default {
   //All of its synchronous child components have been mounted (does not include async components or components inside <Suspense> trees).
   mounted() {
     this.data.email = this.passwordReset.email;
-    this.data.otp = this.passwordReset.otp;
+    this.data.token = this.passwordReset.token;
   },
 
   methods: {

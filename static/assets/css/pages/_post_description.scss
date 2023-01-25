@@ -13,7 +13,10 @@
     &-box {
       box-shadow: 0px 0px 3px #e2e2e2;
       border-radius: 2px;
-      padding: 20px;
+      // padding: 20px;
+      padding-top: 20px;
+      padding-left: 20px;
+      padding-bottom: 20px;
       margin-bottom: 10px;
       border-bottom: 1px solid #e3e3e3;
       &:not(:last-child) {
@@ -21,8 +24,7 @@
         flex-wrap: wrap;
       }
       .post-details {
-        width: 88%;
-        margin-right: 20px;
+        width: 90%;
         .title {
           font-size: 16px;
           font-weight: 400;
@@ -69,6 +71,7 @@
               margin-left: 0.25em !important;
               font-size: 1.25em;
               font-weight: 500;
+              color: $grayColor !important;
               img {
                 width: 1em;
               }
@@ -79,11 +82,11 @@
                 }
               }
             }
+            .active {
+              color: $btnHover !important;
+              font-weight: bolder;
+            }
           }
-        }
-        .active {
-          color: $btnHover !important;
-          font-weight: bolder;
         }
       }
     }
@@ -98,7 +101,6 @@
   }
   .comment {
     width: 100%;
-
     &-box {
       display: flex;
       // padding-bottom: 1rem;
@@ -166,15 +168,15 @@
             color: $grayColor;
             font-size: 0.95em;
             margin-right: 1rem;
-
             &:hover {
               text-decoration: underline;
             }
+            i {
+              color: $grayColor;
+              cursor: pointer;
+            }
           }
-          i {
-            color: $btnHover;
-            cursor: pointer;
-          }
+
           .active {
             color: $btnHover;
             font-weight: bolder;

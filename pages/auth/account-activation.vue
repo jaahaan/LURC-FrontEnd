@@ -19,16 +19,20 @@
 
               <div class="mb-2">
                 Enter OTP
-                <input type="number" class="form-control" v-model="data.otp" />
-                <span class="text-danger" v-if="errors.otp">{{
-                  errors.otp[0]
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model="data.token"
+                />
+                <span class="text-danger" v-if="errors.token">{{
+                  errors.token[0]
                 }}</span>
               </div>
 
               <div class="mb-2">
                 <button
                   :class="[
-                    data.otp ? ' main-btn-change col-12' : ' main-btn col-12',
+                    data.token ? ' main-btn-change col-12' : ' main-btn col-12',
                     ' main-btn col-12',
                   ]"
                   @click="submit"
@@ -47,29 +51,42 @@
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+
 export default {
   name: "forgot",
   data() {
     return {
       data: {
-        otp: "",
+        token: "",
         email: "",
+        password: "",
       },
       isSubmitting: false,
       errors: [],
     };
   },
+  computed: {
+    ...mapGetters({
+      unauthorizedCredential: "unauthorizedCredential",
+    }),
+  },
   methods: {
     async submit() {
-      if (this.data.otp.trim() == "") return this.e("OTP is required");
+      if (this.data.token.trim() == "") return this.e("OTP is required");
+      this.data.email = this.unauthorizedCredential.email;
+      this.data.password = this.unauthorizedCredential.password;
       this.isSubmitting = true;
-      const res = await this.callApi("post", "/verify_email", this.data);
+      const res = await this.callApi("post", "/api/verify_email", this.data);
 
       if (res.status == 200) {
-        this.s(res.data.msg);
-        // this.$store.commit("setVerifyEmail", this.data);
+        this.$store.dispatch("setAuthInfo", res.data.user);
+        this.$store.dispatch("setToken", res.data.token);
+        this.setCookie("token", res.data.token);
+        // window.location = "/home";
         this.$router.push("/home");
-        //this.data.otp = "";
+        this.s("You are logged In");
+        //this.data.token = "";
       } else {
         if (res.status == 401) {
           this.e(res.data.msg);

@@ -24,7 +24,7 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/description/${details.slug}/overview`"
-                >
+                  ><i class="las la-icons"></i>
                   <h4>Overview</h4></nuxt-link
                 >
               </li>
@@ -33,7 +33,7 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/description/${details.slug}/comments`"
-                >
+                  ><i class="fa-solid fa-comment"></i>
                   <h4>Comments</h4></nuxt-link
                 >
               </li>
@@ -149,83 +149,6 @@
                     </span>
                   </p>
                 </div>
-                <!-- <div
-                                    v-if="details.authors != null"
-                                    v-for="author in details.authors"
-                                >
-                                    <h5
-                                        class="sub-title"
-                                        v-if="
-                                            details.authors.length > 1 &&
-                                            details.type != 'Project'
-                                        "
-                                    >
-                                        Authors:
-                                        <span>
-                                            <router-link
-                                                :to="`/profile/${author.slug}/overview`"
-                                                class="authors"
-                                                v-if="authUser"
-                                                >{{ author.name }}</router-link
-                                            >
-                                            <a v-else>{{ author.name }}</a>
-                                        </span>
-                                    </h5>
-                                    <h5
-                                        class="sub-title"
-                                        v-else-if="
-                                            details.authors.length > 1 &&
-                                            details.type == 'Project'
-                                        "
-                                    >
-                                        Team Members:
-                                        <span>
-                                            <router-link
-                                                :to="`/profile/${author.slug}/overview`"
-                                                class="authors"
-                                                v-if="authUser"
-                                                >{{ author.name }}</router-link
-                                            >
-                                            <a v-else>{{ author.name }}</a>
-                                        </span>
-                                    </h5>
-                                    <h5
-                                        class="sub-title"
-                                        v-else-if="
-                                            details.authors.length == 1 &&
-                                            details.type == 'Project'
-                                        "
-                                    >
-                                        Team Member:
-                                        <span>
-                                            <router-link
-                                                :to="`/profile/${author.slug}/overview`"
-                                                class="authors"
-                                                v-if="authUser"
-                                                >{{ author.name }}</router-link
-                                            >
-                                            <a v-else>{{ author.name }}</a>
-                                        </span>
-                                    </h5>
-                                    <h5
-                                        class="sub-title"
-                                        v-else-if="
-                                            details.authors.length == 1 &&
-                                            details.type != 'Project'
-                                        "
-                                    >
-                                        Author:
-                                        <span>
-                                            <router-link
-                                                :to="`/profile/${author.slug}/overview`"
-                                                class="authors"
-                                                v-if="authUser"
-                                                >{{ author.name }}</router-link
-                                            >
-                                            <a v-else>{{ author.name }}</a>
-                                        </span>
-                                    </h5>
-                                </div> -->
 
                 <h6>
                   <!-- {{ details.created_at }} . -->
@@ -252,16 +175,17 @@
                       v-if="details.url"
                       target="_blank"
                     >
-                      Link <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      Link
+                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </a>
                   </p>
                   <p>
-                    <a v-if="details.like_count" @click="getLikedUser(index)">
+                    <a v-if="details.like_count" @click="getLikedUser">
                       {{ details.like_count }}
                     </a>
 
                     <a
-                      v-on:click="like(index)"
+                      v-on:click="like"
                       v-bind:class="{
                         active: details.authUserLike == 'yes',
                       }"
@@ -361,7 +285,20 @@
       </div>
       <div slot="footer"></div>
     </Modal>
-
+    <Modal
+      v-model="likedUserModal"
+      title="People Who Liked"
+      :mask-closable="true"
+      :closable="true"
+    >
+      <div class="comment-liked" v-for="user in likedUser">
+        <img :src="user.image" alt="img" />
+        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+          {{ user.name }}
+        </router-link>
+      </div>
+      <div slot="footer"></div>
+    </Modal>
     <div v-if="isLoading == true">
       <h2 class="text-center pt-50">Loading...</h2>
     </div>
@@ -392,6 +329,7 @@ export default {
       commentReplies: [],
       commentLikedUser: [],
       commentReplyLikedUser: [],
+      likedUser: [],
       commentindex: -1,
       comment_id: -1,
       post_slug: "",
@@ -414,6 +352,8 @@ export default {
       comment_reply_like_count: 0,
       authUserReplyCommentLike: "",
       commentLikedUserModal: false,
+      likedUserModal: false,
+
       hooperTrendingOffer: {
         commentsToShow: 1,
         centerMode: false,
@@ -516,7 +456,7 @@ export default {
     },
 
     async like() {
-      // if (this.posts[index].user_id != this.authUser.id) {
+      if (this.posts[index].user_id != this.authUser.id) {
       let obj = {
         id: this.details.id,
       };
@@ -529,7 +469,9 @@ export default {
         this.details.like_count -= 1;
         this.details.authUserLike = "no";
       }
-      // }
+      } else {
+        this.i("You can't like your own post!!");
+      }
     },
 
     async addComment() {
@@ -680,7 +622,22 @@ export default {
         this.i("You can't like your own reply");
       }
     },
-
+    async getLikedUser() {
+      let obj = {
+        id: this.details.id,
+      };
+      console.log(this.details.id);
+      const res = await this.callApi(
+        "get",
+        `/api/get_liked_user?id=${this.details.id}`
+      );
+      if (res.status == 200) {
+        this.likedUser = res.data.data;
+        this.likedUserModal = true;
+      } else {
+        this.swr();
+      }
+    },
     hideButton() {
       this.showbtn = false;
     },

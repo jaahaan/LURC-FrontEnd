@@ -2,7 +2,7 @@
   <div>
     <section class="container research">
       <div class="row">
-        <div class="col-lg-10 research-post m-auto">
+        <div class="col-lg-9 research-post m-auto">
           <div v-if="isDataLoading == false">
             <div class="research-post--display">
               <div class="research-post--display--icon">
@@ -22,6 +22,7 @@
                     type="search"
                     placeholder="Search..."
                     v-model="search"
+                    :ref="`search${search}`"
                     v-on:keyup="filterPosts"
                   />
                   <button type="button" class="search-button">
@@ -106,6 +107,13 @@
                       >
                         Descending [Z-A]
                       </span>
+                      <span
+                        v-else-if="
+                          filter.default == 'count' && filter.order == 'desc'
+                        "
+                      >
+                        Top Research
+                      </span>
                       <span v-else>Default Sort</span>
                     </span>
                     <i class="lni lni-chevron-down"></i>
@@ -131,7 +139,11 @@
                           Descending [Z-A]
                         </p></DropdownItem
                       >
-                      <DropdownItem><p>Top Research</p></DropdownItem>
+                      <DropdownItem
+                        ><p @click="sortData(['count', 'desc'])">
+                          Top Research
+                        </p></DropdownItem
+                      >
                     </DropdownMenu>
                   </Dropdown>
                 </div>
@@ -153,7 +165,7 @@
                 <div class="mt-2 mb-2">
                   <router-link
                     :to="`/description/${post.slug}/overview`"
-                    class="main-btn main-btn__border d-inline-block text-center"
+                    class="main-btn main-btn__type d-inline-block text-center"
                   >
                     {{ post.type }}</router-link
                   >
@@ -198,7 +210,9 @@
                         class="authors"
                         >{{ author.name }} </router-link
                       ><span v-else> {{ author.name }}</span
-                      ><span class="dot">.</span></span
+                      ><span class="dot" v-if="post.authors.length - 1 > index"
+                        >.</span
+                      ></span
                     >
                   </p>
                   <p
@@ -215,7 +229,9 @@
                         class="authors"
                         >{{ author.name }}</router-link
                       ><span v-else> {{ author.name }}</span
-                      ><span class="dot">.</span></span
+                      ><span class="dot" v-if="post.authors.length - 1 > index"
+                        >.</span
+                      ></span
                     >
                   </p>
                   <p
@@ -294,7 +310,8 @@
                       v-if="post.url"
                       target="_blank"
                     >
-                      Link <i class="fa-solid fa-arrow-up-right-from-square"></i></a>
+                      Link <i class="fa-solid fa-arrow-up-right-from-square"></i
+                    ></a>
                   </p>
 
                   <p v-if="authUser">
@@ -318,18 +335,52 @@
               <h2 class="text-center pt-50">No Data Found!!</h2>
             </div>
           </div>
+          <div v-if="isDataLoading == true">
+            <div class="research-post--skeleton--display">
+              <div class="research-post--skeleton--display--icon">
+                <p></p>
+              </div>
 
-          <div
-            class="research-post--skeleton--display"
-            v-if="isDataLoading == true"
-          >
-            <div class="research-post--skeleton--display--icon">
-              <p></p>
+              <div class="research-post--skeleton--display--default">
+                <p></p>
+                <p></p>
+              </div>
             </div>
-
-            <div class="research-post--skeleton--display--default">
-              <p></p>
-              <p></p>
+            <div class="research-post--skeleton--item">
+              <div class="post-title-skeleton">
+                <p></p>
+              </div>
+              <div class="post-sub-title-skeleton">
+                <p></p>
+              </div>
+              <div class="footer">
+                <a> </a>
+                <a> </a>
+              </div>
+            </div>
+            <div class="research-post--skeleton--item">
+              <div class="post-title-skeleton">
+                <p></p>
+              </div>
+              <div class="post-sub-title-skeleton">
+                <p></p>
+              </div>
+              <div class="footer">
+                <a> </a>
+                <a> </a>
+              </div>
+            </div>
+            <div class="research-post--skeleton--item">
+              <div class="post-title-skeleton">
+                <p></p>
+              </div>
+              <div class="post-sub-title-skeleton">
+                <p></p>
+              </div>
+              <div class="footer">
+                <a> </a>
+                <a> </a>
+              </div>
             </div>
           </div>
           <div v-if="isLoading == true">
@@ -390,6 +441,28 @@
             </div>
           </div> -->
         </div>
+        <div
+          class="col-lg-3 d-none d-lg-block research-people r"
+          v-if="authUser"
+        >
+          <div class="research-post--item">
+            <h5 class="post-title">People you may know</h5>
+            <ul>
+              <li v-for="(user, index) in peopleYouMayKnow">
+                <img :src="user.image" alt="img" />
+                <div>
+                  <nuxt-link :to="`/profile/${user.slug}/overview`">
+                    {{ user.name }}
+                  </nuxt-link>
+                  <p>
+                    {{ user.designation }}<span class="dot">.</span
+                    >{{ user.department.department_name }}
+                  </p>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -402,10 +475,11 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+        <router-link :to="`/profile/${user.slug}/overview`">
           {{ user.name }}
         </router-link>
       </div>
+      <div slot="footer"></div>
     </Modal>
   </div>
 </template>
@@ -447,6 +521,7 @@ export default {
 
   computed: {
     ...mapGetters({
+      peopleYouMayKnow: "getPeopleYouMayKnow",
       posts: "getAllGlobalResearch",
       isLoading: "getGlobalResearchLoading",
     }),
@@ -455,6 +530,11 @@ export default {
     showSearchbar() {
       this.isSearchbar = true;
       this.search = "";
+      this.$nextTick(() => {
+        if (this.$refs["search" + this.search]) {
+          this.$refs["search" + this.search].focus();
+        }
+      });
     },
     cancelSearchBar() {
       this.isSearchbar = false;
@@ -574,6 +654,8 @@ export default {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
+      } else {
+        this.i("You can't like your own post!!");
       }
     },
 
@@ -727,15 +809,30 @@ export default {
   async created() {
     this.page = this.$route.query.page ? this.$route.query.page : 1;
     this.$store.commit("setGlobalResearchLoading", true);
-    const response = await this.callApi(
-      "get",
-      `/api/get_all_research?department=${this.filter.department}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
-    );
-    if (response.status == 200) {
-      // this.posts = response.data.data;
-      this.$store.commit("setAllGlobalResearch", response.data.data);
-      this.$store.commit("setGlobalResearchLoading", false);
-    } else this.e("Oops!", "Something went wrong, please try again!");
+    if (this.authUser) {
+      const [res, res1] = await Promise.all([
+        this.callApi(
+          "get",
+          `/api/get_all_research?department=${this.filter.department}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
+        ),
+        this.callApi("get", "/api/get_people_you_may_know"),
+      ]);
+
+      if (res.status == 200 && res1.status == 200) {
+        this.$store.commit("setAllGlobalResearch", res.data.data);
+        this.$store.dispatch("updatePeopleYouMayKnow", res1.data.data);
+        this.$store.commit("setGlobalResearchLoading", false);
+      }
+    } else {
+      const res = await this.callApi(
+        "get",
+        `/api/get_all_research?department=${this.filter.department}&search=${this.search}&default=${this.filter.default}&limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        this.$store.commit("setAllGlobalResearch", res.data.data);
+        this.$store.commit("setGlobalResearchLoading", false);
+      }
+    }
     this.$store.commit("setGlobalResearchLoading", false);
     this.isDataLoading = false;
   },

@@ -1,260 +1,249 @@
 <template>
   <div>
-    <div>
-      <div class="container pt-4 pb-4 col-lg-8">
-        <!-- post description -->
-        <div class="home-post-section">
-          <div class="post-description menu-item">
-            <div
-              class="menu-item-box"
-              v-for="(post, index) in posts"
-              :key="index"
-              v-if="posts.length"
-            >
-              <div class="vote">
-                <span @click="upVote(index)">
-                  <i
-                    :class="[
-                      post.authUserVote == 'up'
-                        ? 'las la-caret-up upActive'
-                        : 'las la-caret-up',
-                      'las la-caret-up',
-                    ]"
-                  ></i>
-                </span>
-                <h6>{{ post.avgVote }}</h6>
-                <span @click="downVote(index)">
-                  <i
-                    :class="[
-                      post.authUserVote == 'down'
-                        ? 'las la-caret-down downActive'
-                        : 'las la-caret-down',
-                      'las la-caret-down',
-                    ]"
-                  ></i>
-                </span>
-              </div>
-              <div class="post-details">
-                <div class="header">
-                  <img :src="post.image" alt="img" />
-                  <div class="header-content">
-                    <router-link :to="`/profile/${post.user_slug}/overview`">
-                      {{ post.name }}
-                    </router-link>
-                    <!-- . {{ item.created_at }} -->
+    <section class="container home">
+      <div class="row" v-if="isLoading == false">
+        <div class="col-lg-9 research-post m-auto">
+          <!-- post description -->
+          <div class="home-post-section">
+            <div class="post-description menu-item">
+              <div
+                class="menu-item-box"
+                v-for="(post, index) in posts"
+                :key="index"
+                v-if="posts.length"
+              >
+                <div class="vote">
+                  <span @click="upVote(index)">
+                    <i
+                      :class="[
+                        post.authUserVote == 'up'
+                          ? 'las la-caret-up upActive'
+                          : 'las la-caret-up',
+                        'las la-caret-up',
+                      ]"
+                    ></i>
+                  </span>
+                  <h6>{{ post.avgVote }}</h6>
+                  <span @click="downVote(index)">
+                    <i
+                      :class="[
+                        post.authUserVote == 'down'
+                          ? 'las la-caret-down downActive'
+                          : 'las la-caret-down',
+                        'las la-caret-down',
+                      ]"
+                    ></i>
+                  </span>
+                </div>
+                <div class="post-details">
+                  <div class="header">
+                    <img :src="post.image" alt="img" />
+                    <div class="header-content">
+                      <router-link :to="`/profile/${post.user_slug}/overview`">
+                        {{ post.name }}
+                      </router-link>
+                      <!-- . {{ item.created_at }} -->
 
+                      <p>
+                        {{ post.designation }} .
+                        {{ post.department.department_name }}
+                      </p>
+                    </div>
+                  </div>
+                  <h5 class="menu-item--title">
+                    <router-link :to="`/description/${post.slug}/overview`">{{
+                      post.title
+                    }}</router-link>
+                  </h5>
+
+                  <p v-if="post.abstract != null">
+                    {{ post.abstract.substring(0, 190) }}
+                    ...
+                    <router-link :to="`/description/${post.slug}/overview`"
+                      >See more</router-link
+                    >
+                  </p>
+                  <div class="mt-2 mb-2">
+                    <router-link
+                      :to="`/description/${post.slug}/overview`"
+                      class="main-btn main-btn__type d-inline-block text-center"
+                    >
+                      {{ post.type }}</router-link
+                    >
+                  </div>
+                  <div v-if="post.authors.length">
+                    <p
+                      v-if="post.authors.length > 1 && post.type != 'Project'"
+                      class="mt-2"
+                    >
+                      Authors:
+                      <span v-for="author in post.authors">
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                    <p
+                      v-else-if="
+                        post.authors.length > 1 && post.type == 'Project'
+                      "
+                      class="mt-2"
+                    >
+                      Team Members:
+                      <span v-for="author in post.authors">
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                    <p
+                      class="mt-2"
+                      v-else-if="
+                        post.authors.length == 1 && post.type == 'Project'
+                      "
+                    >
+                      Team Member:
+                      <span v-for="author in post.authors">
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                    <p
+                      class="mt-2"
+                      v-else-if="
+                        post.authors.length == 1 && post.type != 'Project'
+                      "
+                    >
+                      Author:
+                      <span v-for="author in post.authors">
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                  </div>
+                  <div
+                    v-else-if="post.authors.length && post.type == 'Project'"
+                  >
+                    <p v-if="post.authors.length > 1" class="mt-2">
+                      Team Members:
+                      <span
+                        v-for="author in post.authors"
+                        v-if="post.authors.length"
+                      >
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                    <p class="mt-2" v-else>
+                      Team Member:
+                      <span
+                        v-for="author in post.authors"
+                        v-if="post.authors.length"
+                      >
+                        <router-link
+                          :to="`/profile/${author.slug}/overview`"
+                          class="authors"
+                          >{{ author.name }}</router-link
+                        >
+                      </span>
+                    </p>
+                  </div>
+                  <div class="sub-title">
                     <p>
-                      {{ post.designation }} .
-                      {{ post.department.department_name }}
+                      {{ post.formatedDateTime }}<span class="dot">.</span
+                      ><a v-if="post.read_count > 1"
+                        >{{ post.read_count }} Reads</a
+                      ><a v-else-if="post.read_count <= 1"
+                        >{{ post.read_count }} Read</a
+                      ><span class="dot">.</span><a>{{ post.upVote }} UpVote</a
+                      ><span class="dot">.</span
+                      ><a>{{ post.downVote }} DownVote</a>
+                    </p>
+                  </div>
+                  <div class="footer">
+                    <p>
+                      <a
+                        v-if="post.attachment && authUser"
+                        class="main-btn main-btn__bg"
+                        :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
+                        >Download <i class="fa-solid fa-download"
+                      /></a>
+                      <a
+                        class="main-btn main-btn__bg px-5"
+                        :href="`${post.url}`"
+                        v-if="post.url"
+                        target="_blank"
+                      >
+                        Link
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      </a>
+                    </p>
+                    <p>
+                      <a v-if="post.like_count" @click="getLikedUser(index)">
+                        {{ post.like_count }}
+                      </a>
+
+                      <a
+                        v-on:click="like(index)"
+                        v-bind:class="{
+                          active: post.authUserLike == 'yes',
+                        }"
+                      >
+                        <i class="fa-solid fa-thumbs-up"></i>
+                      </a>
                     </p>
                   </div>
                 </div>
-                <h5 class="menu-item--title">
-                  <router-link :to="`/description/${post.slug}/overview`">{{
-                    post.title
-                  }}</router-link>
-                </h5>
-
-                <p v-if="post.abstract != null">
-                  {{ post.abstract.substring(0, 190) }}
-                  ...
-                  <router-link :to="`/description/${post.slug}/overview`"
-                    >See more</router-link
-                  >
-                </p>
-                <div class="mt-2 mb-2">
-                  <router-link
-                    :to="`/description/${post.slug}/overview`"
-                    class="main-btn main-btn__border d-inline-block text-center"
-                  >
-                    {{ post.type }}</router-link
-                  >
-                </div>
-                <div v-if="post.authors.length">
-                  <p
-                    v-if="post.authors.length > 1 && post.type != 'Project'"
-                    class="mt-2"
-                  >
-                    Authors:
-                    <span v-for="author in post.authors">
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                  <p
-                    v-else-if="
-                      post.authors.length > 1 && post.type == 'Project'
-                    "
-                    class="mt-2"
-                  >
-                    Team Members:
-                    <span v-for="author in post.authors">
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                  <p
-                    class="mt-2"
-                    v-else-if="
-                      post.authors.length == 1 && post.type == 'Project'
-                    "
-                  >
-                    Team Member:
-                    <span v-for="author in post.authors">
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                  <p
-                    class="mt-2"
-                    v-else-if="
-                      post.authors.length == 1 && post.type != 'Project'
-                    "
-                  >
-                    Author:
-                    <span v-for="author in post.authors">
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                </div>
-                <div v-else-if="post.authors.length && post.type == 'Project'">
-                  <p v-if="post.authors.length > 1" class="mt-2">
-                    Team Members:
-                    <span
-                      v-for="author in post.authors"
-                      v-if="post.authors.length"
-                    >
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                  <p class="mt-2" v-else>
-                    Team Member:
-                    <span
-                      v-for="author in post.authors"
-                      v-if="post.authors.length"
-                    >
-                      <router-link
-                        :to="`/profile/${author.slug}/overview`"
-                        class="authors"
-                        >{{ author.name }}</router-link
-                      >
-                    </span>
-                  </p>
-                </div>
-                <div class="sub-title">
-                  <p>
-                    {{ post.formatedDateTime }}<span class="dot">.</span
-                    ><a v-if="post.read_count > 1"
-                      >{{ post.read_count }} Reads</a
-                    ><a v-else-if="post.read_count <= 1"
-                      >{{ post.read_count }} Read</a
-                    ><span class="dot">.</span><a>{{ post.upVote }} UpVote</a
-                    ><span class="dot">.</span
-                    ><a>{{ post.downVote }} DownVote</a>
-                  </p>
-                </div>
-                <div class="footer">
-                  <p>
-                    <a
-                      v-if="post.attachment && authUser"
-                      class="main-btn main-btn__bg"
-                      :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
-                      >Download <i class="fa-solid fa-download"
-                    /></a>
-                    <a
-                      class="main-btn main-btn__bg px-5"
-                      :href="`${post.url}`"
-                      v-if="post.url"
-                      target="_blank"
-                    >
-                      Link
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </a>
-                  </p>
-                  <p>
-                    <a v-if="post.like_count" @click="getLikedUser(index)">
-                      {{ post.like_count }}
-                    </a>
-
-                    <a
-                      v-on:click="like(index)"
-                      v-bind:class="{
-                        active: post.authUserLike == 'yes',
-                      }"
-                    >
-                      <i class="fa-solid fa-thumbs-up"></i>
-                    </a>
-                  </p>
-                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div v-if="loadMoreLoading && !noPostRemaining">
-          <div class="research-post--skeleton--item">
-            <div class="post-title-skeleton">
-              <p></p>
-            </div>
-            <div class="post-sub-title-skeleton">
-              <p></p>
-            </div>
-            <div class="footer">
-              <a> </a>
-              <a> </a>
-            </div>
+          <div v-if="loadMoreLoading && !noPostRemaining" class="loader">
+            <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
           </div>
-        </div>
-        <div v-if="isLoading == true">
-          <!-- <div class="research-post--skeleton--item">
-            <div class="post-title-skeleton">
-              <p></p>
-            </div>
-            <div class="post-sub-title-skeleton">
-              <p></p>
-            </div>
-            <div class="footer">
-              <a> </a>
-              <a> </a>
-            </div>
-          </div>
-          <div class="research-post--skeleton--item">
-            <div class="post-title-skeleton">
-              <p></p>
-            </div>
-            <div class="post-sub-title-skeleton">
-              <p></p>
-            </div>
-            <div class="footer">
-              <a> </a>
-              <a> </a>
+
+          <!-- <div v-else-if="noResearchRemaining">
+            <div style="text-align: center; margin: 30px 0px">
+              <h4>No More Research Found...</h4>
             </div>
           </div> -->
-          <div style="text-align: center; margin: 30px 0px">
-            <h4>
-              <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
-              <span>Loading Researches...</span>
-            </h4>
+        </div>
+        <div class="col-lg-3 d-none d-lg-block research-people" id="home">
+          <div class="research-post--item">
+            <h5 class="post-title">People you may know</h5>
+            <ul>
+              <li v-for="(user, index) in peopleYouMayKnow">
+                <img :src="user.image" alt="img" />
+                <div>
+                  <nuxt-link :to="`/profile/${user.slug}/overview`">
+                    {{ user.name }}
+                  </nuxt-link>
+                  <p>
+                    {{ user.designation }}<span class="dot">.</span
+                    >{{ user.department.department_name }}
+                  </p>
+                </div>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
-    </div>
+      <div v-if="isLoading == true" class="loader">
+        <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+      </div>
+    </section>
 
     <!--***** Liked User Modal *****-->
     <Modal
@@ -265,27 +254,14 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+        <router-link :to="`/profile/${user.slug}/overview`">
           {{ user.name }}
         </router-link>
       </div>
       <div slot="footer"></div>
     </Modal>
 
-    <!-- <Modal
-            v-model="likedUserModal"
-            title="People Who Liked"
-            :mask-closable="true"
-            :closable="true"
-            :variant="hidden"
-        >
-            <div class="comment-liked" v-for="user in likedUser">
-                <img :src="user.image" alt="img" />
-                <router-link :to="`/profile/${user.slug}/${user.user_id}`">
-                    {{ user.name }}
-                </router-link>
-            </div>
-        </Modal> -->
+
     <!-- <div v-if="loadMoreLoading && !noPostRemaining">
       <div class="research-post--skeleton--item">
         <div class="post-title-skeleton">
@@ -358,6 +334,7 @@ export default {
   },
   computed: {
     ...mapGetters({
+      peopleYouMayKnow: "getPeopleYouMayKnow",
       posts: "getAllGlobalPost",
       isLoading: "getGlobalPostLoading",
     }),
@@ -503,10 +480,10 @@ export default {
     async filterPosts() {
       // window.history.pushState({}, null, `${this.$route.path}`);
       // this.$store.commit("setGlobalPostLoading", true);
-      // const response = await this.callApi(
-      //   "get",
-      //   `/api/get_all_post?limit=${this.limit}`
-      // );
+      const response = await this.callApi(
+        "get",
+        `/api/get_all_post?limit=${this.limit}`
+      );
       if (response.status == 200) {
         this.$store.commit("setAllGlobalPost", response.data.data);
       } else this.swr();
@@ -555,13 +532,15 @@ export default {
   async created() {
     this.page = this.$route.query.page ? this.$route.query.page : 1;
     this.$store.commit("setGlobalPostLoading", true);
-    const response = await this.callApi(
-      "get",
-      `/api/get_all_post?limit=${this.limit}`
-    );
-    if (response.status == 200) {
-      this.$store.commit("setAllGlobalPost", response.data.data);
+    const [res, res1] = await Promise.all([
+      this.callApi("get", `/api/get_all_post?limit=${this.limit}`),
+      this.callApi("get", "/api/get_people_you_may_know"),
+    ]);
+
+    if (res.status == 200 && res1.status == 200) {
+      this.$store.commit("setAllGlobalPost", res.data.data);
       // this.$store.commit("setGlobalPostLoading", false);
+      this.$store.dispatch("updatePeopleYouMayKnow", res1.data.data);
     }
     // else {
     //   this.swr();

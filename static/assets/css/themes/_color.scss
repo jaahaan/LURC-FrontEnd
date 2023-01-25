@@ -20,8 +20,5 @@ p {
   color: #0c0c0c;
 }
 a {
-  color: $grayColor;
-  &:hover {
-    color: $grayColor;
-  }
+  color: $link;
 }

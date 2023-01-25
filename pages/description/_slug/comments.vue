@@ -91,7 +91,7 @@
               v-model="data.commentReply"
               class="form-outline"
               placeholder="Add a comment"
-              ref="textarea"
+              :ref="`commentReply${data.commentReply}`"
               rows="1"
               @focus="resizeTextarea"
               @keyup="resizeTextarea"
@@ -275,6 +275,11 @@ export default {
     showReplyBox(index) {
       this.showreplybox = true;
       this.commentindex = index;
+      this.$nextTick(() => {
+        if (this.$refs["commentReply" + this.data.commentReply]) {
+          this.$refs["commentReply" + this.data.commentReply][0].focus();
+        }
+      });
     },
     async addCommentReply(index) {
       if (this.data.commentReply.trim() == "")

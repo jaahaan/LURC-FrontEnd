@@ -19,19 +19,23 @@
 
               <div class="mb-2">
                 Enter OTP
-                <input type="number" class="form-control" v-model="data.otp" />
-                <span class="alert-danger" v-if="errors.otp">{{
-                  errors.otp[0]
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model="data.token"
+                />
+                <span class="alert-danger" v-if="errors.token">{{
+                  errors.token[0]
                 }}</span>
-                <span class="alert-danger" v-if="errors.otp">{{
-                  errors.otp[0]
+                <span class="alert-danger" v-if="errors.token">{{
+                  errors.token[0]
                 }}</span>
               </div>
 
               <div class="mb-2">
                 <button
                   :class="[
-                    data.otp ? ' main-btn-change col-12' : ' main-btn col-12',
+                    data.token ? ' main-btn-change col-12' : ' main-btn col-12',
                     ' main-btn col-12',
                   ]"
                   @click="submit"
@@ -54,7 +58,7 @@ export default {
   data() {
     return {
       data: {
-        otp: "",
+        token: "",
         email: "",
       },
       isSubmitting: false,
@@ -64,7 +68,7 @@ export default {
   },
   methods: {
     async submit() {
-      if (this.data.otp.trim() == "") return this.e("OTP is required");
+      if (this.data.token.trim() == "") return this.e("OTP is required");
       this.isSubmitting = true;
       const res = await this.callApi(
         "post",
@@ -76,7 +80,7 @@ export default {
         this.msg = res.data.msg;
         this.$store.commit("setPasswordReset", this.data);
         this.$router.push("/auth/reset_password");
-        //this.data.otp = "";
+        //this.data.token = "";
       } else {
         if (res.status == 401) {
           this.msg = res.data.msg;

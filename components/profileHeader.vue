@@ -212,17 +212,56 @@
                 .
                 {{ profileInfo.department.department_name }}
               </p>
-              <p>Leading University</p>
+              <p>{{ profileInfo.email }}</p>
+
+              <div
+                class="footer"
+                v-if="this.authUser.slug !== this.$route.params.slug"
+              >
+                <button
+                  class="main-btn main-btn__bg col-5 mx-1"
+                  v-if="sendRequest"
+                  @click="ignoreConnection"
+                >
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                  Pending
+                </button>
+                <button
+                  class="main-btn main-btn__bg col-5 mx-1"
+                  v-else-if="receivedRequest"
+                  @click="showResponseModal('Are you want to accept ')"
+                >
+                  <i class="fa-solid fa-user-check"></i>
+                  Response
+                </button>
+                <button
+                  class="main-btn main-btn__bg col-5 mx-1"
+                  v-else-if="approvedRequest"
+                  @click="showRemoveModal"
+                >
+                  <i class="fa-solid fa-user-check"></i>
+                  Connected
+                </button>
+                <button
+                  class="main-btn main-btn__border col-5 mx-1"
+                  @click="connect"
+                  v-else
+                >
+                  <!-- <i class="fa-solid fa-user-check"></i> -->
+                  <i class="fa-solid fa-user-plus"></i>
+                  Connect
+                </button>
+                <button class="main-btn main-btn__border col-5 mx-1">
+                  <i class="fa-solid fa-paper-plane"></i>
+                  Message
+                </button>
+              </div>
             </template>
           </div>
           <!---******* loader *******--->
           <div class="container mb-2" v-if="isLoading == true">
-            <div class="profile-header-skeleton m-lg-auto">
-              <img
-                :src="'/profileImages/download.jpg'"
-                alt="img"
-                class="img-fluid m-auto"
-              />
+            <div class="profile-header-skeleton m-auto">
+              <img class="img-fluid m-auto" />
             </div>
             <div class="p-3 profile-info-skeleton">
               <h4 class="mt-1 mb-1" />
@@ -237,7 +276,8 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/profile/${this.$route.params.slug}/overview`"
-                  ><h4>Profile</h4></nuxt-link
+                  ><i class="fa-solid fa-user"></i>
+                  <h4>Profile</h4></nuxt-link
                 >
               </li>
               <li class="profile-menu--list---item" v-if="authUser">
@@ -245,7 +285,11 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/profile/${this.$route.params.slug}/research`"
-                >
+                  ><i
+                    class="fa-regular fa-folder-open"
+                    v-if="$route.name == 'profile-slug-research'"
+                  ></i
+                  ><i class="fa-solid fa-folder" v-else></i>
                   <h4>Research</h4></nuxt-link
                 >
               </li>
@@ -254,7 +298,12 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/profile/${this.$route.params.slug}/project`"
-                  ><h4>Projects</h4></nuxt-link
+                  ><i
+                    class="fa-regular fa-folder-open"
+                    v-if="$route.name == 'profile-slug-project'"
+                  ></i
+                  ><i class="fa-solid fa-folder" v-else></i>
+                  <h4>Projects</h4></nuxt-link
                 >
               </li>
               <li class="profile-menu--list---item" v-if="authUser">
@@ -262,7 +311,8 @@
                   class="menu-link"
                   aria-current="page"
                   :to="`/profile/${this.$route.params.slug}/post`"
-                  ><h4>Posts</h4></nuxt-link
+                  ><i class="fa-solid fa-users"></i>
+                  <h4>Connections</h4></nuxt-link
                 >
               </li>
             </ul>
@@ -279,6 +329,54 @@
           </div>
         </div>
       </div>
+      <Modal v-model="responseModal" width="360">
+        <p slot="header" style="color: #7da2a9; text-align: center">
+          <Icon type="close"></Icon>
+          <span>Response</span>
+        </p>
+        <div style="text-align: center">
+          <b>{{ this.connection_title }}</b
+          >?
+        </div>
+        <div slot="footer" class="justify-content-center d-flex">
+          <Button
+            class="main-btn main-btn__border"
+            :loading="sending"
+            @click="acceptConnection"
+          >
+            <span v-if="!sending">Accept</span>
+            <span v-else>Accepting...</span>
+          </Button>
+          <Button
+            class="main-btn main-btn__border"
+            :loading="sending"
+            @click="ignoreConnection"
+          >
+            <span v-if="!sending">Ignore</span>
+            <span v-else>Ignoring...</span>
+          </Button>
+        </div>
+      </Modal>
+      <Modal v-model="removeModal" width="360">
+        <p slot="header" style="color: #7da2a9; text-align: center">
+          <Icon type="close"></Icon>
+          <span>Response</span>
+        </p>
+        <div style="text-align: center">
+          <b>{{ this.connection_title }}</b>
+        </div>
+        <div slot="footer">
+          <Button
+            class="main-btn main-btn__border"
+            long
+            :loading="sending"
+            @click="ignoreConnection"
+          >
+            <span v-if="!sending">Remove</span>
+            <span v-else>Removing...</span>
+          </Button>
+        </div>
+      </Modal>
     </section>
   </div>
 </template>
@@ -317,8 +415,16 @@ export default {
       index: -1,
       user_slug: "",
       token: "",
+      connection_id: "",
+      connection_title: "",
       isIconImageNew: false,
       isEditingItem: false,
+      sendRequest: false,
+      receivedRequest: false,
+      approvedRequest: false,
+      responseModal: false,
+      removeModal: false,
+      sending: false,
       errors: [],
     };
   },
@@ -424,6 +530,7 @@ export default {
       this.isEditingItem = false;
       this.editModal = false;
     },
+
     async getDepartments() {
       const res = await this.callApi("get", "/api/get_departments");
       if (res.status == 200) {
@@ -433,10 +540,63 @@ export default {
       }
       this.isLoading = false;
     },
+    async connect() {
+      console.log("inside connect");
+      const res = await this.callApi(
+        "post",
+        `/api/add_connection?id=${this.profileInfo.id}`
+      );
+      if (res.status == 201) {
+        this.sendRequest = true;
+        this.connection = res.data.data;
+      }
+    },
+    async acceptConnection() {
+      const res = await this.callApi(
+        "post",
+        `/api/accept_connection?id=${this.connection.id}&user_id=${this.connection.user1.id}`
+      );
+      if (res.status == 201) {
+        this.approvedRequest = true;
+        this.receivedRequest = false;
+        this.responseModal = false;
+        console.log(this.connection.user2.id);
+      }
+    },
+    async ignoreConnection() {
+      // console.log(this.connection.user2.id);
+      const res = await this.callApi(
+        "post",
+        `/api/ignore_connection?id=${this.connection.id}&user_id=${this.profileInfo.id}`
+      );
+      if (res.status == 201) {
+        this.approvedRequest = false;
+        this.receivedRequest = false;
+        this.approvedRequest = false;
+        this.sendRequest = false;
+        this.responseModal = false;
+        this.removeModal = false;
+      }
+    },
+    showResponseModal() {
+      this.connection_title =
+        "Are you sure you want to accept " +
+        this.connection.user1.name +
+        " as your connection";
+      this.responseModal = true;
+    },
+    showRemoveModal() {
+      this.connection_title =
+        "Are you sure you want to remove " +
+        this.connection.user1.name +
+        " from your connection?";
+      this.removeModal = true;
+    },
     async reset() {
       // this.token = window.Laravel.csrfToken;
 
       this.user_slug = this.$route.params.slug;
+      this.isLoading = true;
       const res = await this.callApi(
         "get",
         `/api/get_profile_info/${this.user_slug}`
@@ -453,7 +613,7 @@ export default {
 
   // to perform "side effects" in reaction to state changes
   watch: {
-    "$route.params"(oldValue, newValue) {
+    "$route.params.slug"(oldValue, newValue) {
       if (oldValue != newValue) {
         console.log("route is changing!");
         this.reset();
@@ -462,18 +622,32 @@ export default {
   },
   async created() {
     // this.token = window.Laravel.csrfToken;
-    this.getDepartments();
     this.user_slug = this.$route.params.slug;
     const res = await this.callApi(
       "get",
       `/api/get_profile_info/${this.user_slug}`
     );
+    const res1 = await this.callApi(
+      "get",
+      `/api/connection_status?slug=${this.user_slug}`
+    );
+    if (res1.status == 201) {
+      this.approvedRequest = true;
+    }
+    if (res1.status == 202) {
+      this.receivedRequest = true;
+    }
+    if (res1.status == 203) {
+      this.sendRequest = true;
+    }
     if (res.status == 200) {
       this.profileInfo = res.data.user;
     } else {
       this.swr();
     }
-    this.isLoading = false;
+    this.connection = res1.data.data;
+    console.log(this.connection);
+    this.getDepartments();
   },
 };
 </script>
