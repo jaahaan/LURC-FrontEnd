@@ -24,9 +24,9 @@
           <img :src="comment.image" alt="img" />
           <div class="comment-section-content">
             <div class="comment-section-content-main">
-              <router-link :to="`/profile/${comment.slug}/${comment.user_id}`">
+              <nuxt-link :to="`/profile/${comment.slug}/${comment.user_id}`">
                 {{ comment.name }}
-              </router-link>
+              </nuxt-link>
               <!-- . {{ comment.created_at }} -->
 
               <p>
@@ -107,9 +107,9 @@
             <img :src="reply.image" alt="img" />
             <div class="comment-reply-section-content">
               <div class="comment-reply-section-content-main">
-                <router-link :to="`/profile/${reply.slug}/${reply.user_id}`">
+                <nuxt-link :to="`/profile/${reply.slug}/${reply.user_id}`">
                   {{ reply.name }}
-                </router-link>
+                </nuxt-link>
                 <!-- . {{ comment.created_at }} -->
 
                 <p>

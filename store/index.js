@@ -14,6 +14,7 @@ export const state = () => ({
 
     callNotificationOb:null,
     notification: [],
+    connection: [],
     peopleYouMayKnow:[],
     seenCount:0,
     token: '',
@@ -45,6 +46,10 @@ export const getters = {
     return state.passwordReset;
   },
   
+  getConnectionItem (state) {
+    return state.connection
+  },
+
   getNotificationItem (state) {
     return state.notification
   },
@@ -82,6 +87,14 @@ export const mutations = {
 
   updateSeenCount(state, data) {
     state.seenCount = data
+  },
+
+  removeConnectionItem (state, i) {
+    state.Connection.splice(i,1)
+  },
+  
+  updateConnection (state, data) {
+    state.connection = data
   },
   removeNotificationItem (state, i) {
     state.Notification.splice(i,1)
@@ -138,16 +151,17 @@ export const actions = {
       console.log(res.data)
       commit('setAuthInfo', res.data)
       // const notification = await $axios.get('/api/get_notification')
-      const [notification, peopleYouMayKnow] = await Promise.all([
+      const [notification, peopleYouMayKnow, connection] = await Promise.all([
         this.callApi("get", '/api/get_notification'),
         this.callApi("get", "/api/get_people_you_may_know"),
+        this.callApi("get", "/api/get_auth_user_connection"),
       ]);
-      if(notification.status == 200 && peopleYouMayKnow.status==200){
+      if(notification.status == 200 && peopleYouMayKnow.status==200 && connection.status==200){
         console.log(notification.data.data)
         state.seenCount = notification.data.count
         commit('updateNotification', notification.data.data)
         commit('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
-
+        commit('updateConnection', connection.data.data)
       }
     } catch (e) {
         console.log('nuxt server error ')
@@ -158,6 +172,9 @@ export const actions = {
   setToken ({ commit }, data) {
     commit('setToken', data)
   },
+  updateConnection ({ commit }, data) {
+    commit('updateConnection', data)
+  },
   updateNotification ({ commit }, data) {
     commit('updateNotification', data)
   },
@@ -167,7 +184,7 @@ export const actions = {
   updateSeenCount ({ commit }, data) {
     commit('updateSeenCount', data)
   },
-  setAuthInfo ({ commit }, data) {
+  setAuthInfo ({ commit }, data) { 
     commit('setAuthInfo', data)
   },
 }

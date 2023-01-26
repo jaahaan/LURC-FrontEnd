@@ -2,7 +2,7 @@
   <div>
     <section class="container research">
       <div class="row">
-        <div class="col-lg-9 research-post m-auto">
+        <div class="col-lg-9 research-post mx-auto">
           <div class="dept-header">
             <h2>
               Department of
@@ -63,54 +63,96 @@
               </div>
               <div class="research-post--display--default">
                 <div v-if="isSearchbar == false">
-                  <Dropdown trigger="hover">
+                  <div class="dropdown">
                     <span
                       ><span v-if="search == ''"> Type </span>
                       <span else>{{ search }}</span></span
                     >
                     <i class="lni lni-chevron-down"></i>
-                    <DropdownMenu slot="list">
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Article')">
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Article',
+                          }"
+                          @click="addToFilterSearch('Article')"
+                        >
                           Article
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Conference Paper')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Conference Paper',
+                          }"
+                          @click="addToFilterSearch('Conference Paper')"
+                        >
                           Conference Paper
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Data')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Data',
+                          }"
+                          @click="addToFilterSearch('Data')"
+                        >
                           Data
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Resaerch')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Resaerch',
+                          }"
+                          @click="addToFilterSearch('Resaerch')"
+                        >
                           Resaerch
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Project')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Project',
+                          }"
+                          @click="addToFilterSearch('Project')"
+                        >
                           Project
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Presentation')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Presentation',
+                          }"
+                          @click="addToFilterSearch('Presentation')"
+                        >
                           Presentation
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="addToFilterSearch('Preprint')">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: search == 'Preprint',
+                          }"
+                          @click="addToFilterSearch('Preprint')"
+                        >
                           Preprint
-                        </p></DropdownItem
-                      >
-                    </DropdownMenu>
-                  </Dropdown>
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
 
                 <div v-if="isSearchbar == false">
-                  <Dropdown trigger="hover">
+                  <div class="dropdown">
                     <span>
                       <span v-if="filter.default == 'id'"> Newest </span>
                       <span
@@ -137,35 +179,70 @@
                       <span v-else>Default Sort</span>
                     </span>
                     <i class="lni lni-chevron-down"></i>
-                    <DropdownMenu slot="list">
-                      <DropdownItem
-                        ><p @click="removeFromSelectedFilterAll">
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: filter.default == '' && filter.order == '',
+                          }"
+                          @click="removeFromSelectedFilterAll"
+                        >
                           Default Sort
-                        </p></DropdownItem
-                      >
-
-                      <DropdownItem
-                        ><p @click="sortData(['id', 'desc'])">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive: filter.default == 'id',
+                          }"
+                          @click="sortData(['id', 'desc'])"
+                        >
                           Newest
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="sortData(['title', 'asc'])">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive:
+                              filter.default == 'title' &&
+                              filter.order == 'asc',
+                          }"
+                          @click="sortData(['title', 'asc'])"
+                        >
                           Ascending [A-Z]
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="sortData(['title', 'desc'])">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive:
+                              filter.default == 'title' &&
+                              filter.order == 'desc',
+                          }"
+                          @click="sortData(['title', 'desc'])"
+                        >
                           Descending [Z-A]
-                        </p></DropdownItem
-                      >
-                      <DropdownItem
-                        ><p @click="sortData(['count', 'desc'])">
+                        </p>
+                      </li>
+                      <li>
+                        <p
+                          class="dropdown-item"
+                          v-bind:class="{
+                            dactive:
+                              filter.default == 'count' &&
+                              filter.order == 'desc',
+                          }"
+                          @click="sortData(['count', 'desc'])"
+                        >
                           Top Research
-                        </p></DropdownItem
-                      >
-                    </DropdownMenu>
-                  </Dropdown>
+                        </p>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
@@ -177,23 +254,23 @@
                 :key="index"
               >
                 <h5 class="post-title">
-                  <router-link :to="`/description/${post.slug}/overview`"
-                    ><h5>{{ post.title }}</h5></router-link
+                  <nuxt-link :to="`/description/${post.slug}/overview`"
+                    ><h5>{{ post.title }}</h5></nuxt-link
                   >
                 </h5>
                 <div class="mt-2 mb-2">
-                  <router-link
+                  <nuxt-link
                     :to="`/description/${post.slug}/overview`"
                     class="main-btn main-btn__type d-inline-block text-center"
                   >
-                    {{ post.type }}</router-link
+                    {{ post.type }}</nuxt-link
                   >
                 </div>
                 <p v-if="post.abstract != null">
                   {{ post.abstract.substring(0, 190) }}
                   ...
-                  <router-link :to="`/description/${post.slug}/overview`"
-                    >See more</router-link
+                  <nuxt-link :to="`/description/${post.slug}/overview`"
+                    >See more</nuxt-link
                   >
                 </p>
 
@@ -204,12 +281,12 @@
                   >
                     Authors:
                     <span v-for="author in post.authors">
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -221,12 +298,12 @@
                   >
                     Team Members:
                     <span v-for="author in post.authors">
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -238,12 +315,12 @@
                   >
                     Team Member:
                     <span v-for="author in post.authors">
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -255,12 +332,12 @@
                   >
                     Author:
                     <span v-for="author in post.authors">
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -272,12 +349,12 @@
                       v-for="author in post.authors"
                       v-if="post.authors.length"
                     >
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -287,12 +364,12 @@
                       v-for="author in post.authors"
                       v-if="post.authors.length"
                     >
-                      <router-link
+                      <nuxt-link
                         v-if="authUser"
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
                         >{{ author.name }}
-                      </router-link>
+                      </nuxt-link>
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
@@ -453,9 +530,9 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/overview`">
+        <nuxt-link :to="`/profile/${user.slug}/overview`">
           {{ user.name }}
-        </router-link>
+        </nuxt-link>
       </div>
       <div slot="footer"></div>
     </Modal>
@@ -626,19 +703,19 @@ export default {
 
     async like(index) {
       if (this.posts[index].user_id != this.authUser.id) {
-      let obj = {
-        id: this.posts[index].id,
-      };
-      this.id = this.posts[index].id;
-      console.log(this.id);
-      const res = await this.callApi("post", "/api/like", obj);
-      if (res.status == 201) {
-        this.posts[index].like_count += 1;
-        this.posts[index].authUserLike = "yes";
-      } else {
-        this.posts[index].like_count -= 1;
-        this.posts[index].authUserLike = "no";
-      }
+        let obj = {
+          id: this.posts[index].id,
+        };
+        this.id = this.posts[index].id;
+        console.log(this.id);
+        const res = await this.callApi("post", "/api/like", obj);
+        if (res.status == 201) {
+          this.posts[index].like_count += 1;
+          this.posts[index].authUserLike = "yes";
+        } else {
+          this.posts[index].like_count -= 1;
+          this.posts[index].authUserLike = "no";
+        }
       } else {
         this.i("You can't like your own post!!");
       }

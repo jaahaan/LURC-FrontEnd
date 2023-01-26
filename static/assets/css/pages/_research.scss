@@ -4,7 +4,7 @@
 
 .research {
   padding: 2rem 6rem !important;
-  margin: auto;
+  // margin: auto;
   &-post {
     &--display {
       display: flex;
@@ -81,7 +81,7 @@
 
         div {
           &:not(:last-child) {
-            margin-right: 0.5rem;
+            margin-right: 2.25rem;
           }
         }
 
@@ -92,6 +92,39 @@
         i {
           top: 50%;
           transform: translateY(4px);
+        }
+        .dropdown {
+          position: relative;
+          .dropdown-menu {
+            display: block;
+            position: absolute;
+            top: 100%;
+            right: -2%;
+            transform: translateY(10px);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            background-color: $secondaryColor;
+            .dropdown-item {
+              color: $linkColor;
+              font-size: 14px;
+              &:hover:not(.dactive) {
+                color: $hover;
+              }
+            }
+            .dactive {
+              color: #000;
+            }
+          }
+          &:hover {
+            .dropdown-menu {
+              transform: translateY(0);
+              opacity: 1;
+              visibility: visible;
+              pointer-events: all;
+            }
+          }
         }
       }
     }

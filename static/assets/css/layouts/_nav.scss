@@ -43,21 +43,6 @@
   color: $linkActive !important;
   // border-bottom: 1px solid;
 }
-.navbar.navbar-expand-lg .nav-link:after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 0.5px;
-  border-radius: 1px;
-  background-color: $secondaryColor;
-  transition: width 0.2s ease-in-out;
-}
-
-// .navbar.navbar-expand-lg .nav-item:hover .nav-link:after {
-//     width: 100%;
-// }
 
 // Style Nav
 .navbar {
@@ -81,15 +66,17 @@
             display: block;
             position: absolute;
             top: 100%;
-            right: -40%;
+            right: -10%;
             transform: translateY(10px);
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
             transition: all 0.3s ease;
+            background-color: $secondaryColor;
             .dropdown-item {
+              color: $linkColor;
               &:hover {
-                color: $secondaryColor;
+                color: $hover;
               }
             }
           }
@@ -168,7 +155,6 @@
       li {
         position: relative;
         display: inline-block;
-        font-size: 20px;
         cursor: pointer;
         color: $linkColor;
         transition: color 0.3s linear;
@@ -176,25 +162,129 @@
           color: $linkColor !important;
         }
         &:hover {
-          color: $linkActive;
+          color: $hover;
         }
-        &:not(:last-child) {
-          margin-right: 15px;
+        .nav-link {
+          &:hover {
+            color: $hover;
+          }
+        }
+        &:not(.dropdown li) {
+          margin-left: 15px;
         }
       }
-    }
-    &__right {
-      li {
+      .dropdown {
         position: relative;
-        display: inline-block;
-        cursor: pointer;
-        color: $linkColor;
-        transition: color 0.3s linear;
-        &:hover {
-          color: $linkHover;
+        .dropdown-menu {
+          display: block;
+          position: absolute;
+          top: 100%;
+          right: -10%;
+          transform: translateY(10px);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: all 0.3s ease;
+          background-color: $secondaryColor;
+          // overflow: hidden;
+          // padding-right: 0;
+          border: none;
+          .dropdown-item {
+            color: $linkColor;
+
+            &:hover {
+              color: $hover;
+            }
+          }
         }
-        &:not(:last-child) {
-          margin-right: 15px;
+        &:hover {
+          .dropdown-menu {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+          }
+        }
+      }
+      &__badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        background-color: $titleRed;
+        font-size: 0.5em;
+        font-weight: 500;
+        padding: 1px 6px;
+        color: #ffffff;
+        border-radius: 50%;
+      }
+      .connection {
+        position: relative;
+
+        i {
+          display: block;
+          position: absolute;
+          top: 124%;
+          right: 20%;
+          transform: translateY(10px);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: all 0.3s ease;
+          color: $secondaryColor;
+          font-size: 25px;
+        }
+        .connection-menu {
+          display: block;
+          position: absolute;
+          top: 166%;
+          right: -55%;
+          transform: translateY(10px);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: all 0.3s ease;
+          background-color: $secondaryColor;
+          // box-shadow:  0px 0px 3px #cdcdcd;
+          border-radius: 5px;
+          .connection-item {
+            display: flex;
+            margin: 0.5rem;
+            padding: 0.5rem;
+            min-width: 250px;
+            img {
+              max-width: 40px;
+              margin-right: 0.75rem;
+              border-radius: 50%;
+            }
+            &:not(:last-child) {
+              border-bottom: 1px solid #e3e3e3;
+            }
+
+            h4 {
+              font-size: 16px;
+              color: #000;
+            }
+            p {
+              font-size: 13px;
+              color: $gray;
+            }
+            &:hover {
+              background-color: $headerBg;
+              border-radius: 5px;
+            }
+          }
+        }
+        .connectionMenuActive {
+          transform: translateY(0);
+          opacity: 1;
+          visibility: visible;
+          pointer-events: all;
+          i {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+          }
         }
       }
     }
@@ -202,24 +292,10 @@
   &-body {
     padding-left: 20px;
   }
-  &-action {
-    &__badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background-color: $titleRed;
-      font-size: 0.5em;
-      font-weight: 500;
-      padding: 1px 6px;
-      color: #ffffff;
-      border-radius: 50%;
-    }
-  }
   &-nav {
     .dropdown-menu {
       position: static;
       border: 0;
-      background-color: #ffffff;
       li {
         a:hover {
           color: $linkHover;
@@ -227,6 +303,7 @@
       }
     }
   }
+
   &-search {
     display: flex;
     justify-content: center;
@@ -509,6 +586,7 @@
     background-color: #ffffff;
     transform: translateX(-100%);
     transition: transform 0.3s ease-in-out;
+    overflow-y: auto;
 
     &--wrapper {
       position: fixed;
@@ -579,17 +657,38 @@
             border-right: 4px solid $secondaryColor;
           }
         }
-        &.dropdown {
-          li {
-            border-top: 1px solid #e3e3e3;
-            padding: 0 0.7em;
+      }
+      .dropdown {
+        position: relative;
+        .dropdown-menu {
+          display: block;
+          position: absolute;
+          top: 100%;
+          right: 53%;
+          transform: translateY(10px);
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+          transition: all 0.3s ease;
+          background-color: $secondaryColor;
+          .dropdown-item {
+            color: $linkColor;
+            li {
+              a {
+                margin: 0;
+              }
+            }
+            &:hover {
+              color: $gray;
+            }
           }
-          .dropdown-toggle::after {
-            border-top: 0;
-            font-size: 12px;
-            font-weight: 900;
-            content: "\ea5e";
-            font-family: "LineIcons";
+        }
+        &:hover {
+          .dropdown-menu {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
           }
         }
       }

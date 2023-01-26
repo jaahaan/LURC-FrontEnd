@@ -7,11 +7,11 @@
             <figure>
               <img :src="details.image" alt="" />
             </figure>
-            <router-link :to="`/profile/${details.user_slug}/overview`">
+            <nuxt-link :to="`/profile/${details.user_slug}/overview`">
               <h4 class="header">
                 {{ details.name }}
               </h4>
-            </router-link>
+            </nuxt-link>
 
             <p>
               {{ details.designation }}
@@ -64,10 +64,10 @@
                   >
                     Authors:
                     <span v-for="author in details.authors">
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -79,10 +79,10 @@
                   >
                     Team Members:
                     <span v-for="author in details.authors">
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -94,10 +94,10 @@
                   >
                     Team Member:
                     <span v-for="author in details.authors">
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -109,10 +109,10 @@
                   >
                     Author:
                     <span v-for="author in details.authors">
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -128,10 +128,10 @@
                       v-for="author in details.authors"
                       v-if="details.authors.length"
                     >
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -141,10 +141,10 @@
                       v-for="author in details.authors"
                       v-if="details.authors.length"
                     >
-                      <router-link
+                      <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
-                        >{{ author.name }}</router-link
+                        >{{ author.name }}</nuxt-link
                       >
                     </span>
                   </p>
@@ -279,9 +279,9 @@
     >
       <div class="comment-liked" v-for="user in commentLikedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+        <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
           {{ user.name }}
-        </router-link>
+        </nuxt-link>
       </div>
       <div slot="footer"></div>
     </Modal>
@@ -293,9 +293,9 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/${user.user_id}`">
+        <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
           {{ user.name }}
-        </router-link>
+        </nuxt-link>
       </div>
       <div slot="footer"></div>
     </Modal>
@@ -457,18 +457,18 @@ export default {
 
     async like() {
       if (this.posts[index].user_id != this.authUser.id) {
-      let obj = {
-        id: this.details.id,
-      };
+        let obj = {
+          id: this.details.id,
+        };
 
-      const res = await this.callApi("post", "/api/like", obj);
-      if (res.status == 201) {
-        this.details.like_count += 1;
-        this.details.authUserLike = "yes";
-      } else {
-        this.details.like_count -= 1;
-        this.details.authUserLike = "no";
-      }
+        const res = await this.callApi("post", "/api/like", obj);
+        if (res.status == 201) {
+          this.details.like_count += 1;
+          this.details.authUserLike = "yes";
+        } else {
+          this.details.like_count -= 1;
+          this.details.authUserLike = "no";
+        }
       } else {
         this.i("You can't like your own post!!");
       }

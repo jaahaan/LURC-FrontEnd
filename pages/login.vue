@@ -91,8 +91,8 @@
                     >{{ errors.password[0] }}
                   </span>
 
-                  <router-link class="float-end" to="/auth/forgot_password"
-                    >Forgot Password</router-link
+                  <nuxt-link class="float-end" to="/auth/forgot_password"
+                    >Forgot Password</nuxt-link
                   >
                 </div>
               </div>

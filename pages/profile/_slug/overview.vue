@@ -37,16 +37,10 @@
             <div class="footer">
               <div></div>
               <div>
-                <button
-                  class="main-btn main-btn__border"
-                  @click="updateAbout()"
-                >
+                <button class="main-btn main-btn__border" @click="updateAbout">
                   <i class="fa-solid fa-floppy-disk"></i> Save
                 </button>
-                <button
-                  class="main-btn main-btn__border"
-                  @click="deleteAbout(profileInfo)"
-                >
+                <button class="main-btn main-btn__border" @click="deleteAbout">
                   Delete
                 </button>
               </div>
@@ -62,7 +56,7 @@
               <div
                 v-if="authUser.slug == this.$route.params.slug"
                 class="btn-edit"
-                @click="editAbout(profileInfo)"
+                @click="editAbout"
               >
                 <i class="lni lni-pencil"></i>
               </div>
@@ -113,7 +107,7 @@
                     <Input
                       v-model="editEducationData.institute"
                       placeholder="Ex: Leading University"
-                      :ref="`institute${education.id}`" 
+                      :ref="`institute${education.id}`"
                     ></Input>
                     <span class="text-danger" v-if="errors.institute">{{
                       errors.institute[0]
@@ -256,7 +250,11 @@
                 <i class="fa-solid fa-xmark"></i>
               </div>
             </h5>
+            <div v-if="loadingSkills" class="loader">
+              <h1 />
+            </div>
             <Select
+              v-else
               filterable
               multiple
               placeholder="Select Skills"
@@ -274,12 +272,9 @@
                 <button class="main-btn main-btn__border" @click="updateSkills">
                   <i class="fa-solid fa-floppy-disk"></i> Save
                 </button>
-                <button
-                  class="main-btn main-btn__border"
-                  @click="deleteSkills(profileInfo)"
-                >
+                <!-- <button class="main-btn main-btn__border" @click="deleteSkills">
                   Delete
-                </button>
+                </button> -->
               </div>
             </div>
           </div>
@@ -394,13 +389,10 @@
           <div slot="footer">
             <div></div>
             <div>
-              <button class="main-btn main-btn__bg" @click="updateAbout()">
+              <button class="main-btn main-btn__bg" @click="updateAbout">
                 <i class="fa-solid fa-floppy-disk"></i> Save
               </button>
-              <button
-                class="main-btn main-btn__border"
-                @click="deleteAbout(profileInfo)"
-              >
+              <button class="main-btn main-btn__border" @click="deleteAbout">
                 Delete
               </button>
             </div>
@@ -449,7 +441,7 @@
                 <div class="col-6">
                   <FormItem label="Start Date">
                     <DatePicker
-                      type="date"
+                      type="month"
                       v-model="educationData.start_date"
                       placeholder="Start Date"
                       class="d-block"
@@ -463,7 +455,7 @@
                 <div class="col-6">
                   <FormItem label="End Date (or expected)">
                     <DatePicker
-                      type="date"
+                      type="month"
                       v-model="educationData.end_date"
                       placeholder="End Date (or expected)"
                       class="d-block"
@@ -604,14 +596,15 @@
                   v-if="researchData.type == 'Conference Paper'"
                 >
                   <label>Publication Date</label>
-                  <input
+                  <DatePicker
                     type="month"
                     v-model="researchData.publication_date"
                     placeholder="Publication Date"
-                    class="d-block w-100 p-1"
-                  />
-                  <span class="text-danger" v-if="errors.start_date">{{
-                    errors.start_date[0]
+                    class="d-block"
+                  ></DatePicker>
+
+                  <span class="text-danger" v-if="errors.publication_date">{{
+                    errors.publication_date[0]
                   }}</span>
                 </div>
               </div>
@@ -854,22 +847,22 @@
               <div class="row">
                 <div class="col-6">
                   <label>Start Date</label>
-                  <input
+                  <DatePicker
                     type="month"
                     v-model="researchData.start_date"
                     placeholder="Start Date"
-                    class="d-block w-100 p-1"
-                  />
+                    class="d-block"
+                  ></DatePicker>
                 </div>
 
                 <div class="col-6">
                   <label>End Date (or expected)</label>
-                  <input
+                  <DatePicker
                     type="month"
                     v-model="researchData.end_date"
                     placeholder="End Date (or expected)"
-                    class="d-block w-100 p-1"
-                  />
+                    class="d-block"
+                  ></DatePicker>
                 </div>
               </div>
             </Form>
@@ -945,6 +938,7 @@ export default {
       isAdding: false,
       sending: false,
       edit_education: false,
+      loadingSkills: false,
       profileInfo: "",
       skills: [],
       users: [],
@@ -1101,6 +1095,7 @@ export default {
     },
 
     showAboutModal() {
+      this.errors = [];
       let obj = {
         id: this.profileInfo.id,
         about: this.profileInfo.about,
@@ -1110,25 +1105,8 @@ export default {
       this.isEditingItem = true;
       this.hideSidebar();
     },
-    async saveAbout() {
-      if (this.editData.about.trim() == "") return this.e("required");
-      const res = await this.callApi("post", `/api/save_about`, this.editData);
-      if (res.status === 200) {
-        this.profileInfo.about = this.editData.about;
-        // this.reset();
-        this.s("About has been updated successfully!");
-        this.aboutModal = false;
-      } else {
-        if (res.status == 422) {
-          if (res.data.errors.about) {
-            this.e(res.data.errors.about[0]);
-          }
-        } else {
-          this.swr();
-        }
-      }
-    },
-    editAbout(profileInfo) {
+
+    editAbout() {
       this.reset();
       this.editData.about = profileInfo.about;
       this.editData.id = profileInfo.id;
@@ -1145,10 +1123,14 @@ export default {
     },
     async updateAbout() {
       if (this.editData.about.trim() == "") return this.e("required");
-      const res = await this.callApi("post", `/api/save_about`, this.editData);
+      const res = await this.callApi(
+        "post",
+        `/api/update_about`,
+        this.editData
+      );
       if (res.status === 200) {
         this.profileInfo.about = this.editData.about;
-        this.reset();
+        this.closeModal();
         this.s("About has been updated successfully!");
         this.errors = [];
       } else {
@@ -1161,17 +1143,12 @@ export default {
         }
       }
     },
-    async deleteAbout(profileInfo) {
+    async deleteAbout() {
       if (this.profileInfo.id) {
-        const res = await this.callApi(
-          "post",
-          `/api/delete_about/${this.profileInfo.id}`,
-          this.editData
-        );
-
+        const res = await this.callApi("post", `/api/delete_about`);
         if (res.status === 200) {
-          this.profileInfo.about = this.editData.about;
-          this.reset();
+          this.profileInfo.about = "";
+          this.closeModal();
           this.s("About has been deleted successfully!");
         } else {
           this.swe();
@@ -1181,6 +1158,7 @@ export default {
 
     //education
     showEducationModal() {
+      this.errors = [];
       this.educationModal = true;
       this.hideSidebar();
     },
@@ -1195,17 +1173,16 @@ export default {
         this.s("Education has been added successfully!");
         this.educationModal = false;
         this.reset();
-      } else {
-        if (res.status == 422) {
-          if (res.data.errors) {
-            this.e(res.data.errors[0]);
-          }
-        } else {
-          this.swr();
+      } else if (res.status == 422) {
+        for (let i in res.data) {
+          this.errors = res.data;
         }
+      } else {
+        this.swr();
       }
     },
     showEditAllEducation() {
+      this.errors = [];
       this.edit_education = true;
     },
     cancelEditEducation() {
@@ -1218,6 +1195,7 @@ export default {
       this.editEducationData.end_date = "";
       this.editEducationData.grade = "";
       this.editEducationData.activities = "";
+      this.errors = [];
     },
     showEditSingleEducation(index) {
       if (this.educationInfo[index].id) {
@@ -1293,8 +1271,9 @@ export default {
       } else {
         if (res.status == 422) {
           for (let i in res.data.errors) {
-            this.errors = res.data.errors;
+            // this.errors = res.data.errors;
             // this.e(res.data.errors[i][0]);
+            this.e(res.data.errors[i][0]);
           }
         } else {
           this.swr();
@@ -1311,7 +1290,7 @@ export default {
       this.editEducationData.endDate = "";
       this.editEducationData.grade = "";
       this.editEducationData.activities = "";
-
+      this.errors = [];
       this.educationModal = false;
     },
     showEducationRemove(index) {
@@ -1339,6 +1318,7 @@ export default {
       }
     },
     showSkillsModal() {
+      this.errors = [];
       this.skillsModal = true;
       this.hideSidebar();
     },
@@ -1370,6 +1350,7 @@ export default {
       this.skill_id = this.profileInfo.id;
       this.editData.about = "";
       this.user_slug = this.$route.params.slug;
+      this.loadingSkills = true;
       const response = await this.callApi("get", `/api/get_skills`);
       if (response.status == 200) {
         this.skills = response.data;
@@ -1377,14 +1358,7 @@ export default {
       for (let t of this.profileInfo.user_skills) {
         this.editData.skill_id.push(parseInt(t.id));
       }
-
-      // if (this.profileInfo) {
-      //     this.$nextTick(() => {
-      //         if (this.$refs["todo" + this.todos[index].id]) {
-      //             this.$refs["todo" + this.todos[index].id][0].focus();
-      //         }
-      //     });
-      // }
+      this.loadingSkills = false;
     },
     async updateSkills() {
       if (this.editData.skill_id == []) return this.e("required");
@@ -1412,46 +1386,16 @@ export default {
     },
 
     showProjectModal() {
+      this.errors = [];
       this.researchData.type = "Project";
       this.projectModal = true;
       this.hideSidebar();
     },
-    // async saveProject() {
-    //   // if (this.researchData.project_name.trim() == "")
-    //   //     return this.e("Project Name is required");
-    //   // if (this.researchData.project_type.trim() == "")
-    //   //     return this.e("Project type is required");
-    //   // if (this.researchData.start_date.trim() == "")
-    //   //     return this.e("Start date is required");
-    //   this.researchData.type = "Project";
-    //   const res = await this.callApi(
-    //     "post",
-    //     "/api/save_post",
-    //     this.researchData
-    //   );
-    //   this.isLoading = true;
-    //   if (res.status === 200) {
-    //     this.s(res.data.msg);
-    //     // this.msg = res.researchData.msg;
-    //     this.closeModal();
-    //     this.reset();
-    //   } else {
-    //     if (res.status == 422) {
-    //       console.log(this.$route.params.id);
 
-    //       for (let i in res.data.errors) {
-    //         this.errors = res.data.errors;
-    //       }
-    //     } else {
-    //       this.swr();
-    //     }
-    //   }
-    //   this.isLoading = false;
-    // },
     async showResearchModal(type) {
+      this.errors = [];
       this.researchData.type = type;
       this.getAuthors(this.authUser.name);
-
       this.researchData.author_id.push(this.authUser.id);
       this.researchModal = true;
       this.hideSidebar();
@@ -1472,14 +1416,10 @@ export default {
       this.isLoading = true;
       if (res.status === 200) {
         this.s(res.data.msg);
-        // this.msg = res.data.msg;
         this.closeModal();
         this.reset();
-        // this.clearErrorMessage();
       } else {
         if (res.status == 422) {
-          console.log(this.$route.params.id);
-
           for (let i in res.data.errors) {
             this.errors = res.data.errors;
           }
@@ -1490,7 +1430,6 @@ export default {
       this.isLoading = false;
     },
     async getSkills(query) {
-      // console.log(query);
       const response = await this.callApi(
         "get",
         `/api/search_skills?keyword=${query}`
@@ -1515,11 +1454,7 @@ export default {
       this.skillsModal = false;
       this.projectModal = false;
       this.researchModal = false;
-      // this.user_id = "";
-      // this.editData.about = "";
-      // this.about_id = "";
-      // this.editData.skills = "";
-      // this.skills_id = "";
+
       this.researchData.type = "";
       this.researchData.title = "";
       this.researchData.author_id = [];
@@ -1529,7 +1464,15 @@ export default {
       this.researchData.end_date = "";
       this.researchData.url = "";
       this.attachmentName = "";
+
+      //
+      this.user_slug = "";
+      this.editData.about = "";
+      this.about_id = "";
+      this.editData.skill_id = [];
+      this.skill_id = "";
     },
+
     async reset() {
       this.user_slug = "";
       this.editData.about = "";

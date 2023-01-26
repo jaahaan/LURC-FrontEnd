@@ -348,8 +348,8 @@
           </template>
           <template v-else>
             <h5 class="post-title">
-              <router-link :to="`/description/${research.slug}/overview`"
-                ><h5>{{ research.title }}</h5></router-link
+              <nuxt-link :to="`/description/${research.slug}/overview`"
+                ><h5>{{ research.title }}</h5></nuxt-link
               >
               <div
                 v-if="authUser.slug == route_slug"
@@ -376,8 +376,8 @@
             <p v-if="research.abstract != null">
               {{ research.abstract.substring(0, 190) }}
               ...
-              <router-link :to="`/description/${research.slug}/overview`"
-                >See more</router-link
+              <nuxt-link :to="`/description/${research.slug}/overview`"
+                >See more</nuxt-link
               >
             </p>
             <div v-if="research.authors.length">
@@ -387,12 +387,12 @@
               >
                 Authors:
                 <span v-for="author in research.authors">
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -404,12 +404,12 @@
               >
                 Team Members:
                 <span v-for="author in research.authors">
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -421,12 +421,12 @@
               >
                 Team Member:
                 <span v-for="author in research.authors">
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -438,12 +438,12 @@
               >
                 Author:
                 <span v-for="author in research.authors">
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -457,12 +457,12 @@
                   v-for="author in research.authors"
                   v-if="research.authors.length"
                 >
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -472,12 +472,12 @@
                   v-for="author in research.authors"
                   v-if="research.authors.length"
                 >
-                  <router-link
+                  <nuxt-link
                     v-if="authUser"
                     :to="`/profile/${author.slug}/overview`"
                     class="authors"
                     >{{ author.name }}
-                  </router-link>
+                  </nuxt-link>
                   <span v-else> {{ author.name }} . </span>
                 </span>
               </p>
@@ -573,9 +573,9 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <router-link :to="`/profile/${user.slug}/overview`">
+        <nuxt-link :to="`/profile/${user.slug}/overview`">
           {{ user.name }}
-        </router-link>
+        </nuxt-link>
       </div>
       <div slot="footer"></div>
     </Modal>

@@ -60,12 +60,12 @@
               >
                 Departments
               </a>
+
               <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                 <li v-for="(department, index) in departments" :key="index">
                   <nuxt-link
-                    :to="`/department/${department.department_name}/${department.id}`"
                     class="dropdown-item"
-                    href="#"
+                    :to="`/department/${department.department_name}/${department.id}`"
                     >{{ department.department_name }}</nuxt-link
                   >
                 </li>
@@ -142,7 +142,11 @@
             </ul>
             <ul
               v-for="(notification, index) in notificationItem"
-              v-else-if="isLoading == false && notificationItem.length > 0"
+              v-else-if="
+                isLoading == false &&
+                notificationItem != undefined &&
+                notificationItem.length > 0
+              "
             >
               <nuxt-link
                 class="nav-item"
@@ -280,14 +284,12 @@
       <nav class="navbar navbar-expand-lg">
         <div class="container header-content">
           <div class="navbar-item navbar-itemLogo">
-            <a class="navbar-brand">
-              <nuxt-link class="lurc" to="/home" v-if="authUser"
-                ><img src="/assets/images/logo.png" alt="Brand" />
-              </nuxt-link>
-              <nuxt-link class="lurc" to="/" v-else
-                ><img src="/assets/images/logo.png" alt="Brand" />
-              </nuxt-link>
-            </a>
+            <nuxt-link class="navbar-brand" to="/home" v-if="authUser"
+              ><img src="/assets/images/logo.png" alt="Brand" />
+            </nuxt-link>
+            <nuxt-link class="navbar-brand" to="/" v-else
+              ><img src="/assets/images/logo.png" alt="Brand" />
+            </nuxt-link>
           </div>
           <div class="navbar-item navbar-body d-none d-lg-block">
             <ul class="navbar-nav">
@@ -344,18 +346,122 @@
 
           <div class="navbar-item">
             <ul class="navbar-item__action" v-if="authUser">
-              <li v-on:click="showSearchbar()" ref="searchBoxSource">
-                <svg
-                  viewBox="0 0 28 28"
-                  class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6"
-                  fill="currentColor"
-                  height="24"
-                  width="24"
+              <!-- <li class="connection">
+                <a class="nav-link" @click="showConnectionBox">
+                  <svg
+                    viewBox="0 0 28 28"
+                    class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6"
+                    fill="currentColor"
+                    height="24"
+                    width="24"
+                  >
+                    <path
+                      d="M10.5 4.5c-2.272 0-2.75 1.768-2.75 3.25C7.75 9.542 8.983 11 10.5 11s2.75-1.458 2.75-3.25c0-1.482-.478-3.25-2.75-3.25zm0 8c-2.344 0-4.25-2.131-4.25-4.75C6.25 4.776 7.839 3 10.5 3s4.25 1.776 4.25 4.75c0 2.619-1.906 4.75-4.25 4.75zm9.5-6c-1.41 0-2.125.841-2.125 2.5 0 1.378.953 2.5 2.125 2.5 1.172 0 2.125-1.122 2.125-2.5 0-1.659-.715-2.5-2.125-2.5zm0 6.5c-1.999 0-3.625-1.794-3.625-4 0-2.467 1.389-4 3.625-4 2.236 0 3.625 1.533 3.625 4 0 2.206-1.626 4-3.625 4zm4.622 8a.887.887 0 00.878-.894c0-2.54-2.043-4.606-4.555-4.606h-1.86c-.643 0-1.265.148-1.844.413a6.226 6.226 0 011.76 4.336V21h5.621zm-7.122.562v-1.313a4.755 4.755 0 00-4.749-4.749H8.25A4.755 4.755 0 003.5 20.249v1.313c0 .518.421.938.937.938h12.125c.517 0 .938-.42.938-.938zM20.945 14C24.285 14 27 16.739 27 20.106a2.388 2.388 0 01-2.378 2.394h-5.81a2.44 2.44 0 01-2.25 1.5H4.437A2.44 2.44 0 012 21.562v-1.313A6.256 6.256 0 018.25 14h4.501a6.2 6.2 0 013.218.902A5.932 5.932 0 0119.084 14h1.861z"
+                    ></path>
+                  </svg>
+                </a>
+                <i
+                  class="fa-solid fa-caret-up"
+                  v-bind:class="{ connectionMenuActive: isConnectionBox }"
+                ></i>
+
+                <div
+                  class="connection-menu"
+                  aria-labelledby="navbarDropdown"
+                  v-bind:class="{ connectionMenuActive: isConnectionBox }"
                 >
-                  <path
-                    d="M10.5 4.5c-2.272 0-2.75 1.768-2.75 3.25C7.75 9.542 8.983 11 10.5 11s2.75-1.458 2.75-3.25c0-1.482-.478-3.25-2.75-3.25zm0 8c-2.344 0-4.25-2.131-4.25-4.75C6.25 4.776 7.839 3 10.5 3s4.25 1.776 4.25 4.75c0 2.619-1.906 4.75-4.25 4.75zm9.5-6c-1.41 0-2.125.841-2.125 2.5 0 1.378.953 2.5 2.125 2.5 1.172 0 2.125-1.122 2.125-2.5 0-1.659-.715-2.5-2.125-2.5zm0 6.5c-1.999 0-3.625-1.794-3.625-4 0-2.467 1.389-4 3.625-4 2.236 0 3.625 1.533 3.625 4 0 2.206-1.626 4-3.625 4zm4.622 8a.887.887 0 00.878-.894c0-2.54-2.043-4.606-4.555-4.606h-1.86c-.643 0-1.265.148-1.844.413a6.226 6.226 0 011.76 4.336V21h5.621zm-7.122.562v-1.313a4.755 4.755 0 00-4.749-4.749H8.25A4.755 4.755 0 003.5 20.249v1.313c0 .518.421.938.937.938h12.125c.517 0 .938-.42.938-.938zM20.945 14C24.285 14 27 16.739 27 20.106a2.388 2.388 0 01-2.378 2.394h-5.81a2.44 2.44 0 01-2.25 1.5H4.437A2.44 2.44 0 012 21.562v-1.313A6.256 6.256 0 018.25 14h4.501a6.2 6.2 0 013.218.902A5.932 5.932 0 0119.084 14h1.861z"
-                  ></path>
-                </svg>
+                  <div
+                    v-for="(connection, index) in connectionItem"
+                    v-if="
+                      isLoading == false &&
+                      connectionItem != undefined &&
+                      connectionItem.length > 0
+                    "
+                  >
+                    <nuxt-link
+                      class="connection-item"
+                      v-if="authUser.id == connection.sent_request_user"
+                      :to="`/profile/${connection.user2.slug}/overview`"
+                    >
+                      <img :src="connection.user2.image" />
+                      <div>
+                        <h4>{{ connection.user2.name }}</h4>
+                        <p>{{ connection.user2.designation }}</p>
+                      </div>
+                    </nuxt-link>
+                    <nuxt-link
+                      class="connection-item"
+                      v-else-if="
+                        authUser.id == connection.received_request_user
+                      "
+                      :to="`/profile/${connection.user1.slug}/overview`"
+                    >
+                      <img :src="connection.user1.image" />
+                      <div>
+                        <h4>{{ connection.user1.name }}</h4>
+                        <p>{{ connection.user1.designation }}</p>
+                      </div>
+                    </nuxt-link>
+                  </div>
+                </div>
+              </li> -->
+              <li class="connection">
+                <a class="nav-link" @click="showConnectionBox">
+                  <svg
+                    viewBox="0 0 28 28"
+                    class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6"
+                    fill="currentColor"
+                    height="24"
+                    width="24"
+                  >
+                    <path
+                      d="M10.5 4.5c-2.272 0-2.75 1.768-2.75 3.25C7.75 9.542 8.983 11 10.5 11s2.75-1.458 2.75-3.25c0-1.482-.478-3.25-2.75-3.25zm0 8c-2.344 0-4.25-2.131-4.25-4.75C6.25 4.776 7.839 3 10.5 3s4.25 1.776 4.25 4.75c0 2.619-1.906 4.75-4.25 4.75zm9.5-6c-1.41 0-2.125.841-2.125 2.5 0 1.378.953 2.5 2.125 2.5 1.172 0 2.125-1.122 2.125-2.5 0-1.659-.715-2.5-2.125-2.5zm0 6.5c-1.999 0-3.625-1.794-3.625-4 0-2.467 1.389-4 3.625-4 2.236 0 3.625 1.533 3.625 4 0 2.206-1.626 4-3.625 4zm4.622 8a.887.887 0 00.878-.894c0-2.54-2.043-4.606-4.555-4.606h-1.86c-.643 0-1.265.148-1.844.413a6.226 6.226 0 011.76 4.336V21h5.621zm-7.122.562v-1.313a4.755 4.755 0 00-4.749-4.749H8.25A4.755 4.755 0 003.5 20.249v1.313c0 .518.421.938.937.938h12.125c.517 0 .938-.42.938-.938zM20.945 14C24.285 14 27 16.739 27 20.106a2.388 2.388 0 01-2.378 2.394h-5.81a2.44 2.44 0 01-2.25 1.5H4.437A2.44 2.44 0 012 21.562v-1.313A6.256 6.256 0 018.25 14h4.501a6.2 6.2 0 013.218.902A5.932 5.932 0 0119.084 14h1.861z"
+                    ></path>
+                  </svg>
+                </a>
+                <i
+                  class="fa-solid fa-caret-up"
+                  v-bind:class="{ connectionMenuActive: isConnectionBox }"
+                ></i>
+                <div
+                  class="connection-menu"
+                  aria-labelledby="navbarDropdown"
+                  v-bind:class="{ connectionMenuActive: isConnectionBox }"
+                >
+                  <a
+                    v-for="(connection, index) in connectionItem"
+                    v-if="
+                      isLoading == false &&
+                      connectionItem != undefined &&
+                      connectionItem.length > 0
+                    "
+                  >
+                    <nuxt-link
+                      class="connection-item"
+                      v-if="authUser.id == connection.sent_request_user"
+                      :to="`/profile/${connection.user2.slug}/overview`"
+                    >
+                      <img :src="connection.user2.image" />
+                      <div>
+                        <h4>{{ connection.user2.name }}</h4>
+                        <p>{{ connection.user2.designation }}</p>
+                      </div>
+                    </nuxt-link>
+                    <nuxt-link
+                      class="connection-item"
+                      v-else-if="
+                        authUser.id == connection.received_request_user
+                      "
+                      :to="`/profile/${connection.user1.slug}/overview`"
+                    >
+                      <img :src="connection.user1.image" />
+                      <div>
+                        <h4>{{ connection.user1.name }}</h4>
+                        <p>{{ connection.user1.designation }}</p>
+                      </div>
+                    </nuxt-link>
+                  </a>
+                </div>
               </li>
 
               <li v-on:click="showSearchbar()" ref="searchBoxSource">
@@ -409,40 +515,27 @@
                   >
                 </div>
               </li>
-
-              <Dropdown trigger="hover">
-                <span
-                  ><nuxt-link :to="`/profile/${authUser.slug}/overview`">
-                    <img
-                      :src="authUser.image"
-                      alt="img"
-                      class="img-fluid nav-profile-img m-auto"
-                    />
-                    <!-- <i class="lni lni-user"></i> -->
-                  </nuxt-link></span
-                >
+              <li class="dropdown">
+                <nuxt-link :to="`/profile/${authUser.slug}/overview`">
+                  <img
+                    :src="authUser.image"
+                    alt="img"
+                    class="img-fluid nav-profile-img m-auto"
+                /></nuxt-link>
                 <i class="lni lni-chevron-down" style="color: #fff"></i>
-                <!-- <span >category</span> -->
-                <DropdownMenu slot="list">
-                  <div>
-                    <DropdownItem class="d-block">
-                      <nuxt-link
-                        :to="`/profile/${authUser.slug}/overview`"
-                        style="color: #000"
-                      >
-                        Your Profile
-                      </nuxt-link>
-                    </DropdownItem>
-                  </div>
-                  <div>
-                    <DropdownItem class="d-block"
-                      ><a @click="logout" style="color: #000">
-                        Log Out
-                      </a></DropdownItem
+                <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <li>
+                    <nuxt-link
+                      class="dropdown-item"
+                      :to="`/profile/${authUser.slug}/overview`"
+                      >Your Profile</nuxt-link
                     >
-                  </div>
-                </DropdownMenu>
-              </Dropdown>
+                  </li>
+                  <li>
+                    <a @click="logout" class="dropdown-item">Log Out</a>
+                  </li>
+                </ul>
+              </li>
 
               <li v-on:click="showSidebar()" class="d-lg-none">
                 <svg
@@ -460,7 +553,7 @@
                 </svg>
               </li>
             </ul>
-            <ul class="navbar-item__right" v-else>
+            <ul class="navbar-item__action" v-else>
               <li>
                 <nuxt-link class="nav-link" to="/login">Login</nuxt-link>
               </li>
@@ -499,6 +592,7 @@ export default {
       isLoading: false,
       isSidebar: false,
       isSearchbar: false,
+      isConnectionBox: false,
       isNotification: false,
       isFilter: false,
       isAll: true,
@@ -526,6 +620,7 @@ export default {
         this.hideNotification();
         this.hideSidebar();
         this.hideSearchbar();
+        this.hideConnectionBox();
         if (this.authUser) {
           this.getNotification();
         }
@@ -537,6 +632,7 @@ export default {
     ...mapGetters({
       seenCount: "getSeenCount",
       notificationItem: "getNotificationItem",
+      connectionItem: "getConnectionItem",
     }),
   },
   methods: {
@@ -546,6 +642,18 @@ export default {
     hideSidebar() {
       this.isSidebar = false;
     },
+
+    showConnectionBox() {
+      console.log("inside showConnectionBox");
+      if (this.isConnectionBox == true) {
+        this.isConnectionBox = false;
+      } else {
+        this.isConnectionBox = true;
+      }
+    },
+    hideConnectionBox() {
+      this.isConnectionBox = false;
+    },
     showSearchbar() {
       this.isSearchbar = true;
       this.$nextTick(() => {
@@ -553,31 +661,6 @@ export default {
           this.$refs["search" + this.keyword].focus();
         }
       });
-    },
-    hideSearchbar(e) {
-      if (this.isSearchbar) {
-        let target = e.target;
-        var container = this.$refs.searchBox;
-        var source = this.$refs.searchBoxSource;
-
-        if (!source.contains(target) && !container.contains(target)) {
-          this.isSearchbar = false;
-          this.keyword = "";
-        }
-      }
-    },
-    async showNotification() {
-      this.isNotification = true;
-      this.getNotification();
-      if (this.seenCount > 0) {
-        const res = await this.callApi("post", "/api/mark_as_seen");
-        if (res.status == 200) {
-          this.$store.dispatch("updateSeenCount", 0);
-        }
-      }
-    },
-    hideNotification() {
-      this.isNotification = false;
     },
     cancelSearchBar() {
       this.isSearchbar = false;
@@ -606,13 +689,33 @@ export default {
       } else {
         this.swr();
       }
-      // axios
-      //   .get("/api/search", {
-      //     params: { keyword: this.keyword },
-      //   })
-      //   .then((res) => (this.Users = res.data))
-      //   .catch((error) => {});
     },
+    hideSearchbar(e) {
+      if (this.isSearchbar) {
+        let target = e.target;
+        var container = this.$refs.searchBox;
+        var source = this.$refs.searchBoxSource;
+
+        if (!source.contains(target) && !container.contains(target)) {
+          this.isSearchbar = false;
+          this.keyword = "";
+        }
+      }
+    },
+    async showNotification() {
+      this.isNotification = true;
+      this.getNotification();
+      if (this.seenCount > 0) {
+        const res = await this.callApi("post", "/api/mark_as_seen");
+        if (res.status == 200) {
+          this.$store.dispatch("updateSeenCount", 0);
+        }
+      }
+    },
+    hideNotification() {
+      this.isNotification = false;
+    },
+
     async markAsRead(index) {
       this.hideNotification();
       if (this.notificationItem[index].read_at == null) {
@@ -627,6 +730,17 @@ export default {
       } else {
         this.swr();
       }
+    },
+    async getConnection() {
+      const connection = await this.callApi(
+        "get",
+        "/api/get_auth_user_connection"
+      );
+
+      if (connection.status == 200) {
+        this.$store.dispatch("updateConnection", connection.data.data);
+      }
+      this.isLoading = false;
     },
     async getNotification() {
       this.isAll = true;
@@ -714,9 +828,11 @@ export default {
 
   mounted() {
     document.addEventListener("click", this.hideSearchbar);
+    // document.addEventListener("click", this.hideConnectionBox);
   },
   beforeDestroy() {
     document.removeEventListener("click", this.hideSearchbar);
+    // document.addEventListener("click", this.hideConnectionBox);
   },
   // async asyncData({ app, store, redirect, params }) {
   //   try {
@@ -732,8 +848,12 @@ export default {
   // },
   async created() {
     // console.log(this.seenCount);
-    // console.log(this.notificationItem);
-    this.getNotification();
+    // console.log(this.connectionItem);
+    if (this.authUser) {
+      this.getNotification();
+      this.getConnection();
+      console.log(this.connectionItem);
+    }
     this.getDepartments();
   },
 };

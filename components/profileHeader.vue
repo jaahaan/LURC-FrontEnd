@@ -329,7 +329,9 @@
           </div>
         </div>
       </div>
-      <Modal v-model="responseModal" width="360">
+    </section>
+    <div v-if="isLoading == false">
+      <Modal v-model="responseModal">
         <p slot="header" style="color: #7da2a9; text-align: center">
           <Icon type="close"></Icon>
           <span>Response</span>
@@ -357,7 +359,7 @@
           </Button>
         </div>
       </Modal>
-      <Modal v-model="removeModal" width="360">
+      <Modal v-model="removeModal">
         <p slot="header" style="color: #7da2a9; text-align: center">
           <Icon type="close"></Icon>
           <span>Response</span>
@@ -377,7 +379,7 @@
           </Button>
         </div>
       </Modal>
-    </section>
+    </div>
   </div>
 </template>
 <script>
