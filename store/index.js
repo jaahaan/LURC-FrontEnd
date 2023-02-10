@@ -6,21 +6,22 @@ import cookie from 'cookie'
 export const state = () => ({
     user : 'no user',
     authUser: false,
+    userResearch:[],
+    userProject:[],
     allGlobalResearch:[],
     globalResearchLoading:true,
-
     allGlobalPost:[],
     globalPostLoading:true,
-
     callNotificationOb:null,
     notification: [],
     connection: [],
+    authUserConnection: [],
+    departmentInfo: [],
     peopleYouMayKnow:[],
     seenCount:0,
     token: '',
     passwordReset: { email: "" , token: ""},
     unauthorizedCredential: { email: "",  password: ""},
-    
 })
 // common getters
 export const getters = {
@@ -29,6 +30,9 @@ export const getters = {
   },
   getAuthUser (state) {
     return state.authUser
+  },
+  getDepartment (state) {
+    return state.departmentInfo
   },
   getToken (state) {
     return state.token
@@ -49,6 +53,9 @@ export const getters = {
   getConnectionItem (state) {
     return state.connection
   },
+  getAuthUserConnection(state) {
+    return state.authUserConnection
+  },
 
   getNotificationItem (state) {
     return state.notification
@@ -57,10 +64,16 @@ export const getters = {
   getPeopleYouMayKnow (state) {
     return state.peopleYouMayKnow
   },
-
+  getUserResearch (state) {
+    return state.userResearch
+  },
+  getUserProject (state) {
+    return state.userProject
+  },
   getAllGlobalResearch (state) {
     return state.allGlobalResearch
   },
+  
   getGlobalResearchLoading (state) {
     return state.globalResearchLoading
   },
@@ -84,17 +97,35 @@ export const mutations = {
   setToken(state, data) {
     state.token = data
   },
-
+  setDepartmentInfo (state, data) {
+    state.departmentInfo = data
+  },
   updateSeenCount(state, data) {
     state.seenCount = data
   },
 
   removeConnectionItem (state, i) {
-    state.Connection.splice(i,1)
+    state.connection.splice(i,1)
   },
-  
+ 
   updateConnection (state, data) {
     state.connection = data
+  },
+
+  pushConnection (state, data) {
+    state.connection.push(data)
+  },
+
+  removeAuthUserConnection (state, i) {
+    state.authUserConnection.splice(i,1)
+  },
+ 
+  updateAuthUserConnection (state, data) {
+    state.authUserConnection = data
+  },
+
+  pushAuthUserConnection (state, data) {
+    state.authUserConnection.push(data)
   },
   removeNotificationItem (state, i) {
     state.Notification.splice(i,1)
@@ -102,6 +133,9 @@ export const mutations = {
   
   updateNotification (state, data) {
     state.notification = data
+  },
+  pushNotification (state, data) {
+    state.notification.push(data)
   },
   updatePeopleYouMayKnow (state, data) {
     state.peopleYouMayKnow = data
@@ -116,6 +150,24 @@ export const mutations = {
   setPasswordReset(state, data) {
     state.passwordReset = data;
   },
+
+  //user research
+  setUserResearch (state, data) {
+    state.userResearch = data
+  },
+  
+  pushUserResearch (state, data) {
+    state.userResearch.push(data)
+  },
+  //user project
+  setUserProject (state, data) {
+    state.userProject = data
+  },
+
+  pushUserProject (state, data) {
+    state.userProject.push(data)
+  },
+
   //research
   setAllGlobalResearch (state, data) {
     state.allGlobalResearch = data
@@ -147,10 +199,17 @@ export const actions = {
     // console.log("token : ",session)
     $axios.setToken(session.token, 'Bearer');
     try {
+      
+      // const notification = await $axios.get('/api/get_notification')
+      const department  = await $axios.get('/api/get_departments')
+      console.log(department.data)
+      if(department.status == 200){
+        commit('setDepartmentInfo', department.data)
+      }
       const res  = await $axios.get('/api/auth_user')
       console.log(res.data)
       commit('setAuthInfo', res.data)
-      // const notification = await $axios.get('/api/get_notification')
+      
       const [notification, peopleYouMayKnow, connection] = await Promise.all([
         this.callApi("get", '/api/get_notification'),
         this.callApi("get", "/api/get_people_you_may_know"),
@@ -158,10 +217,10 @@ export const actions = {
       ]);
       if(notification.status == 200 && peopleYouMayKnow.status==200 && connection.status==200){
         console.log(notification.data.data)
-        state.seenCount = notification.data.count
+        // state.seenCount = notification.data.count
         commit('updateNotification', notification.data.data)
         commit('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
-        commit('updateConnection', connection.data.data)
+        commit('updateAuthUserConnection', connection.data.data)
       }
     } catch (e) {
         console.log('nuxt server error ')
@@ -172,8 +231,12 @@ export const actions = {
   setToken ({ commit }, data) {
     commit('setToken', data)
   },
+  
   updateConnection ({ commit }, data) {
     commit('updateConnection', data)
+  },
+  updateAuthUserConnection ({ commit }, data) {
+    commit('updateAuthUserConnection', data)
   },
   updateNotification ({ commit }, data) {
     commit('updateNotification', data)
@@ -183,6 +246,9 @@ export const actions = {
   },
   updateSeenCount ({ commit }, data) {
     commit('updateSeenCount', data)
+  },
+  setDepartmentInfo ({ commit }, data) {
+    commit('setDepartmentInfo', data)
   },
   setAuthInfo ({ commit }, data) { 
     commit('setAuthInfo', data)

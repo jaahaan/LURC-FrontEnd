@@ -1,7 +1,7 @@
 <template>
   <div class="container-fluid col-10 p-3">
-    <div class="alert alert-dark" v-if="msg">{{ msg }}</div>
-    <h1 class="text-center p-3">Register As Teacher</h1>
+    <div class="alert alert-dark p-2" v-if="msg">{{ msg }}</div>
+    <h1 class="text-center mb-3">Register As Teacher</h1>
     <div class="mb-2">
       <input type="text" v-model="data.name" placeholder="Name" />
       <span class="text-danger" v-if="errors.name">{{ errors.name[0] }}</span>
@@ -41,7 +41,7 @@
     <div class="mb-2">
       <Select v-model="data.department" placeholder="Department">
         <Option
-          v-for="(department, index) in departments"
+          v-for="(department, index) in departmentInfo"
           :key="index"
           :value="department.id"
           >{{ department.department_name }}</Option
@@ -90,7 +90,6 @@ export default {
       isLoading: false,
       msg: "",
       errors: [],
-      departments: [],
     };
   },
   methods: {
@@ -142,18 +141,8 @@ export default {
       }
       this.isLoading = false;
     },
-    async getDepartments() {
-      const res = await this.callApi("get", "/api/get_departments");
-      if (res.status == 200) {
-        this.departments = res.data.data;
-      } else {
-        this.swr();
-      }
-    },
   },
-  async created() {
-    this.getDepartments();
-  },
+  async created() {},
 };
 </script>
 <style scoped>

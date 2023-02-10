@@ -1,69 +1,284 @@
 <template>
   <div>
-    <div v-if="isLoading == false">
-      <section class="container pt-4 pb-4">
-        <div class="post-section">
-          <div class="post-menu">
-            <figure>
-              <img :src="details.image" alt="" />
-            </figure>
-            <nuxt-link :to="`/profile/${details.user_slug}/overview`">
-              <h4 class="header">
-                {{ details.name }}
-              </h4>
-            </nuxt-link>
+    <div v-if="isLoading" class="loader-lg">
+      <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+    </div>
+    <div v-else class="container pt-4 pb-4">
+      <section class="post-section">
+        <div class="post-menu">
+          <figure>
+            <img :src="details.image" alt="" />
+          </figure>
+          <nuxt-link :to="`/profile/${details.user_slug}/overview`">
+            <h4 class="header">
+              {{ details.name }}
+            </h4>
+          </nuxt-link>
 
-            <p>
-              {{ details.designation }}
-              .
-              {{ details.department.department_name }}
-            </p>
-            <ul class="post-menu--list">
-              <li class="post-menu--list---item">
-                <nuxt-link
-                  class="menu-link"
-                  aria-current="page"
-                  :to="`/description/${details.slug}/overview`"
-                  ><i class="las la-icons"></i>
-                  <h4>Overview</h4></nuxt-link
+          <p>
+            {{ details.designation }}
+            .
+            {{ details.department.department_name }}
+          </p>
+          <ul class="post-menu--list">
+            <li class="post-menu--list---item">
+              <nuxt-link
+                class="menu-link"
+                aria-current="page"
+                :to="`/description/${details.slug}/overview`"
+                ><i class="las la-icons"></i>
+                <h4>Overview</h4></nuxt-link
+              >
+            </li>
+            <li class="post-menu--list---item" v-if="authUser">
+              <nuxt-link
+                class="menu-link"
+                aria-current="page"
+                :to="`/description/${details.slug}/comments`"
+                ><i class="fa-solid fa-comment"></i>
+                <h4>Comments</h4></nuxt-link
+              >
+            </li>
+          </ul>
+        </div>
+
+        <!-- post description -->
+        <div class="post-description menu-item">
+          <div class="menu-item-box">
+            <div class="post-details">
+              <h4 class="menu-item--title">
+                {{ details.title }}
+              </h4>
+              <h5 class="sub-title">
+                {{ details.type }}
+              </h5>
+              <h5 class="sub-title" v-if="details.type == 'Conference Paper'">
+                Conference: 2021 International Conference on Science &
+                Contemporary Technologies (ICSCT)
+              </h5>
+
+              <hooper
+                :settings="hooperImage"
+                :wheelControl="false"
+                v-if="details.images.length > 0"
+              >
+                <slide
+                  class="post-image"
+                  v-for="(image, index) in details.images"
+                  :key="index"
                 >
-              </li>
-              <li class="post-menu--list---item" v-if="authUser">
-                <nuxt-link
-                  class="menu-link"
-                  aria-current="page"
-                  :to="`/description/${details.slug}/comments`"
-                  ><i class="fa-solid fa-comment"></i>
-                  <h4>Comments</h4></nuxt-link
+                  <img :src="`${http + image.image_name}`" />
+                  <div class="post-image-cover">
+                    <i
+                      class="lni lni-search-alt"
+                      @click="handleView(image.image_name, index)"
+                    ></i>
+                  </div>
+                </slide>
+
+                <hooper-navigation
+                  slot="hooper-addons"
+                  class="hooper-relatedResearch_button"
+                ></hooper-navigation>
+              </hooper>
+
+              <div v-if="details.authors.length">
+                <p
+                  v-if="details.authors.length > 1 && details.type != 'Project'"
+                  class="mt-2"
                 >
-              </li>
-            </ul>
+                  Authors:
+                  <span v-for="author in details.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+                <p
+                  v-else-if="
+                    details.authors.length > 1 && details.type == 'Project'
+                  "
+                  class="mt-2"
+                >
+                  Team Members:
+                  <span v-for="author in details.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+                <p
+                  class="mt-2"
+                  v-else-if="
+                    details.authors.length == 1 && details.type == 'Project'
+                  "
+                >
+                  Team Member:
+                  <span v-for="author in details.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+                <p
+                  class="mt-2"
+                  v-else-if="
+                    details.authors.length == 1 && details.type != 'Project'
+                  "
+                >
+                  Author:
+                  <span v-for="author in details.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+              </div>
+              <div
+                v-else-if="details.authors.length && details.type == 'Project'"
+              >
+                <p v-if="details.authors.length > 1" class="mt-2">
+                  Team Members:
+                  <span
+                    v-for="author in details.authors"
+                    v-if="details.authors.length"
+                  >
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+                <p class="mt-2" v-else>
+                  Team Member:
+                  <span
+                    v-for="author in details.authors"
+                    v-if="details.authors.length"
+                  >
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    >
+                  </span>
+                </p>
+              </div>
+
+              <h6>
+                <!-- {{ details.created_at }} . -->
+                <a v-if="details.read_count > 1"
+                  >{{ details.read_count }} Reads</a
+                ><a v-else-if="details.read_count <= 1"
+                  >{{ details.read_count }} Read</a
+                >
+                . <a>{{ upVoteCount }} UpVote</a> .
+                <a>{{ downVoteCount }} DownVote</a>
+              </h6>
+
+              <div class="footer">
+                <p>
+                  <a
+                    v-if="details.attachment && authUser"
+                    class="main-btn main-btn__bg"
+                    :href="`http://localhost:8000/api/download_attachment/${details.attachment}`"
+                    >Download <i class="fa-solid fa-download"
+                  /></a>
+                  <a
+                    class="main-btn main-btn__bg px-5"
+                    :href="`${details.url}`"
+                    v-if="details.url"
+                    target="_blank"
+                  >
+                    Link
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                  </a>
+                </p>
+                <p>
+                  <a v-if="details.like_count" @click="getLikedUser">
+                    {{ details.like_count }}
+                  </a>
+
+                  <a
+                    v-on:click="like"
+                    v-bind:class="{
+                      active: details.authUserLike == 'yes',
+                    }"
+                  >
+                    <i class="fa-solid fa-thumbs-up"></i>
+                  </a>
+                </p>
+              </div>
+            </div>
+            <div class="vote" v-if="authUser">
+              <span @click="upVote">
+                <i
+                  :class="[
+                    authUserVoteCount == 'up'
+                      ? 'las la-caret-up upActive'
+                      : 'las la-caret-up',
+                    'las la-caret-up',
+                  ]"
+                ></i>
+              </span>
+              <h6>{{ avgVoteCount }}</h6>
+              <span @click="downVote">
+                <i
+                  :class="[
+                    authUserVoteCount == 'down'
+                      ? 'las la-caret-down downActive'
+                      : 'las la-caret-down',
+                    'las la-caret-down',
+                  ]"
+                ></i>
+              </span>
+            </div>
           </div>
 
-          <!-- post description -->
-          <div class="post-description menu-item">
-            <div class="menu-item-box">
-              <div class="post-details">
-                <h4 class="menu-item--title">
-                  {{ details.title }}
-                </h4>
-                <h5 class="sub-title">
-                  {{ details.type }}
-                </h5>
-                <h5 class="sub-title" v-if="details.type == 'Conference Paper'">
-                  Conference: 2021 International Conference on Science &
-                  Contemporary Technologies (ICSCT)
-                </h5>
+          <div class="menu-item-box">
+            <Nuxt />
+          </div>
+        </div>
+      </section>
+      <!--***************Related Research Section****************-->
 
-                <div v-if="details.authors.length">
+      <section class="related-research__section">
+        <div class="container">
+          <div class="dept-header">
+            <h2>Related Research</h2>
+          </div>
+
+          <hooper :settings="hooperTrendingOffer" :wheelControl="false">
+            <slide v-for="(research, index) in relatedResearch" :key="index">
+              <div class="related_research--section">
+                <h4>
+                  <nuxt-link :to="`/description/${research.slug}/overview`">
+                    {{ research.title }}
+                  </nuxt-link>
+                </h4>
+
+                <p>{{ research.type }}</p>
+                <p>
+                  <i class="fa-solid fa-graduation-cap"></i> Associated with
+                  {{ research.affiliation }}
+                </p>
+                <div v-if="research.authors.length">
                   <p
                     v-if="
-                      details.authors.length > 1 && details.type != 'Project'
+                      research.authors.length > 1 && research.type != 'Project'
                     "
                     class="mt-2"
                   >
                     Authors:
-                    <span v-for="author in details.authors">
+                    <span v-for="author in research.authors">
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
@@ -73,12 +288,12 @@
                   </p>
                   <p
                     v-else-if="
-                      details.authors.length > 1 && details.type == 'Project'
+                      research.authors.length > 1 && research.type == 'Project'
                     "
                     class="mt-2"
                   >
                     Team Members:
-                    <span v-for="author in details.authors">
+                    <span v-for="author in research.authors">
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
@@ -89,11 +304,11 @@
                   <p
                     class="mt-2"
                     v-else-if="
-                      details.authors.length == 1 && details.type == 'Project'
+                      research.authors.length == 1 && research.type == 'Project'
                     "
                   >
                     Team Member:
-                    <span v-for="author in details.authors">
+                    <span v-for="author in research.authors">
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
@@ -104,11 +319,11 @@
                   <p
                     class="mt-2"
                     v-else-if="
-                      details.authors.length == 1 && details.type != 'Project'
+                      research.authors.length == 1 && research.type != 'Project'
                     "
                   >
                     Author:
-                    <span v-for="author in details.authors">
+                    <span v-for="author in research.authors">
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
                         class="authors"
@@ -119,14 +334,14 @@
                 </div>
                 <div
                   v-else-if="
-                    details.authors.length && details.type == 'Project'
+                    research.authors.length && research.type == 'Project'
                   "
                 >
-                  <p v-if="details.authors.length > 1" class="mt-2">
+                  <p v-if="research.authors.length > 1" class="mt-2">
                     Team Members:
                     <span
-                      v-for="author in details.authors"
-                      v-if="details.authors.length"
+                      v-for="author in research.authors"
+                      v-if="research.authors.length"
                     >
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
@@ -138,8 +353,8 @@
                   <p class="mt-2" v-else>
                     Team Member:
                     <span
-                      v-for="author in details.authors"
-                      v-if="details.authors.length"
+                      v-for="author in research.authors"
+                      v-if="research.authors.length"
                     >
                       <nuxt-link
                         :to="`/profile/${author.slug}/overview`"
@@ -149,159 +364,38 @@
                     </span>
                   </p>
                 </div>
-
-                <h6>
-                  <!-- {{ details.created_at }} . -->
-                  <a v-if="details.read_count > 1"
-                    >{{ details.read_count }} Reads</a
-                  ><a v-else-if="details.read_count <= 1"
-                    >{{ details.read_count }} Read</a
-                  >
-                  . <a>{{ upVoteCount }} UpVote</a> .
-                  <a>{{ downVoteCount }} DownVote</a>
-                </h6>
-
-                <div class="footer">
-                  <p>
-                    <a
-                      v-if="details.attachment && authUser"
-                      class="main-btn main-btn__bg"
-                      :href="`http://localhost:8000/api/download_attachment/${details.attachment}`"
-                      >Download <i class="fa-solid fa-download"
-                    /></a>
-                    <a
-                      class="main-btn main-btn__bg px-5"
-                      :href="`${details.url}`"
-                      v-if="details.url"
-                      target="_blank"
-                    >
-                      Link
-                      <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    </a>
-                  </p>
-                  <p>
-                    <a v-if="details.like_count" @click="getLikedUser">
-                      {{ details.like_count }}
-                    </a>
-
-                    <a
-                      v-on:click="like"
-                      v-bind:class="{
-                        active: details.authUserLike == 'yes',
-                      }"
-                    >
-                      <i class="fa-solid fa-thumbs-up"></i>
-                    </a>
-                  </p>
-                </div>
               </div>
-              <div class="vote" v-if="authUser">
-                <span @click="upVote">
-                  <i
-                    :class="[
-                      authUserVoteCount == 'up'
-                        ? 'las la-caret-up upActive'
-                        : 'las la-caret-up',
-                      'las la-caret-up',
-                    ]"
-                  ></i>
-                </span>
-                <h6>{{ avgVoteCount }}</h6>
-                <span @click="downVote">
-                  <i
-                    :class="[
-                      authUserVoteCount == 'down'
-                        ? 'las la-caret-down downActive'
-                        : 'las la-caret-down',
-                      'las la-caret-down',
-                    ]"
-                  ></i>
-                </span>
-              </div>
-            </div>
+            </slide>
 
-            <div class="menu-item-box">
-              <Nuxt />
-            </div>
-          </div>
+            <hooper-navigation
+              slot="hooper-addons"
+              class="hooper-relatedResearch_button"
+            ></hooper-navigation>
+          </hooper>
         </div>
-        <!--***************Related Research Section****************-->
-
-        <section class="related-research__section">
-          <div class="container">
-            <div class="section-header">
-              <h2>Related Research</h2>
-            </div>
-
-            <hooper :settings="hooperTrendingOffer" :wheelControl="false">
-              <slide>
-                <div class="related_research--section">
-                  <h5>
-                    A Bangla Text-to-Speech System using Deep Neural Networks
-                  </h5>
-                  <h6>Conference Paper</h6>
-                  <h6>Author: Prithwiraj Bhattacharjee</h6>
-                </div>
-              </slide>
-              <slide>
-                <div class="related_research--section">
-                  <h5>
-                    A Bangla Text-to-Speech System using Deep Neural Networks
-                  </h5>
-                  <h6>Conference Paper</h6>
-                  <h6>Author: Prithwiraj Bhattacharjee</h6>
-                </div> </slide
-              ><slide>
-                <div class="related_research--section">
-                  <h5>
-                    A Bangla Text-to-Speech System using Deep Neural Networks
-                  </h5>
-                  <h6>Conference Paper</h6>
-                  <h6>Author: Prithwiraj Bhattacharjee</h6>
-                </div>
-              </slide>
-              <hooper-navigation
-                slot="hooper-addons"
-                class="hooper-relatedResearch_button"
-              ></hooper-navigation>
-            </hooper>
-          </div>
-        </section>
       </section>
+
+      <Modal
+        v-model="likedUserModal"
+        title="People Who Liked"
+        :mask-closable="true"
+        :closable="true"
+      >
+        <div class="comment-liked" v-for="user in likedUser">
+          <img :src="user.image" alt="img" />
+          <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
+            {{ user.name }}
+          </nuxt-link>
+        </div>
+        <div slot="footer"></div>
+      </Modal>
+      <Modal v-model="visible">
+        <img :src="imgName" v-if="visible" style="width: 100%" />
+        <div slot="footer">Figure: {{ index + 1 }}</div>
+      </Modal>
     </div>
 
     <!--***** Comment Liked User Modal *****-->
-    <Modal
-      v-model="commentLikedUserModal"
-      title="People Who Liked"
-      :mask-closable="true"
-      :closable="true"
-    >
-      <div class="comment-liked" v-for="user in commentLikedUser">
-        <img :src="user.image" alt="img" />
-        <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
-          {{ user.name }}
-        </nuxt-link>
-      </div>
-      <div slot="footer"></div>
-    </Modal>
-    <Modal
-      v-model="likedUserModal"
-      title="People Who Liked"
-      :mask-closable="true"
-      :closable="true"
-    >
-      <div class="comment-liked" v-for="user in likedUser">
-        <img :src="user.image" alt="img" />
-        <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
-          {{ user.name }}
-        </nuxt-link>
-      </div>
-      <div slot="footer"></div>
-    </Modal>
-    <div v-if="isLoading == true">
-      <h2 class="text-center pt-50">Loading...</h2>
-    </div>
   </div>
 </template>
 
@@ -324,14 +418,22 @@ export default {
   },
   data() {
     return {
+      hooperImage: {
+        commentsToShow: 1,
+        centerMode: false,
+        breakpoints: {
+          768: {
+            centerMode: false,
+            itemsToShow: 2,
+          },
+        },
+      },
+      visible: false,
+      imgName: "",
+      index: "",
+      relatedResearch: [],
       details: [],
-      comments: [],
-      commentReplies: [],
-      commentLikedUser: [],
-      commentReplyLikedUser: [],
       likedUser: [],
-      commentindex: -1,
-      comment_id: -1,
       post_slug: "",
       post_id: "",
       isPostInfoIndex: 1,
@@ -340,20 +442,9 @@ export default {
       downVoteCount: 0,
       avgVoteCount: 0,
       authUserVoteCount: "",
-      showbtn: false,
-      showreplybox: false,
-      showcommentreplies: false,
-      data: {
-        comment: "",
-        commentReply: "",
-      },
-      comment_like_count: 0,
-      authUserCommentLike: "",
-      comment_reply_like_count: 0,
-      authUserReplyCommentLike: "",
-      commentLikedUserModal: false,
-      likedUserModal: false,
 
+      likedUserModal: false,
+      limit: 4,
       hooperTrendingOffer: {
         commentsToShow: 1,
         centerMode: false,
@@ -364,9 +455,15 @@ export default {
           },
         },
       },
+      http: "http://localhost:8000/images/",
     };
   },
   methods: {
+    handleView(item, index) {
+      this.imgName = this.http + item;
+      this.index = index;
+      this.visible = true;
+    },
     showPostInfo(index) {
       this.isPostInfoIndex = index;
     },
@@ -455,100 +552,26 @@ export default {
       }
     },
 
-    async like() {
-      if (this.posts[index].user_id != this.authUser.id) {
+    async like(index) {
+      if (this.details.user_id != this.authUser.id) {
         let obj = {
           id: this.details.id,
         };
-
-        const res = await this.callApi("post", "/api/like", obj);
-        if (res.status == 201) {
+        this.id = this.details.id;
+        console.log(this.id);
+        if (this.details.authUserLike == "no") {
           this.details.like_count += 1;
           this.details.authUserLike = "yes";
         } else {
           this.details.like_count -= 1;
           this.details.authUserLike = "no";
         }
+        const res = await this.callApi("post", "/api/like", obj);
       } else {
         this.i("You can't like your own post!!");
       }
     },
 
-    async addComment() {
-      this.showreplybox = false;
-      if (this.data.comment.trim() == "")
-        return this.e("Comment field is empty!!!");
-      let obj = {
-        id: this.details.id,
-        comment: this.data.comment,
-      };
-
-      // var today = new Date();
-      // var date =
-      //     today.getFullYear() +
-      //     "-" +
-      //     (today.getMonth() + 1) +
-      //     "-" +
-      //     today.getDate();
-      // var time =
-      //     today.getHours() +
-      //     ":" +
-      //     today.getMinutes() +
-      //     ":" +
-      //     today.getSeconds();
-
-      const res = await this.callApi("post", "/api/add_comment", obj);
-      if (res.status == 201) {
-        let data = {
-          id: res.data.id,
-          user_id: this.authUser.id,
-          comment: this.data.comment,
-          image: this.authUser.image,
-          name: this.authUser.name,
-          // created_at: date + " " + time,
-          comment_like_count: 0,
-        };
-        this.comments.unshift(data);
-        this.data.comment = "";
-      } else {
-        this.swr();
-      }
-    },
-
-    async CommentLike(index) {
-      if (this.comments[index].user_id != this.authUser.id) {
-        let obj = {
-          id: this.comments[index].id,
-        };
-
-        const res = await this.callApi("post", "/api/comment_like", obj);
-        if (res.status == 201) {
-          this.comments[index].comment_like_count += 1;
-          this.comments[index].authUserCommentLike = "yes";
-        } else {
-          this.comments[index].comment_like_count -= 1;
-          this.comments[index].authUserCommentLike = "no";
-        }
-      } else {
-        this.i("You can't like your own comment");
-      }
-    },
-    async getCommentLikedUser(index) {
-      let obj = {
-        id: this.comments[index].id,
-      };
-      console.log(this.comments[index].id);
-      const res = await this.callApi(
-        "get",
-        `/api/get_comment_liked_user?id=${this.comments[index].id}`
-      );
-      if (res.status == 200) {
-        this.commentLikedUser = res.data.data;
-        this.commentLikedUserModal = true;
-      } else {
-        this.swr();
-      }
-    },
     resizeTextarea(e) {
       let area = e.target;
       area.style.height = "auto";
@@ -556,72 +579,7 @@ export default {
       area.style.height = area.scrollHeight + "px";
       // this.showbtn = true;
     },
-    showButton() {
-      this.showbtn = true;
-    },
-    showReplyBox(index) {
-      this.showreplybox = true;
-      this.commentindex = index;
-    },
-    async addCommentReply(index) {
-      if (this.data.commentReply.trim() == "")
-        return this.e("Field is empty!!!");
-      let obj = {
-        post_id: this.details.id,
-        comment_id: this.comments[index].id,
-        commentReply: this.data.commentReply,
-      };
 
-      const res = await this.callApi("post", "/api/add_comment_reply", obj);
-      if (res.status == 201) {
-        let data = {
-          id: res.data.id,
-          user_id: this.authUser.id,
-          post_id: this.details.id,
-          comment_id: this.comments[index].id,
-          comment: this.data.commentReply,
-          image: this.authUser.image,
-          name: this.authUser.name,
-          comment_reply_like_count: 0,
-        };
-        this.commentReplies.unshift(data);
-        this.showCommentReplies(index);
-        this.data.commentReply = "";
-      } else {
-        this.swr();
-      }
-    },
-
-    async showCommentReplies(index) {
-      this.showcommentreplies = true;
-      this.comment_id = this.comments[index].id;
-      const res = await this.callApi(
-        "get",
-        `/api/get_comment_replies?comment_id=${this.comments[index].id}`
-      );
-      if (res.status == 200) {
-        this.commentReplies = res.data.data;
-      }
-    },
-
-    async CommentReplyLike(index) {
-      if (this.commentReplies[index].user_id != this.authUser.id) {
-        let obj = {
-          id: this.commentReplies[index].id,
-        };
-
-        const res = await this.callApi("post", "/api/comment_reply_like", obj);
-        if (res.status == 201) {
-          this.commentReplies[index].comment_reply_like_count += 1;
-          this.commentReplies[index].authUserReplyCommentLike = "yes";
-        } else {
-          this.commentReplies[index].comment_reply_like_count -= 1;
-          this.commentReplies[index].authUserReplyCommentLike = "no";
-        }
-      } else {
-        this.i("You can't like your own reply");
-      }
-    },
     async getLikedUser() {
       let obj = {
         id: this.details.id,
@@ -638,47 +596,62 @@ export default {
         this.swr();
       }
     },
-    hideButton() {
-      this.showbtn = false;
+
+    async getRelatedResearch() {
+      this.post_slug = this.$route.params.slug;
+
+      const res = await this.callApi(
+        "get",
+        `/api/get_related_research?slug=${this.post_slug}&type=${this.details.type}&limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        this.relatedResearch = res.data.data;
+      } else {
+        this.swr();
+      }
+    },
+    async getDetails() {
+      this.post_slug = this.$route.params.slug;
+
+      this.isLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/post_details/${this.post_slug}`
+      );
+
+      if (res.status == 200) {
+        this.details = res.data.data[0];
+        this.upVoteCount = this.details.upVote;
+        this.downVoteCount = this.details.downVote;
+        this.avgVoteCount = this.details.avgVote;
+        this.authUserVoteCount = this.details.authUserVote;
+        this.post_id = this.details.id;
+        this.getRelatedResearch();
+
+        if (this.authUser) {
+          const res1 = await this.callApi(
+            "post",
+            `/api/read/${this.details.id}`
+          );
+        }
+      } else {
+        this.swr();
+      }
+
+      this.isLoading = false;
+    },
+  },
+  watch: {
+    "$route.params.slug"(oldValue, newValue) {
+      if (oldValue != newValue) {
+        console.log("route is changing!");
+        this.getDetails();
+      }
     },
   },
   async created() {
     // this.token = window.Laravel.csrfToken;
-    this.post_slug = this.$route.params.slug;
-    console.log(this.post_slug);
-    const res = await this.callApi(
-      "get",
-      `/api/post_details/${this.post_slug}`
-    );
-    if (this.authUser) {
-      // const resR = await this.callApi("get", `/api/get_comment_replies`);
-      // if (resR.status == 200) {
-      //   this.commentReplies = resR.data.data;
-      // }
-      const res1 = await this.callApi(
-        "get",
-        `/api/get_comments/${this.post_slug}`
-      );
-
-      if (res1.status == 200) {
-        this.comments = res1.data.data;
-      }
-    }
-    if (res.status == 200) {
-      this.details = res.data.data[0];
-      this.upVoteCount = this.details.upVote;
-      this.downVoteCount = this.details.downVote;
-      this.avgVoteCount = this.details.avgVote;
-      this.authUserVoteCount = this.details.authUserVote;
-      this.post_id = this.details.id;
-      if (this.authUser) {
-        const res1 = await this.callApi("post", `/api/read/${this.details.id}`);
-      }
-    } else {
-      this.swr();
-    }
-
-    this.isLoading = false;
+    this.getDetails();
   },
   // mounted() {
   //     document.addEventListener("click", this.hideButton);
@@ -689,6 +662,44 @@ export default {
 };
 </script>
 
+<style lang="scss">
+.slide {
+  &-enter {
+    overflow: hidden;
+    max-height: 0;
+    &-to {
+      max-height: 500px;
+      overflow: hidden;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: ease-in;
+      -webkit-transition-timing-function: ease-in;
+      -o-transition-timing-function: ease-in;
+      transition-timing-function: ease-in;
+    }
+  }
+  &-leave {
+    @extend .slide-enter-to;
+    &-to {
+      @extend .slide-enter;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    }
+  }
+}
+</style>
 <style lang="scss">
 .slide {
   &-enter {

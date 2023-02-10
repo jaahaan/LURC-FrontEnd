@@ -10,6 +10,7 @@ const cookies = new Cookies();
 Vue.mixin({
     computed: {
         ...mapGetters({
+          departmentInfo: "getDepartment",
           authUser: "getAuthUser",
           isLoggedIn:'getIsLoggedIn',
         }),

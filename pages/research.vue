@@ -2,7 +2,7 @@
   <div>
     <section class="container research">
       <div class="row">
-        <div class="col-lg-9 research-post mx-auto">
+        <div class="col-lg-8 research-post mx-auto">
           <div v-if="isDataLoading == false">
             <div class="research-post--display">
               <div class="research-post--display--icon">
@@ -247,6 +247,30 @@
                     {{ post.type }}</nuxt-link
                   >
                 </div>
+                <hooper
+                  :settings="hooperImage"
+                  :wheelControl="false"
+                  v-if="post.images.length > 0"
+                >
+                  <slide
+                    class="post-image"
+                    v-for="(image, index) in post.images"
+                    :key="index"
+                  >
+                    <img :src="`${http + image.image_name}`" />
+                    <div class="post-image-cover">
+                      <i
+                        class="lni lni-search-alt"
+                        @click="handleView(image.image_name, index)"
+                      ></i>
+                    </div>
+                  </slide>
+
+                  <hooper-navigation
+                    slot="hooper-addons"
+                    class="hooper-relatedResearch_button"
+                  ></hooper-navigation>
+                </hooper>
                 <p v-if="post.abstract != null">
                   {{ post.abstract.substring(0, 190) }}
                   ...
@@ -518,24 +542,39 @@
             </div>
           </div> -->
         </div>
-        <div
-          class="col-lg-3 d-none d-lg-block research-people r"
-          v-if="authUser"
-        >
+        <div class="col-lg-4 d-none d-lg-block research-people" v-if="authUser">
           <div class="research-post--item">
             <h5 class="post-title">People you may know</h5>
             <ul>
               <li v-for="(user, index) in peopleYouMayKnow">
-                <img :src="user.image" alt="img" />
-                <div>
-                  <nuxt-link :to="`/profile/${user.slug}/overview`">
-                    {{ user.name }}
-                  </nuxt-link>
-                  <p>
-                    {{ user.designation }}<span class="dot">.</span
-                    >{{ user.department.department_name }}
-                  </p>
+                <div class="content">
+                  <img :src="user.image" alt="img" />
+                  <div>
+                    <nuxt-link :to="`/profile/${user.slug}/overview`">
+                      {{ user.name }}
+                    </nuxt-link>
+                    <p>
+                      {{ user.designation }}<span class="dot">.</span
+                      >{{ user.department.department_name }}
+                    </p>
+                  </div>
                 </div>
+                <button
+                  class="main-btn main-btn__bg"
+                  v-if="user.status == 'pending'"
+                  @click="ignoreConnection(index)"
+                >
+                  <i class="fa-solid fa-clock-rotate-left"></i>
+                  Pending
+                </button>
+                <button
+                  class="main-btn main-btn__border"
+                  @click="connect(index)"
+                  v-else-if="user.status == 'connect'"
+                >
+                  <i class="fa-solid fa-user-plus"></i>
+                  Connect
+                </button>
               </li>
             </ul>
           </div>
@@ -558,17 +597,48 @@
       </div>
       <div slot="footer"></div>
     </Modal>
+    <Modal v-model="visible">
+      <img :src="imgName" v-if="visible" style="width: 100%" />
+      <div slot="footer">Figure: {{ index + 1 }}</div>
+    </Modal>
   </div>
 </template>
 
 <script>
 import { mapGetters } from "vuex";
-
+import {
+  Hooper,
+  Slide,
+  Progress as HooperProgress,
+  Pagination as HooperPagination,
+  Navigation as HooperNavigation,
+} from "hooper";
+import "hooper/dist/hooper.css";
 export default {
+  components: {
+    Hooper,
+    Slide,
+    HooperProgress,
+    HooperPagination,
+    HooperNavigation,
+  },
   // Properties returned from data() become reactive state
   // and will be exposed on `this`.
   data() {
     return {
+      hooperImage: {
+        commentsToShow: 1,
+        centerMode: false,
+        breakpoints: {
+          768: {
+            centerMode: false,
+            itemsToShow: 2,
+          },
+        },
+      },
+      visible: false,
+      imgName: "",
+      index: "",
       isSearchbar: false,
       likedUserModal: false,
       loadMoreLoading: false,
@@ -577,8 +647,6 @@ export default {
       // isLoading: false,
       isDataLoading: true,
       users: [],
-      // posts: [],
-      departments: [],
       likedUser: [],
       url: "",
       user_id: "",
@@ -593,6 +661,7 @@ export default {
       search: "",
       departmentName: "",
       type: "",
+      http: "http://localhost:8000/images/",
     };
   },
 
@@ -604,6 +673,11 @@ export default {
     }),
   },
   methods: {
+    handleView(item, index) {
+      this.imgName = this.http + item;
+      this.index = index;
+      this.visible = true;
+    },
     showSearchbar() {
       this.isSearchbar = true;
       this.search = "";
@@ -723,14 +797,16 @@ export default {
         };
         this.id = this.posts[index].id;
         console.log(this.id);
-        const res = await this.callApi("post", "/api/like", obj);
-        if (res.status == 201) {
+        if (this.posts[index].authUserLike == "no") {
           this.posts[index].like_count += 1;
           this.posts[index].authUserLike = "yes";
         } else {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
+        this.socket.emit("notification", obj);
+
+        const res = await this.callApi("post", "/api/like", obj);
       } else {
         this.i("You can't like your own post!!");
       }
@@ -768,20 +844,6 @@ export default {
         this.s(res.data.msg);
       }
     },
-    // async searchPost(query) {
-    //     this.isLoading = true;
-    //     console.log(query);
-
-    //     // const response = await this.callApi("get", `/api/get_all_research`);
-    //     const response = await this.callApi(
-    //         "get",
-    //         `/api/get_all_research?search=${query}`
-    //     );
-    //     if (response.status == 200) {
-    //         this.posts = response.data.data;
-    //     } else this.swr();
-    //     this.isLoading = false;
-    // },
 
     sortData(key) {
       this.filter.default = key[0];
@@ -805,19 +867,6 @@ export default {
       this.departmentName = "";
       this.filterPosts();
     },
-    // async filterPosts() {
-    //   this.isLoading = true;
-    //   // const response = await this.callApi("get", `/api/get_all_research`);
-    //   const response = await this.callApi(
-    //     "get",
-    //     `/api/get_all_research?department=${this.filter.department}&search=${this.search}&default=${this.filter.default}&order=${this.filter.order}`
-    //   );
-    //   if (response.status == 200) {
-    //     this.posts = response.data.data;
-    //   } else this.swr();
-    //   this.isLoading = false;
-    // },
-
     async filterPosts() {
       window.history.pushState(
         {},
@@ -862,15 +911,33 @@ export default {
       console.log("Load more is finished! length", this.posts.length);
     },
 
-    // async getDepartments() {
-    //   const res = await this.callApi("get", "/api/get_departments");
-    //   if (res.status == 200) {
-    //     this.departments = res.data.data;
-    //   } else {
-    //     this.swr();
-    //   }
-    //   this.isDataLoading = false;
-    // },
+    async connect(index) {
+      console.log("inside connect");
+      // this.sendRequest = true;
+      this.peopleYouMayKnow[index].status = "pending";
+      const res = await this.callApi(
+        "post",
+        `/api/add_connection?id=${this.peopleYouMayKnow[index].id}`
+      );
+      if (res.status == 201) {
+        // this.sendRequest = true;
+        this.connection = res.data.data;
+      } else {
+        this.sendRequest = false;
+      }
+    },
+
+    async ignoreConnection(index) {
+      // console.log(this.connection.user2.id);
+      this.peopleYouMayKnow[index].status = "connect";
+      const res = await this.callApi(
+        "post",
+        `/api/ignore_connection?id=${this.connection.id}&user_id=${this.peopleYouMayKnow[index].id}`
+      );
+      if (res.status == 201) {
+        this.sendRequest = false;
+      }
+    },
   },
   watch: {
     "$route.fullPath": function (newVal, oldVal) {
@@ -960,5 +1027,43 @@ h6:hover {
   width: 50px;
   height: 15px;
   background-color: #a7a7a7;
+}
+</style>
+<style lang="scss">
+.slide {
+  &-enter {
+    overflow: hidden;
+    max-height: 0;
+    &-to {
+      max-height: 500px;
+      overflow: hidden;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: ease-in;
+      -webkit-transition-timing-function: ease-in;
+      -o-transition-timing-function: ease-in;
+      transition-timing-function: ease-in;
+    }
+  }
+  &-leave {
+    @extend .slide-enter-to;
+    &-to {
+      @extend .slide-enter;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    }
+  }
 }
 </style>

@@ -42,17 +42,22 @@
 .hooper {
   height: 100%;
 }
+
 .bg {
   /*background-image: linear-gradient(angle, color-stop1, color-stop2);*/
   background: linear-gradient(
     90deg,
     #ffffff 0%,
     #ffffff 30%,
-    #a3babe 30%,
+    #a3babe 50%,
     #a3babe 100%
   );
 }
 @media (max-width: 768px) {
+  .login-logo {
+    width: 200px;
+    height: 200px;
+  }
   .slider {
     margin-bottom: 20px;
   }
@@ -61,8 +66,8 @@
     background: linear-gradient(
       180deg,
       #ffffff 0%,
-      #ffffff 30%,
-      #a3babe 30%,
+      #ffffff 20%,
+      #a3babe 20%,
       #a3babe 100%
     );
   }

@@ -21,6 +21,8 @@ button {
   font-weight: 500;
   min-width: 125px;
   border: 1px solid $secondaryColor;
+  transition: 0.3s linear;
+
   &__border {
     background-color: transparent;
     color: $secondaryColor;
@@ -41,7 +43,7 @@ button {
   &:hover {
     // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7);
     background-color: $btnHover;
-    border: 1px solid $secondaryColor;
+    // border: 1px solid $secondaryColor;
     color: $bgWhite;
   }
   &-change {

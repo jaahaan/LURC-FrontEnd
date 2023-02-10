@@ -3,15 +3,18 @@
     <!--****** Add Project box ******-->
 
     <template
-      v-if="isDataLoading == false && showProjectForm == false && posts == ''"
+      v-if="isLoading == false && showProjectForm == false && posts == ''"
     >
       <div
-        class="card mb-2 p-3"
+        class="_card mb-2 p-3"
         v-if="authUser.slug == this.$route.params.slug"
       >
-        <button class="add_new_card" v-on:click="showForm()">
+        <button v-on:click="showForm()">
           <i class="lni lni-folder"></i> Add Your Project
         </button>
+      </div>
+      <div v-else>
+        <h1>No Project Found</h1>
       </div>
     </template>
 
@@ -72,12 +75,48 @@
               errors.url[0]
             }}</span>
           </FormItem>
-
+          <FormItem label="Image">
+            <Upload
+              ref="uploads"
+              type="drag"
+              :multiple="true"
+              :show-upload-list="false"
+              :on-success="handleImageSuccess"
+              :on-error="handleError"
+              :format="['jpg', 'jpeg', 'png']"
+              :max-size="2048"
+              :on-format-error="handleFormatError"
+              :on-exceeded-size="handleMaxSize"
+              action="http://localhost:8000/api/upload"
+            >
+              <div style="padding: 20px 0">
+                <Icon
+                  type="ios-cloud-upload"
+                  size="52"
+                  style="color: #3399ff"
+                ></Icon>
+                <p>Click or drag files here to upload</p>
+              </div>
+            </Upload>
+            <div
+              class="demo-upload-list"
+              v-if="data.images"
+              v-for="(image, index) in data.images"
+            >
+              <img :src="`${http + image}`" />
+              <div class="demo-upload-list-cover">
+                <Icon
+                  type="ios-trash-outline"
+                  @click="deleteImage(index)"
+                ></Icon>
+              </div>
+            </div>
+          </FormItem>
           <FormItem label="Attachment">
             <Upload
               ref="upload"
-              :multiple="true"
-              :show-upload-list="true"
+              :multiple="false"
+              :show-upload-list="false"
               :on-success="handleSuccess"
               :format="[
                 'jpg',
@@ -93,7 +132,7 @@
               :max-size="21048"
               :on-format-error="handleFormatError"
               :on-exceeded-size="handleMaxSize"
-              :on-remove="deleteAttachment"
+              :on-remove="handleRemove"
               type="drag"
               action="http://localhost:8000/api/upload_attachment"
             >
@@ -102,15 +141,12 @@
                 Upload Attachment
               </div>
             </Upload>
-            <!-- <div v-if="this.attachmentName" class="attachmentName">
-              <span class="c-pointer">{{ this.attachmentName }}</span>
+            <div v-if="attachmentName" class="attachmentName">
+              <span class="c-pointer">{{ attachmentName }}</span>
               <span @click="deleteAttachment"
                 ><i class="lni lni-trash-can c-pointer"></i
               ></span>
-            </div> -->
-            <span class="text-danger" v-if="errors.url">{{
-              errors.url[0]
-            }}</span>
+            </div>
           </FormItem>
           <FormItem label="Project URL">
             <Input type="url" v-model="data.url" placeholder="Project URL" />
@@ -122,7 +158,7 @@
             <div class="col-6">
               <FormItem label="Start Date">
                 <DatePicker
-                  type="date"
+                  type="month"
                   v-model="data.start_date"
                   placeholder="Start Date"
                   class="d-block"
@@ -136,7 +172,7 @@
             <div class="col-6">
               <FormItem label="End Date (or expected)">
                 <DatePicker
-                  type="date"
+                  type="month"
                   v-model="data.end_date"
                   placeholder="End Date (or expected)"
                   class="d-block"
@@ -158,10 +194,10 @@
             <Button
               class="main-btn main-btn__bg"
               @click="save"
-              :disabled="isLoading"
-              :loading="isLoading"
+              :disabled="loading"
+              :loading="loading"
               ><i class="fa-solid fa-floppy-disk"></i>
-              {{ isLoading ? "Saving..." : "Save" }}</Button
+              {{ loading ? "Saving..." : "Save" }}</Button
             >
           </div>
         </div>
@@ -171,7 +207,7 @@
     <!--**** Projects ****-->
 
     <template
-      v-if="posts != '' && isDataLoading == false && showProjectForm == false"
+      v-if="posts != '' && isLoading == false && showProjectForm == false"
     >
       <div>
         <div>
@@ -257,12 +293,49 @@
                   errors.url[0]
                 }}</span>
               </FormItem>
+              <FormItem label="Image">
+                <Upload
+                  ref="editDataUploads"
+                  type="drag"
+                  :multiple="true"
+                  :show-upload-list="false"
+                  :on-success="handleImageSuccess"
+                  :on-error="handleError"
+                  :format="['jpg', 'jpeg', 'png']"
+                  :max-size="2048"
+                  :on-format-error="handleFormatError"
+                  :on-exceeded-size="handleMaxSize"
+                  action="http://localhost:8000/api/upload"
+                >
+                  <div style="padding: 20px 0">
+                    <Icon
+                      type="ios-cloud-upload"
+                      size="52"
+                      style="color: #3399ff"
+                    ></Icon>
+                    <p>Click or drag files here to upload</p>
+                  </div>
+                </Upload>
+                <div
+                  class="demo-upload-list"
+                  v-if="editData.images"
+                  v-for="(image, index) in editData.images"
+                >
+                  <img :src="`${http + image}`" />
+                  <div class="demo-upload-list-cover">
+                    <Icon
+                      type="ios-trash-outline"
+                      @click="deleteImage(index)"
+                    ></Icon>
+                  </div>
+                </div>
+              </FormItem>
 
               <FormItem label="Attachment">
                 <Upload
                   ref="upload"
-                  :multiple="true"
-                  :show-upload-list="true"
+                  :multiple="false"
+                  :show-upload-list="false"
                   :on-success="handleSuccess"
                   :format="[
                     'jpg',
@@ -278,7 +351,7 @@
                   :max-size="21048"
                   :on-format-error="handleFormatError"
                   :on-exceeded-size="handleMaxSize"
-                  :on-remove="deleteAttachment"
+                  :on-remove="handleRemove"
                   type="drag"
                   action="http://localhost:8000/api/upload_attachment"
                 >
@@ -287,15 +360,12 @@
                     Upload Attachment
                   </div>
                 </Upload>
-                <!-- <div v-if="this.attachmentName" class="attachmentName">
-              <span class="c-pointer">{{ this.attachmentName }}</span>
-              <span @click="deleteAttachment"
-                ><i class="lni lni-trash-can c-pointer"></i
-              ></span>
-            </div> -->
-                <span class="text-danger" v-if="errors.url">{{
-                  errors.url[0]
-                }}</span>
+                <div v-if="attachmentName" class="attachmentName">
+                  <span class="c-pointer">{{ attachmentName }}</span>
+                  <span @click="deleteAttachment"
+                    ><i class="lni lni-trash-can c-pointer"></i
+                  ></span>
+                </div>
               </FormItem>
 
               <div class="row">
@@ -332,16 +402,21 @@
             <div class="footer">
               <div></div>
               <div>
-                <button class="main-btn main-btn__border" @click="deletePost">
-                  Delete
-                </button>
+                <Button
+                  class="main-btn main-btn__border"
+                  @click="deletePost"
+                  :disabled="loading"
+                  :loading="loading"
+                >
+                  {{ loading ? "Deleting..." : "Delete" }}</Button
+                >
                 <Button
                   class="main-btn main-btn__bg"
                   @click="update"
-                  :disabled="isLoading"
-                  :loading="isLoading"
+                  :disabled="loading"
+                  :loading="loading"
                   ><i class="fa-solid fa-floppy-disk"></i>
-                  {{ isLoading ? "Saving..." : "Save" }}</Button
+                  {{ loading ? "Saving..." : "Save" }}</Button
                 >
               </div>
             </div>
@@ -354,7 +429,7 @@
               <div
                 v-if="authUser.slug == route_slug"
                 class="btn-edit"
-                @click="showEditProject(index)"
+                @click="showEdit(index)"
               >
                 <i class="lni lni-pencil"></i>
               </div>
@@ -373,6 +448,32 @@
                 {{ research.affiliation }}
               </p>
             </div>
+
+            <hooper
+              :settings="hooperImage"
+              :wheelControl="false"
+              v-if="research.images.length > 0"
+            >
+              <slide
+                class="post-image"
+                v-for="(image, index) in research.images"
+                :key="index"
+              >
+                <img :src="`${http + image.image_name}`" />
+                <div class="post-image-cover">
+                  <i
+                    class="lni lni-search-alt"
+                    @click="handleView(image.image_name, index)"
+                  ></i>
+                </div>
+              </slide>
+
+              <hooper-navigation
+                slot="hooper-addons"
+                class="hooper-relatedResearch_button"
+              ></hooper-navigation>
+            </hooper>
+
             <p v-if="research.abstract != null">
               {{ research.abstract.substring(0, 190) }}
               ...
@@ -485,15 +586,15 @@
             <div class="post-sub-title">
               <p>
                 {{ research.formatedDateTime }}
-                .
+                <span class="dot">.</span>
                 <a v-if="research.read_count > 1"
                   >{{ research.read_count }} Reads</a
                 ><a v-else-if="research.read_count <= 1"
                   >{{ research.read_count }} Read</a
                 >
-                .
+                <span class="dot">.</span>
                 <a>{{ research.upVote }} UpVote</a>
-                .
+                <span class="dot">.</span>
                 <a>{{ research.downVote }} DownVote</a>
               </p>
             </div>
@@ -535,7 +636,7 @@
       </div>
     </template>
     <!--**** loader ****-->
-    <template v-if="isDataLoading == true">
+    <template v-if="isLoading == true">
       <div class="section-header__skeleton">
         <h3></h3>
         <i></i>
@@ -579,26 +680,60 @@
       </div>
       <div slot="footer"></div>
     </Modal>
+    <Modal v-model="visible">
+      <img :src="imgName" v-if="visible" style="width: 100%" />
+      <div slot="footer">Figure: {{ index + 1 }}</div>
+    </Modal>
   </div>
 </template>
 
 <script>
+import { mapGetters } from "vuex";
+import {
+  Hooper,
+  Slide,
+  Progress as HooperProgress,
+  Pagination as HooperPagination,
+  Navigation as HooperNavigation,
+} from "hooper";
+import "hooper/dist/hooper.css";
 export default {
-  components: {},
+  middleware: "auth",
+
+  components: {
+    Hooper,
+    Slide,
+    HooperProgress,
+    HooperPagination,
+    HooperNavigation,
+  },
   data() {
     return {
+      hooperImage: {
+        commentsToShow: 1,
+        centerMode: false,
+        breakpoints: {
+          768: {
+            centerMode: false,
+            itemsToShow: 2,
+          },
+        },
+      },
+      limit: 3,
+      page: 1,
+      loadMoreLoading: false,
+      noPostRemaining: false,
       showProjectForm: false,
-      isDataLoading: true,
-      isLoading: false,
+      loading: false,
       likedUserModal: false,
+      visible: false,
+      imgName: "",
       errors: [],
-      posts: [],
       users: [],
       likedUser: [],
       user_id: -1,
       user_slug: "",
       route_slug: this.$route.params.slug,
-      attachmentName: "",
       data: {
         type: "",
         title: "",
@@ -611,6 +746,7 @@ export default {
         pdf: "",
         start_date: "",
         end_date: "",
+        iconImage: "",
       },
       editData: {
         id: "",
@@ -625,37 +761,115 @@ export default {
         end_date: "",
         url: "",
         images: [],
+        iconImage: "",
       },
+      imageName: [],
       edit_id: "",
       index: "",
+      attachmentName: "",
+      isEditingItem: false,
+      isDeletingAll: false,
+      isIconImageNew: false,
+      iconImageName: "",
+      http: "http://localhost:8000/images/",
+      isAdd: false,
     };
+  },
+  computed: {
+    ...mapGetters({
+      posts: "getUserProject",
+      isLoading: "getGlobalPostLoading",
+    }),
   },
   methods: {
     async deleteAttachment() {
       let attachment = this.attachmentName;
-      this.$refs.upload.clearFiles();
+      // this.$refs.upload.clearFiles();
       this.attachmentName = "";
       this.data.attachment = "";
+      this.editData.attachment = "";
+
       const res = await this.callApi("post", "/api/delete_attachment", {
         Name: attachment,
       });
       if (res.status != 200) {
-        this.data.attachment = attachment;
+        if (edit_id != "") {
+          this.editData.attachment = attachment;
+        } else {
+          this.data.attachment = attachment;
+        }
         this.swr();
       }
     },
-    handleSuccess(res, file) {
-      // res = `/attachments/${res}`;
-      // res1 = `${res}`;
-      // this.$refs.upload.clearFiles();
-      // if (this.isEditingItem) {
-      //     console.log("inside");
-      //     return (this.data.attachments = res);
-      // }
-      // console.log(res);
-      // this.data.attachment = `\\attachments\\${res}`;
+    async handleRemove(file, fileList) {
+      let attachment = this.attachmentName;
+
+      this.attachmentName = "";
+      this.data.attachment = "";
+      this.editData.attachment = "";
+
+      const res = await this.callApi("post", "/api/delete_attachment", {
+        Name: attachment,
+      });
+      if (res.status != 200) {
+        if (edit_id != "") {
+          this.editData.attachment = attachment;
+        } else {
+          this.data.attachment = attachment;
+        }
+        this.swr();
+      }
+    },
+    handleImageSuccess(res, file) {
+      // this.iconImageName = `${res}`;
+      this.imageName.push(`${res}`);
+
+      res = `${res}`;
+      if (this.isEditingItem) {
+        console.log("inside");
+        return this.editData.images.push(res);
+      }
+      console.log(res);
+      // this.data.iconImage = res;
+      this.data.images.push(res);
+    },
+    async deleteImage(index) {
+      let image;
+      if (this.isEditingItem) {
+        // for editing....
+        console.log(this.imageName);
+
+        image = this.editData.images[index];
+        this.editData.images.splice(index, 1);
+
+        // this.$refs.editDataUploads.clearFiles();
+      } else {
+        // image = this.iconImageName;
+
+        image = this.data.images[index];
+        this.data.images.splice(index, 1);
+      }
+      const res = await this.callApi("post", "/api/delete_image", {
+        imageName: image,
+      });
+      // this.imageName.splice(index, 1);
+      if (res.status != 200) {
+        this.data.iconImage = image;
+        this.swr();
+      }
+    },
+    async handleSuccess(res, file) {
+      let attachment = this.attachmentName;
+      const res1 = await this.callApi("post", "/api/delete_attachment", {
+        Name: attachment,
+      });
       console.log(this.data.attachment);
-      this.data.attachment = `${res}`;
+      // this.data.attachment = `${res}`;
+      if (this.edit_id != "") {
+        this.editData.attachment = `${res}`;
+      } else {
+        this.data.attachment = `${res}`;
+      }
       this.attachmentName = `${res}`;
     },
     handleError(res, file) {
@@ -683,13 +897,18 @@ export default {
         desc: "File  " + file.name + " is too large, no more than 2M.",
       });
     },
+    handleView(item, index) {
+      this.imgName = this.http + item;
+      this.index = index;
+      this.visible = true;
+    },
     async showForm() {
-      this.isLoading = true;
+      this.loading = true;
 
       this.getAuthors(this.authUser.name);
       this.data.author_id.push(this.authUser.id);
       this.showProjectForm = true;
-      this.isLoading = false;
+      this.loading = false;
     },
     async reset() {
       this.showProjectForm = false;
@@ -720,17 +939,20 @@ export default {
         start_date: "",
         end_date: "",
       };
-      this.isDataLoading = true;
+      this.$store.commit("setGlobalPostLoading", true);
+
       const res = await this.callApi(
         "get",
-        `/api/get_user_project/${this.user_slug}`
+        `/api/get_user_project/${this.user_slug}?limit=${this.limit}`
       );
       if (res.status == 200) {
-        this.posts = res.data.data;
-      } else {
-        this.swr();
+        this.$store.commit("setUserProject", res.data.data);
+        // this.$store.commit("setGlobalPostLoading", false);
       }
-      this.isDataLoading = false;
+      // else {
+      //   this.swr();
+      // }
+      this.$store.commit("setGlobalPostLoading", false);
     },
     async save() {
       // if (this.data.project_name.trim() == "")
@@ -740,7 +962,7 @@ export default {
       // if (this.data.start_date.trim() == "")
       //     return this.e("Start date is required");
       this.data.type = "Project";
-      this.isLoading = true;
+      this.loading = true;
 
       const res = await this.callApi("post", `/api/save_post`, this.data);
       if (res.status === 200) {
@@ -755,9 +977,9 @@ export default {
           this.swr();
         }
       }
-      this.isLoading = false;
+      this.loading = false;
     },
-    async showEditProject(index) {
+    async showEdit(index) {
       this.editData = {
         type: "",
         title: "",
@@ -778,25 +1000,33 @@ export default {
         this.editData.title = this.posts[index].title;
         this.editData.type = this.posts[index].type;
         this.editData.affiliation = this.posts[index].affiliation;
-        this.editData.attachment = this.posts[index].attachment;
         this.editData.start_date = this.posts[index].edit_start_date;
         this.editData.end_date = this.posts[index].edit_end_date;
         this.editData.url = this.posts[index].url;
         this.editData.abstract = this.posts[index].abstract;
-        const response = await this.callApi("get", `/api/get_user`);
-        if (response.status == 200) {
-          this.users = response.data;
-        }
+        this.editData.attachment = this.posts[index].attachment;
+        this.attachmentName = this.editData.attachment;
+
+        // const response = await this.callApi("get", `/api/get_user`);
+        // if (response.status == 200) {
+        //   this.users = response.data;
+        // }
+        this.users = this.posts[index].authors;
+
         for (let t of this.posts[index].authors) {
           console.log(t.name);
-
           this.editData.author_id.push(parseInt(t.id));
+        }
+        for (let t of this.posts[index].images) {
+          this.editData.images.push(t.image_name);
+          this.imageName.push(t.image_name);
         }
         this.$nextTick(() => {
           if (this.$refs["projectName" + this.posts[index].id]) {
             this.$refs["projectName" + this.posts[index].id][0].focus();
           }
         });
+        this.isEditingItem = true;
       }
     },
     async update() {
@@ -814,7 +1044,7 @@ export default {
         month: "short",
         year: "numeric",
       });
-      this.isLoading = true;
+      this.loading = true;
       const res = await this.callApi("post", "/api/update_post", this.editData);
       if (res.status === 200) {
         // this.reset();
@@ -859,23 +1089,32 @@ export default {
           this.swr();
         }
       }
-      this.isLoading = false;
+      this.loading = false;
     },
     async deletePost() {
-      this.isLoading = true;
+      this.loading = true;
+      this.deleteAttachment();
+      for (let t of this.editData.images) {
+        const res = await this.callApi("post", "/api/delete_image", {
+          imageName: t,
+        });
+      }
       const res = await this.callApi(
         "post",
-        `/api/delete_project/${this.editData.id}`
+        `/api/delete_post?id=${this.editData.id}`
       );
       if (res.status === 200) {
         this.s(res.data.msg);
         // this.reset();
-        this.posts.splice(this.editData.index, 1);
+        this.edit_id = "";
+        this.index = "";
+        this.posts.splice(this.index, 1);
       } else {
         this.swr();
       }
-      this.isLoading = false;
+      this.loading = false;
     },
+
     async like(index) {
       if (this.posts[index].user_id != this.authUser.id) {
         let obj = {
@@ -883,14 +1122,16 @@ export default {
         };
         this.id = this.posts[index].id;
         console.log(this.id);
-        const res = await this.callApi("post", "/api/like", obj);
-        if (res.status == 201) {
+        if (this.posts[index].authUserLike == "no") {
           this.posts[index].like_count += 1;
           this.posts[index].authUserLike = "yes";
         } else {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
+        const res = await this.callApi("post", "/api/like", obj);
+      } else {
+        this.i("You can't like your own post!!");
       }
     },
 
@@ -920,28 +1161,80 @@ export default {
         this.users = response.data;
       }
     },
+    async loadMore(more) {
+      console.log("Load more is calling! length", this.posts.length);
+      this.user_slug = this.$route.params.slug;
+
+      if (this.noPostRemaining) return;
+
+      this.limit = this.limit + more;
+      this.loadMoreLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_user_project/${this.user_slug}?limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        let prevLength = this.posts.length;
+        if (this.posts.length == res.data.data.length) {
+          this.noPostRemaining = true;
+        }
+        for (let i in res.data.data) {
+          console.log("pushing data");
+          let d = res.data.data[i];
+          if (i >= prevLength) {
+            this.$store.commit("pushUserProject", d);
+          }
+        }
+      }
+      this.loadMoreLoading = false;
+      console.log("Load more is finished! length", this.posts.length);
+    },
   },
-  // watch: {
-  //   "$route.params"(oldValue, newValue) {
-  //     if (oldValue != newValue) {
-  //       console.log("route is changing!");
-  //       this.reset();
-  //     }
-  //   },
-  // },
+
   async created() {
-    // this.token = window.Laravel.csrfToken;
+    this.page = this.$route.query.page ? this.$route.query.page : 1;
+    this.$store.commit("setGlobalPostLoading", true);
     this.user_slug = this.$route.params.slug;
+
     const res = await this.callApi(
       "get",
-      `/api/get_user_project/${this.user_slug}`
+      `/api/get_user_project/${this.user_slug}?limit=${this.limit}`
     );
     if (res.status == 200) {
-      this.posts = res.data.data;
-    } else {
-      this.swr();
+      this.$store.commit("setUserProject", res.data.data);
+      // this.$store.commit("setGlobalPostLoading", false);
     }
-    this.isDataLoading = false;
+    // else {
+    //   this.swr();
+    // }
+    this.$store.commit("setGlobalPostLoading", false);
+  },
+
+  mounted() {
+    // document.addEventListener("click", this.hideSearchbar);
+    window.onscroll = () => {
+      this.bottomOfWindow =
+        window.pageYOffset + window.innerHeight >
+        document.body.scrollHeight - 100;
+
+      if (this.bottomOfWindow) {
+        if (!this.loadMoreLoading) {
+          this.loadMore(3);
+        }
+      }
+    };
+  },
+
+  watch: {
+    "$route.fullPath": function (newVal, oldVal) {
+      // watch it
+      console.log("Prop changed: ", newVal, " | was: ", oldVal);
+      window.scrollTo(0, 0);
+
+      this.page = this.$route.query.page ? this.$route.query.page : 1;
+
+      this.filterPosts();
+    },
   },
 };
 </script>
@@ -965,5 +1258,43 @@ p {
   height: 16px;
   margin: 0.25rem;
   background-color: #c0c0c0;
+}
+</style>
+<style lang="scss">
+.slide {
+  &-enter {
+    overflow: hidden;
+    max-height: 0;
+    &-to {
+      max-height: 500px;
+      overflow: hidden;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: ease-in;
+      -webkit-transition-timing-function: ease-in;
+      -o-transition-timing-function: ease-in;
+      transition-timing-function: ease-in;
+    }
+  }
+  &-leave {
+    @extend .slide-enter-to;
+    &-to {
+      @extend .slide-enter;
+    }
+    &-active {
+      -moz-transition-duration: 0.5s;
+      -webkit-transition-duration: 0.5s;
+      -o-transition-duration: 0.5s;
+      transition-duration: 0.5s;
+      -moz-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -webkit-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      -o-transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+      transition-timing-function: cubic-bezier(0, 1, 0.5, 1);
+    }
+  }
 }
 </style>

@@ -13,8 +13,8 @@ Vue.use(iView, {
 Vue.mixin({
     computed:{
         ...mapGetters({
-            cartItem:'getCartItem',
-            order: 'order',
+            departmentInfo: "getDepartment",
+
         })
     },
     methods: {

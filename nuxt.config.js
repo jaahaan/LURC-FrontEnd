@@ -32,6 +32,22 @@ export default {
       { rel: 'stylesheet', href: "/assets/css/vendor/line-awesome.min.css"},
       { rel: 'stylesheet', href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"},
 
+    ],
+    script: [{
+      src: "https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js",
+      type: "module",
+      body: true
+      },
+      // {
+      //   src: "https://cdn.socket.io/4.3.2/socket.io.esm.min.js"
+      // },
+      { src: "https://cdn.socket.io/4.0.1/socket.io.min.js" },
+      { src: 'https://js.stripe.com/v3/' },
+      {
+          src: "https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js",
+          body: true
+      },
+
     ]
   },
 
@@ -77,5 +93,14 @@ export default {
   server: {
     port: 3000, // default: 3000
     host: 'localhost' // default: localhost
-  }
+  },
+  publicRuntimeConfig: {
+    // BASE_URL: process.env.BASE_URL,
+    SOCKET_URL: "http://127.0.0.1:8000",
+    // SITE_TITLE: process.env.SITE_TITLE,
+    // SITE_URL: process.env.SITE_URL,
+    // Stripe_Publishable_key: process.env.Stripe_Publishable_key,
+    // IS_CAREVAN: process.env.IS_CAREVAN
+
+},
 }

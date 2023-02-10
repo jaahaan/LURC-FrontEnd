@@ -3,11 +3,7 @@
     <div class="container-fluid justify-content-center py-md-4 py-3">
       <div class="row">
         <div class="col-md-6 my-md-auto text-center justify-content-center">
-          <img
-            :src="'/assets/images/lurc.png'"
-            alt="img"
-            class="img-fluid scientific"
-          />
+          <img :src="'/assets/images/lurc.png'" alt="img" class="login-logo" />
         </div>
 
         <!-- Two Factor Form -->
@@ -16,7 +12,7 @@
           v-if="!isLoggingBlock"
         >
           <div class="container-fluid">
-            <div class="container-fluid rt col-10 p-5">
+            <div class="container-fluid rt col-10 p-2">
               <h1 class="text-center mb-2">Two Factor Authentication</h1>
               <div class="alert alert-dark" v-if="msg">
                 {{ msg }}
@@ -60,7 +56,7 @@
           v-else-if="isLoggingBlock"
         >
           <div class="container-fluid">
-            <div class="container-fluid col-10 p-5">
+            <div class="container-fluid col-10 p-2">
               <h1 class="p-3 text-center">Login</h1>
               <!-- <div class="alert alert-dark" v-if="msg">
                                 {{ msg }}
@@ -124,6 +120,8 @@
 <script>
 export default {
   name: "login",
+  middleware: "guest",
+
   data() {
     return {
       data: {

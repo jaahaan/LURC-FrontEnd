@@ -192,6 +192,8 @@ import {
 import "hooper/dist/hooper.css";
 export default {
   name: "index",
+  middleware: "guest",
+
   components: {
     Hooper,
     Slide,
@@ -229,9 +231,9 @@ export default {
   methods: {},
   async asyncData({ app, store, redirect, params }) {
     try {
-      let [res1] = await Promise.all([app.$axios.get(`/api/banners`)]);
+      let [res] = await Promise.all([app.$axios.get(`/api/banners`)]);
       return {
-        dataBanner: res1.data,
+        dataBanner: res.data.data,
       };
     } catch (error) {
       console.log("error from asyncData server");
@@ -242,17 +244,15 @@ export default {
 
   async created() {
     console.log("index page");
-    if (this.authUser) {
-      window.location = "/home";
-    } else {
-      const response = await this.callApi("get", "/api/banners");
-      if (response.status == 200) {
-        this.dataBanner = response.data.data;
-        console.log("index page");
-      } else this.e("Oops!", "Something went wrong, please try again!");
-    }
-
-    this.isDataLoading = false;
+    // if (this.authUser) {
+    //   window.location = "/home";
+    // } else {
+    // const response = await this.callApi("get", "/api/banners");
+    // if (response.status == 200) {
+    //   this.dataBanner = response.data.data;
+    //   console.log("index page");
+    // } else this.e("Oops!", "Something went wrong, please try again!");
+    // this.isDataLoading = false;
   },
 };
 </script>

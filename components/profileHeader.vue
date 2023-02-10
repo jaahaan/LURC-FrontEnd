@@ -38,7 +38,7 @@
                     :max-size="2048"
                     :on-format-error="handleFormatError"
                     :on-exceeded-size="handleMaxSize"
-                    action="http://localhost:8000/api/upload"
+                    action="http://localhost:8000/api/upload_profile_image"
                   >
                     <div class="profile-main-btn">
                       <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -83,7 +83,7 @@
                       placeholder="Department"
                     >
                       <Option
-                        v-for="(department, index) in departments"
+                        v-for="(department, index) in departmentInfo"
                         :key="index"
                         :value="department.id"
                         >{{ department.department_name }}</Option
@@ -135,7 +135,7 @@
                     :max-size="2048"
                     :on-format-error="handleFormatError"
                     :on-exceeded-size="handleMaxSize"
-                    action="http://localhost:8000/api/upload"
+                    action="http://localhost:8000/api/upload_profile_image"
                   >
                     <div class="profile-main-btn">
                       <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -161,7 +161,7 @@
                       placeholder="Department"
                     >
                       <Option
-                        v-for="(department, index) in departments"
+                        v-for="(department, index) in departmentInfo"
                         :key="index"
                         :value="department.id"
                         >{{ department.department_name }}</Option
@@ -251,10 +251,10 @@
                   <i class="fa-solid fa-user-plus"></i>
                   Connect
                 </button>
-                <button class="main-btn main-btn__border col-5 mx-1">
+                <!-- <button class="main-btn main-btn__border col-5 mx-1">
                   <i class="fa-solid fa-paper-plane"></i>
                   Message
-                </button>
+                </button> -->
               </div>
             </template>
           </div>
@@ -310,7 +310,7 @@
                 <nuxt-link
                   class="menu-link"
                   aria-current="page"
-                  :to="`/profile/${this.$route.params.slug}/post`"
+                  :to="`/profile/${this.$route.params.slug}/connection`"
                   ><i class="fa-solid fa-users"></i>
                   <h4>Connections</h4></nuxt-link
                 >
@@ -390,7 +390,7 @@ export default {
 
   data() {
     return {
-      isLoading: true,
+      isLoading: false,
       data: {
         image: "",
         name: "",
@@ -403,7 +403,7 @@ export default {
         Skills: "",
       },
       editModal: false,
-      departments: [],
+      // departments: [],
       profileInfo: [],
       editData: {
         image: "",
@@ -449,7 +449,7 @@ export default {
         this.profileInfo.name = this.editData.name;
         this.profileInfo.designation = this.editData.designation;
         this.profileInfo.department_id = this.editData.department;
-        this.reset();
+        this.getProfileInfo();
         this.s("Profile has been updated successfully!");
         this.editModal = false;
         this.errors = [];
@@ -520,7 +520,7 @@ export default {
       image = this.editData.image;
       this.editData.image = "http://localhost:8000/profileImages/download.jpg";
       this.$refs.editDataUploads.clearFiles();
-      const res = await this.callApi("post", "/api/delete_image", {
+      const res = await this.callApi("post", "/api/delete__profile_image", {
         imageName: image,
       });
       if (res.status != 200) {
@@ -536,7 +536,7 @@ export default {
     async getDepartments() {
       const res = await this.callApi("get", "/api/get_departments");
       if (res.status == 200) {
-        this.departments = res.data.data;
+        this.departments = res.data;
       } else {
         this.swr();
       }
@@ -544,40 +544,59 @@ export default {
     },
     async connect() {
       console.log("inside connect");
+      this.sendRequest = true;
       const res = await this.callApi(
         "post",
         `/api/add_connection?id=${this.profileInfo.id}`
       );
       if (res.status == 201) {
-        this.sendRequest = true;
         this.connection = res.data.data;
+      } else {
+        this.sendRequest = false;
       }
     },
     async acceptConnection() {
+      this.approvedRequest = true;
+      this.receivedRequest = false;
+      this.responseModal = false;
       const res = await this.callApi(
         "post",
         `/api/accept_connection?id=${this.connection.id}&user_id=${this.connection.user1.id}`
       );
       if (res.status == 201) {
-        this.approvedRequest = true;
-        this.receivedRequest = false;
-        this.responseModal = false;
+        // this.approvedRequest = true;
+        // this.receivedRequest = false;
+        // this.responseModal = false;
         console.log(this.connection.user2.id);
+      } else {
+        // this.approvedRequest = true;
+        // this.receivedRequest = false;
+        // this.responseModal = false;
+        this.swr();
       }
     },
     async ignoreConnection() {
       // console.log(this.connection.user2.id);
+      this.approvedRequest = false;
+      this.receivedRequest = false;
+      this.approvedRequest = false;
+      this.sendRequest = false;
+      this.responseModal = false;
+      this.removeModal = false;
       const res = await this.callApi(
         "post",
         `/api/ignore_connection?id=${this.connection.id}&user_id=${this.profileInfo.id}`
       );
       if (res.status == 201) {
-        this.approvedRequest = false;
-        this.receivedRequest = false;
-        this.approvedRequest = false;
-        this.sendRequest = false;
-        this.responseModal = false;
-        this.removeModal = false;
+        console.log("success");
+        // this.approvedRequest = false;
+        // this.receivedRequest = false;
+        // this.approvedRequest = false;
+        // this.sendRequest = false;
+        // this.responseModal = false;
+        // this.removeModal = false;
+      } else {
+        this.swr();
       }
     },
     showResponseModal() {
@@ -594,14 +613,34 @@ export default {
         " from your connection?";
       this.removeModal = true;
     },
-    async reset() {
+    async connectionStatus() {
+      this.user_slug = this.$route.params.slug;
+      this.isLoading = true;
+
+      const res = await this.callApi(
+        "get",
+        `/api/connection_status?slug=${this.user_slug}`
+      );
+      if (res.status == 201) {
+        this.approvedRequest = true;
+      }
+      if (res.status == 202) {
+        this.receivedRequest = true;
+      }
+      if (res.status == 203) {
+        this.sendRequest = true;
+      }
+      this.connection = res.data.data;
+      this.isLoading = false;
+    },
+    async getProfileInfo() {
       // this.token = window.Laravel.csrfToken;
 
       this.user_slug = this.$route.params.slug;
       this.isLoading = true;
       const res = await this.callApi(
         "get",
-        `/api/get_profile_info/${this.user_slug}`
+        `/api/get_profile_header_info/${this.user_slug}`
       );
 
       if (res.status == 200) {
@@ -618,38 +657,16 @@ export default {
     "$route.params.slug"(oldValue, newValue) {
       if (oldValue != newValue) {
         console.log("route is changing!");
-        this.reset();
+        this.getProfileInfo();
+        this.connectionStatus();
       }
     },
   },
   async created() {
     // this.token = window.Laravel.csrfToken;
-    this.user_slug = this.$route.params.slug;
-    const res = await this.callApi(
-      "get",
-      `/api/get_profile_info/${this.user_slug}`
-    );
-    const res1 = await this.callApi(
-      "get",
-      `/api/connection_status?slug=${this.user_slug}`
-    );
-    if (res1.status == 201) {
-      this.approvedRequest = true;
-    }
-    if (res1.status == 202) {
-      this.receivedRequest = true;
-    }
-    if (res1.status == 203) {
-      this.sendRequest = true;
-    }
-    if (res.status == 200) {
-      this.profileInfo = res.data.user;
-    } else {
-      this.swr();
-    }
-    this.connection = res1.data.data;
-    console.log(this.connection);
-    this.getDepartments();
+    this.getProfileInfo();
+
+    this.connectionStatus();
   },
 };
 </script>

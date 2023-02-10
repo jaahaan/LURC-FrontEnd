@@ -54,7 +54,7 @@
 import { mapGetters } from "vuex";
 
 export default {
-  name: "forgot",
+  middleware: "guest",
   data() {
     return {
       data: {

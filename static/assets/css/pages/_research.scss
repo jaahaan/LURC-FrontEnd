@@ -3,7 +3,7 @@
 @use "../abstracts/mixins" as *;
 
 .research {
-  padding: 2rem 6rem !important;
+  padding: 2rem 3rem !important;
   // margin: auto;
   &-post {
     &--display {
@@ -144,14 +144,15 @@
         margin-bottom: 17px;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        // align-items: center;
         i {
           font-size: 18px;
           color: $gray;
+          cursor: pointer;
+          margin-left: 0.5rem;
         }
         a {
           font-size: 12px;
-          text-align: center;
         }
         h5 {
           font-size: 22px;
@@ -168,7 +169,63 @@
           color: $gray;
           cursor: pointer;
         }
+        img {
+          width: 200px;
+          height: 200px;
+        }
       }
+
+      .post-image {
+        // margin: 5px 0px;
+        // justify-content: flex-start;
+        // display: flex;
+        display: inline-block;
+        width: 150px !important;
+        height: 150px;
+        text-align: center;
+        line-height: 60px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        background: #fff;
+        position: relative;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        margin-right: 1rem;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+
+        img {
+          width: 100%;
+          height: 100%;
+        }
+        &-cover {
+          display: none;
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: rgba(0, 0, 0, 0.6);
+          padding-top: 55px;
+
+          i {
+            color: #fff;
+            font-size: 40px;
+            font-weight: 800;
+            cursor: pointer;
+            // margin: 0 2px;
+          }
+        }
+        &:hover .post-image-cover {
+          display: block;
+        }
+        // img {
+        //   width: 150px;
+        //   height: 150px;
+        //   margin-right: 1rem;
+        // }
+      }
+
       .footer {
         display: flex;
         width: 100%;
@@ -226,7 +283,7 @@
         &--default {
           display: flex;
           margin-left: 20px;
-          margin-bottom: 5px;
+          // margin-bottom: 5px;
           p {
             border-radius: 5px;
             width: 100px;
@@ -298,34 +355,7 @@
       }
     }
   }
-  &-people {
-    &:not(#home) {
-      margin-top: 3.5rem;
-    }
-    li {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      img {
-        max-width: 40px;
-        max-height: 40px;
-        margin-right: 0.75rem;
-        border-radius: 50%;
-      }
-      &:not(:last-child) {
-        margin-bottom: 17px;
-      }
 
-      h4 {
-        font-size: 16px;
-        color: #000;
-      }
-      p {
-        font-size: 13px;
-        color: $gray;
-      }
-    }
-  }
   &-search {
     display: flex;
     justify-content: center;
@@ -371,12 +401,92 @@
       color: #e3e3e3;
     }
   }
+
+  &-people {
+    &:not(#home) {
+      margin-top: 3.5rem;
+    }
+    li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      &:not(:last-child) {
+        margin-bottom: 17px;
+      }
+
+      .content {
+        display: flex;
+        align-items: center;
+        img {
+          max-width: 40px;
+          max-height: 40px;
+          margin-right: 0.75rem;
+          border-radius: 50%;
+        }
+
+        h4 {
+          font-size: 16px;
+          color: #000;
+        }
+        p {
+          font-size: 13px;
+          color: $gray;
+        }
+      }
+      button {
+        font-size: 0.8rem;
+        font-weight: 500;
+        border: none;
+        &:hover {
+          background-color: $headerBg;
+        }
+      }
+    }
+  }
 }
 .dot {
   // font-size: 1rem;
   font-weight: 780;
   padding: 0rem 0.35rem;
 }
+.demo-upload-list {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #fff;
+  position: relative;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  margin-right: 4px;
+  img {
+    width: 100%;
+    height: 100%;
+  }
+  &-cover {
+    display: none;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    i {
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      margin: 0 2px;
+    }
+  }
+  &:hover .demo-upload-list-cover {
+    display: block;
+  }
+}
+
 // Responsive
 @include breakpoint-max(1400px) {
   .research {

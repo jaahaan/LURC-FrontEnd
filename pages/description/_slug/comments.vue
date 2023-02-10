@@ -1,10 +1,10 @@
-<template>
-  <div>
-    <div v-if="isLoading" class="loader">
-      <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
-    </div>
-    <div v-else class="comment">
+<template>    
+    <div class="comment">
       <h4 class="menu-item--title">Comments</h4>
+      <div v-if="isLoading" class="loader">
+      <h1 />
+    </div>
+      <div v-else>
       <div class="comment-box">
         <img :src="authUser.image" alt="img" />
         <textarea
@@ -139,8 +139,8 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
-  </div>
 </template>
 <script>
 export default {

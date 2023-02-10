@@ -58,7 +58,7 @@
 
 <script>
 export default {
-  name: "forgot",
+  middleware: "guest",
   data() {
     return {
       data: {

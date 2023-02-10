@@ -79,7 +79,7 @@
 import { mapGetters } from "vuex";
 
 export default {
-  name: "reset",
+  middleware: "guest",
   data() {
     return {
       data: {

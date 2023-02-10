@@ -1,88 +1,47 @@
 <template>
-  <div class="mt-2">
-    <!--****** Add Research box ******-->
-
-    <template
-      v-if="isLoading == false && showResearchForm == false && researches == ''"
-    >
-      <div
-        class="card mb-2 p-3"
-        v-if="authUser.slug == this.$route.params.slug"
-      >
-        <button class="add_new_card" v-on:click="showForm()">
-          <i class="lni lni-folder"></i> What's on your mind?
-        </button>
-      </div>
-    </template>
-
-    <!--****** Add Research form ******-->
-    <template v-if="showResearchForm == true">
-      <div class="card mb-2">
-        <div class="card-header card-header-border p-3">
-          <div class="d-block">
-            <div class="float-start">
-              <h5>Create Post</h5>
-            </div>
-            <div class="btn-edit text-danger mx-2 float-end" @click="reset">
-              <i class="fa-solid fa-xmark"></i>
+  <div class="research-people">
+    <div class="research-post--item">
+      <h5 class="post-title">Connections</h5>
+      <ul>
+        <li v-for="(user, index) in peopleYouMayKnow">
+          <div class="content">
+            <img :src="user.image" alt="img" />
+            <div>
+              <nuxt-link :to="`/profile/${user.slug}/overview`">
+                {{ user.name }}
+              </nuxt-link>
+              <p>
+                {{ user.designation }}<span class="dot">.</span
+                >{{ user.department.department_name }}
+              </p>
             </div>
           </div>
-        </div>
-        <div class="card-body">
-          <div class="mb-2">
-            <label>What's on your mind? </label>
-
-            <editor
-              :headers="{
-                'x-csrf-token': token,
-                'X-Requested-With': 'XMLHttpRequest',
-              }"
-              class="form-control form-outline"
-              ref="editor"
-              autofocus
-              holder-id="codex-editor"
-              save-button-id="save-button"
-              :init-data="initData"
-              @save="onSave"
-              :config="config"
-            />
-          </div>
-
-          <div class="mb-2">
-            <label>Mention</label>
-
-            <Select
-              filterable
-              multiple
-              placeholder="Select User"
-              v-model="data.author_id"
-            >
-              <Option
-                v-for="(user, index) in users"
-                :value="user.id"
-                :key="index"
-                >{{ user.name }}</Option
-              >
-            </Select>
-          </div>
-        </div>
-        <div class="card-footer text-muted p-3">
-          <div class="d-block">
-            <button class="profile-main-btn mx-2 float-end" @click="save">
-              <i class="fa-solid fa-floppy-disk"></i> Save
-            </button>
-            <button class="profile-main-btn mx-2 float-end" @click="reset()">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    </template>
+          <button
+            class="main-btn main-btn__bg"
+            v-if="user.status == 'pending'"
+            @click="ignoreConnection(index)"
+          >
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            Pending
+          </button>
+          <button
+            class="main-btn main-btn__border"
+            @click="connect(index)"
+            v-else-if="user.status == 'connect'"
+          >
+            <i class="fa-solid fa-user-plus"></i>
+            Connect
+          </button>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
+  middleware: "auth",
+
   components: {},
   data() {
     return {
