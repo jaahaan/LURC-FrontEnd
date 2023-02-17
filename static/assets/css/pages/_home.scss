@@ -17,7 +17,7 @@
         margin-bottom: 15px;
         box-shadow: 0px 0px 3px #cdcdcd;
         background-color: $bgWhite;
-        border-radius: 5px;
+        border-radius: 10px;
         padding-top: 20px;
         padding-right: 20px;
         padding-bottom: 20px;
@@ -184,101 +184,34 @@
   }
 }
 
-// Responsive
-@include breakpoint-max(1199px) {
-  .post {
-    &-menu {
-      &--list {
-        &---item {
-          i {
-            margin-left: 10px;
-          }
-        }
-      }
-    }
-  }
-}
-@include breakpoint-max(991px) {
+@include breakpoint-max(767px) {
   .home {
-    padding-right: 0 !important;
+    padding: 1.5rem !important;
+    // margin: 0;
     &-post {
       &-section {
-        display: block;
-        gap: 0;
-        // box-shadow: 0px 0px 3px #e2e2e2;
-        border-radius: 2px;
+        padding: 0;
         .menu-item {
-          box-shadow: none;
-          border-radius: 0;
-          padding-right: 2rem;
-        }
-      }
-      &-menu {
-        width: 100%;
-        box-shadow: none;
-        border-radius: 0;
-        margin-bottom: 20px;
-        &--list {
-          &---item {
-            .menu-link {
-              border-bottom: 1px solid #e3e3e3;
+          &-box {
+            padding-left: 10px;
+
+            .post-details {
+              padding-left: 10px;
+              .sub-title {
+                font-size: 12px;
+              }
+            }
+            .vote {
+              i {
+                font-size: 1.6rem;
+              }
             }
           }
-        }
-      }
-    }
-  }
-}
-@include breakpoint-max(767px) {
-  .post {
-    &-section {
-      padding-bottom: 0;
-      .menu-item {
-        padding: 2px 20px;
-        &-box {
-          .post-details {
-            margin-right: 7px;
-            .sub-title {
-              font-size: 12px;
-            }
-          }
-          .vote {
-            i {
-              font-size: 1.6rem;
-            }
-          }
-        }
-        &--title {
-          font-size: 18px;
-          padding-bottom: 10px;
-          margin-bottom: 10px;
-        }
-      }
-    }
-    &-menu {
-      figure {
-        text-align: center;
-        margin-bottom: 20px;
-        padding-top: 35px;
-      }
-      .header {
-        font-size: 16px;
-        margin-bottom: 5px;
-      }
-      p {
-        font-size: 13px;
-        margin-bottom: 35px;
-      }
-      &--list {
-        &---item {
-          .menu-link {
-            padding: 18px 15px;
-            i {
-              font-size: 18px;
-            }
-            h4 {
-              font-size: 13px;
-            }
+          &--title {
+            font-size: 20px;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+            font-weight: 500;
           }
         }
       }

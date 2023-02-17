@@ -58,10 +58,6 @@
           <div class="container-fluid">
             <div class="container-fluid col-10 p-2">
               <h1 class="p-3 text-center">Login</h1>
-              <!-- <div class="alert alert-dark" v-if="msg">
-                                {{ msg }}
-                            </div> -->
-
               <div class="mb-2">
                 Email
                 <input type="email" v-model="data.email" placeholder="Email" />
@@ -78,13 +74,10 @@
                   placeholder="Password"
                 />
                 <div class="d-block">
-                  <span class="w-full text-danger float-start" v-if="msg"
-                    >{{ msg }}
-                  </span>
                   <span
                     class="w-full text-danger float-start"
                     v-if="errors.password"
-                    >{{ errors.password[0] }}
+                    >{{ errors.password }}
                   </span>
 
                   <nuxt-link class="float-end" to="/auth/forgot_password"
@@ -146,7 +139,7 @@ export default {
       // if (this.data.password.trim() == "")
       //     return this.e("Password is required");
       this.isLogging = true;
-
+      this.errors = [];
       //if we put await in front of it, it will be a response! The await keyword causes code to wait for that Promise to resolve. And whatever data is normally passed to your callback as an argument is instead returned. There is still an asynchronous AJAX call happening, but our code reads a bit more like synchronous code.
       const res = await this.callApi("post", "/api/login", this.data);
 
@@ -170,14 +163,16 @@ export default {
           // this.msg = res.data.msg;
           this.e(res.data.error);
         } else if (res.status == 401) {
-          // this.msg = res.data.msg;
-          this.e(res.data.error);
+          this.errors.password = res.data.msg;
+          // this.e(res.data.msg);
         } else if (res.status == 422) {
           if (res.data.email) {
-            this.e(res.data.email[0]);
+            this.errors.email = res.data.email;
+            // this.e(res.data.email[0]);
           }
           if (res.data.password) {
-            this.e(res.data.password[0]);
+            this.errors.password = res.data.password[0];
+            // this.e(res.data.password[0]);
           }
         } else if (res.status == 402) {
           let emailPassword = {

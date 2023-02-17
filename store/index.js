@@ -1,11 +1,13 @@
 //import Vuex from 'vuex'
 //import axios from 'axios'
 export const strict = false
-import cookie from 'cookie'
+import cookie from 'cookie';
 
 export const state = () => ({
     user : 'no user',
     authUser: false,
+    socket: null,
+    messages:[],
     userResearch:[],
     userProject:[],
     allGlobalResearch:[],
@@ -22,6 +24,8 @@ export const state = () => ({
     token: '',
     passwordReset: { email: "" , token: ""},
     unauthorizedCredential: { email: "",  password: ""},
+    selectedUserInfo: {room_id: "", selectedUserId: "",selectedUserImage:"", selectedUserSlug:"",  selectedUserName: "" },
+
 })
 // common getters
 export const getters = {
@@ -31,23 +35,32 @@ export const getters = {
   getAuthUser (state) {
     return state.authUser
   },
-  getDepartment (state) {
-    return state.departmentInfo
-  },
   getToken (state) {
     return state.token
-  },
-  getSeenCount (state) {
-    return state.seenCount
-  },
-  getCallNotificationOb (state) {
-    return state.callNotificationOb
   },
   unauthorizedCredential(state) {
     return state.unauthorizedCredential;
   },
   passwordReset(state) {
     return state.passwordReset;
+  },
+  
+  getSocket (state) {
+    return state.socket
+  },
+  getDepartment (state) {
+    return state.departmentInfo
+  },
+  
+  getSeenCount (state) {
+    return state.seenCount
+  },
+  getCallNotificationOb (state) {
+    return state.callNotificationOb
+  },
+  
+  getSelectedUserInfo(state) {
+    return state.selectedUserInfo;
   },
   
   getConnectionItem (state) {
@@ -60,9 +73,12 @@ export const getters = {
   getNotificationItem (state) {
     return state.notification
   },
-
   getPeopleYouMayKnow (state) {
     return state.peopleYouMayKnow
+  },
+
+  getMessages (state) {
+    return state.messages
   },
   getUserResearch (state) {
     return state.userResearch
@@ -93,6 +109,9 @@ export const mutations = {
   },
   setAuthInfo(state, data) {
     state.authUser = data
+  },
+  setSocket(state, data) {
+    state.socket = data
   },
   setToken(state, data) {
     state.token = data
@@ -140,15 +159,27 @@ export const mutations = {
   updatePeopleYouMayKnow (state, data) {
     state.peopleYouMayKnow = data
   },
-  
   setCallNotificationOb (state, data) {
     state.callNotificationOb = data
   },
   setUnauthorizedCredential(state, data)  {
     state.unauthorizedCredential = data;
   },
+
+  setSelectedUserInfo(state, data)  {
+    state.selectedUserInfo = data;
+  },
   setPasswordReset(state, data) {
     state.passwordReset = data;
+  },
+
+  //user research
+  setMessages (state, data) {
+    state.messages = data
+  },
+  
+  pushMessages (state, data) {
+    state.messages.push(data)
   },
 
   //user research
@@ -191,6 +222,7 @@ export const mutations = {
   },
   
 }
+
 // actionns for commiting mutations
 export const actions = {
     async nuxtServerInit({ commit, state }, { $axios, req, env })  {
@@ -210,6 +242,7 @@ export const actions = {
       console.log(res.data)
       commit('setAuthInfo', res.data)
       
+
       const [notification, peopleYouMayKnow, connection] = await Promise.all([
         this.callApi("get", '/api/get_notification'),
         this.callApi("get", "/api/get_people_you_may_know"),
@@ -252,5 +285,8 @@ export const actions = {
   },
   setAuthInfo ({ commit }, data) { 
     commit('setAuthInfo', data)
+  },
+  setSocket ({ commit }, data) { 
+    commit('setSocket', data)
   },
 }

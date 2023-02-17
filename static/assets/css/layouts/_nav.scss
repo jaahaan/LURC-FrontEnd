@@ -161,6 +161,9 @@
         span {
           color: $linkColor !important;
         }
+        a {
+          color: $linkColor !important;
+        }
         &:hover:not(.profile):not(.dropdown li) {
           // color: $hover;
           background-color: $headerBg;
@@ -173,6 +176,11 @@
         &:not(.dropdown li) {
           padding: 7px;
           border-radius: 50%;
+        }
+        img {
+          border-radius: 50%;
+          width: 30px;
+          height: 30px;
         }
       }
       .dropdown {
@@ -202,6 +210,19 @@
             &:hover {
               color: $hover;
             }
+          }
+          .box {
+            overflow-y: scroll;
+            overflow-x: hidden;
+            max-height: 80%;
+            // &::-webkit-scrollbar {
+            //   visibility: hidden !important;
+            // }
+            // &:hover {
+            //   &::-webkit-scrollbar {
+            //     // visibility: visible;
+            //   }
+            // }
           }
           .connection {
             &-item {
@@ -357,9 +378,9 @@
         top: -2px;
         right: -2px;
         background-color: $notification-badge;
-        font-size: 0.8125rem;
+        font-size: 0.75rem;
         font-weight: 500;
-        padding: 1px 5px;
+        padding: 1px 6px;
         color: #ffffff;
         border-radius: 50%;
         min-width: 19px;
@@ -481,12 +502,10 @@
         padding: 20px;
         border-radius: 6px;
         height: 40px;
-        color: $bgWhite;
       }
       button {
         top: 50%;
         transform: translate(-40px, 0px);
-        color: #f4f4f4;
       }
     }
     &-cancel {
@@ -1008,12 +1027,12 @@
           &__action {
             li {
               font-size: 16px;
-              i {
-                svg {
-                  width: 20px;
-                  height: 20px;
-                }
-              }
+              // i {
+              //   svg {
+              //     width: 18px;
+              //     height: 18px;
+              //   }
+              // }
             }
           }
           &__badge {
@@ -1027,7 +1046,8 @@
     &-item {
       &__action {
         li:not(:last-child) {
-          margin-right: 8px;
+          padding: 6px;
+          margin-right: 0;
         }
       }
     }
@@ -1058,15 +1078,26 @@
 }
 @include breakpoint-max(400px) {
   .navbar {
-    &-search {
-      &-input {
-        width: auto;
-        input {
-          padding: 18px 15px;
+    &.navbar-expand-lg {
+      .header-content {
+        .navbar-itemLogo {
+          .navbar-brand {
+            img {
+              max-width: 80px;
+            }
+          }
         }
       }
-      &-cancel {
-        transform: translateY(42px, 7px);
+    }
+
+    &-item {
+      &__action {
+        li {
+          font-size: 14px;
+          :not(:last-child) {
+            margin-right: 0;
+          }
+        }
       }
     }
   }

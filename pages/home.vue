@@ -200,7 +200,7 @@
                     <p>
                       <a
                         v-if="post.attachment && authUser"
-                        class="main-btn main-btn__bg"
+                        class="main-btn main-btn__bg px-4"
                         :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
                         >Download <i class="fa-solid fa-download"
                       /></a>
@@ -317,6 +317,8 @@ import {
   Navigation as HooperNavigation,
 } from "hooper";
 import "hooper/dist/hooper.css";
+const { io } = require("socket.io-client");
+
 export default {
   middleware: "auth",
 
@@ -359,6 +361,7 @@ export default {
       authUserLike: "",
       page: 1,
       http: "http://localhost:8000/images/",
+      socket: null,
     };
   },
   computed: {
@@ -405,6 +408,10 @@ export default {
             this.posts[index].avgVote = upVoteCount1 + 1 - downVoteCount1;
             this.posts[index].authUserVote = "up";
           }
+          let notificationObj = {
+            id: this.posts[index].user_id,
+          };
+          this.socket.emit("notification", notificationObj);
         } else {
           this.i("You can't vote your own post!");
         }
@@ -442,12 +449,15 @@ export default {
             this.posts[index].avgVote = upVoteCount1 - 1 - (downVoteCount1 + 1);
             this.posts[index].authUserVote = "down";
           }
-
           if (res.status == 202) {
             this.posts[index].avgVote = upVoteCount1 - (downVoteCount1 + 1);
             this.posts[index].downVote = downVoteCount1 + 1;
             this.posts[index].authUserVote = "down";
           }
+          let notificationObj = {
+            id: this.posts[index].user_id,
+          };
+          this.socket.emit("notification", notificationObj);
         } else {
           this.i("You can't vote your own post!");
         }
@@ -472,15 +482,13 @@ export default {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
-        // this.socket.emit("notification", obj);
+        let notificationObj = {
+          id: this.posts[index].user_id,
+        };
+
         const res = await this.callApi("post", "/api/like", obj);
         // if (res.status == 201) {
-        //   this.posts[index].like_count += 1;
-        //   this.posts[index].authUserLike = "yes";
-        //   // this.socket.emit("notification", "this.posts[index].user_id");
-        // } else {
-        //   this.posts[index].like_count -= 1;
-        //   this.posts[index].authUserLike = "no";
+        this.socket.emit("notification", notificationObj);
         // }
       } else {
         this.i("You can't like your own post!!");
@@ -568,6 +576,10 @@ export default {
         "post",
         `/api/add_connection?id=${this.peopleYouMayKnow[index].id}`
       );
+      let notificationObj = {
+        id: this.peopleYouMayKnow[index].id,
+      };
+      this.socket.emit("notification", notificationObj);
       if (res.status == 201) {
         // this.sendRequest = true;
         this.connection = res.data.data;
@@ -643,6 +655,11 @@ export default {
 
   mounted() {
     // document.addEventListener("click", this.hideSearchbar);
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
     window.onscroll = () => {
       this.bottomOfWindow =
         window.pageYOffset + window.innerHeight >

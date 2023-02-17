@@ -17,6 +17,7 @@ Vue.mixin({
 
         })
     },
+    
     methods: {
         i(msg, i = 'Hey!') {
             this.$Notice.info({

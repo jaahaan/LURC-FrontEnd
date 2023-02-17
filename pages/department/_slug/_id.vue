@@ -416,7 +416,7 @@
                   <p>
                     <a
                       v-if="post.attachment && authUser"
-                      class="main-btn main-btn__bg"
+                      class="main-btn main-btn__bg px-4"
                       :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
                       >Download <i class="fa-solid fa-download"></i
                     ></a>
@@ -587,7 +587,6 @@
 
 <script>
 import { mapGetters } from "vuex";
-
 import {
   Hooper,
   Slide,
@@ -596,6 +595,8 @@ import {
   Navigation as HooperNavigation,
 } from "hooper";
 import "hooper/dist/hooper.css";
+const { io } = require("socket.io-client");
+
 export default {
   components: {
     Hooper,
@@ -608,6 +609,8 @@ export default {
   // and will be exposed on `this`.
   data() {
     return {
+      socket: null,
+
       hooperImage: {
         commentsToShow: 1,
         centerMode: false,
@@ -794,6 +797,11 @@ export default {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
+        let notificationObj = {
+          id: this.posts[index].user_id,
+        };
+
+        this.socket.emit("notification", notificationObj);
         const res = await this.callApi("post", "/api/like", obj);
       } else {
         this.i("You can't like your own post!!");
@@ -905,6 +913,10 @@ export default {
         "post",
         `/api/add_connection?id=${this.peopleYouMayKnow[index].id}`
       );
+      let notificationObj = {
+        id: this.peopleYouMayKnow[index].id,
+      };
+      this.socket.emit("notification", notificationObj);
       if (res.status == 201) {
         // this.sendRequest = true;
         this.connection = res.data.data;
@@ -970,6 +982,11 @@ export default {
   },
 
   mounted() {
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
     document.addEventListener("click", this.hideSearchbar);
     window.onscroll = () => {
       this.bottomOfWindow =

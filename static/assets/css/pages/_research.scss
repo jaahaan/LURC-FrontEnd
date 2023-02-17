@@ -133,7 +133,7 @@
       &:not(#modal) {
         box-shadow: 0px 0px 3px #cdcdcd;
         // border: 1px solid $borderColor;
-        border-radius: 5px;
+        border-radius: 10px;
         padding: 20px;
         margin-bottom: 10px;
       }
@@ -185,7 +185,7 @@
         text-align: center;
         line-height: 60px;
         border: 1px solid transparent;
-        border-radius: 4px;
+        border-radius: 5px;
         overflow: hidden;
         background: #fff;
         position: relative;
@@ -299,7 +299,8 @@
         border: 1px solid $borderColor;
         padding: 20px;
         margin-bottom: 10px;
-        border-radius: 5px;
+        border-radius: 10px;
+        // background-color: #fff;
         background-color: #f4f4f4;
 
         .post-title-skeleton {

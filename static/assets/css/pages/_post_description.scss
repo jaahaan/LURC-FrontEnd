@@ -15,7 +15,7 @@
       &-box {
         box-shadow: 0px 0px 3px #cdcdcd;
         background-color: $bgWhite;
-        border-radius: 5px;
+        border-radius: 10px;
         padding-top: 20px;
         padding-left: 20px;
         padding-bottom: 20px;
@@ -299,39 +299,35 @@
   &-menu {
     width: 40%;
     box-shadow: 0px 0px 3px #cdcdcd;
-    border-radius: 5px;
+    border-radius: 10px;
     background-color: $bgWhite;
-
-    figure {
-      text-align: center;
-      margin-bottom: 20px;
-      padding-top: 35px;
+    &--header {
+      display: flex;
+      padding: 20px;
+      align-items: center;
       img {
         border-radius: 50%;
-        max-width: 90px;
+        width: 90px;
+        height: 90px;
+      }
+      .content {
+        margin-left: 0.75rem !important;
+
+        a {
+          color: #000000;
+          font-size: 1.25rem;
+          font-weight: 500;
+          &:hover {
+            color: $grayColor;
+            text-decoration: underline;
+          }
+        }
+        p {
+          font-size: 1rem;
+        }
       }
     }
-    .header {
-      text-align: center;
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 10px;
-    }
-    p {
-      text-align: center;
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 60px;
-    }
-    .nuxt-link-exact-active:not(.lurc) {
-      background-color: $primaryColor;
-      i {
-        color: $inverseColor;
-      }
-      h4 {
-        color: $inverseColor;
-      }
-    }
+
     &--list {
       &---item {
         .menu-link {
@@ -378,6 +374,16 @@
         }
       }
     }
+
+    .nuxt-link-exact-active:not(.lurc) {
+      background-color: $primaryColor;
+      i {
+        color: $inverseColor;
+      }
+      h4 {
+        color: $inverseColor;
+      }
+    }
   }
   &-description {
     .sub-title {
@@ -397,7 +403,7 @@
     text-align: center;
     line-height: 60px;
     border: 1px solid transparent;
-    border-radius: 4px;
+    border-radius: 5px;
     overflow: hidden;
     background: #fff;
     position: relative;
@@ -482,7 +488,7 @@
 .related_research--section {
   align-items: center;
   border: 1px solid $borderColor;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: #ffffff;
   padding: 30px 45px;
   h4 {
@@ -519,19 +525,18 @@
     &-section {
       display: block;
       gap: 0;
-      box-shadow: 0px 0px 3px #e2e2e2;
-      border-radius: 2px;
+      // box-shadow: 0px 0px 3px #e2e2e2;
+      border-radius: 10px;
       .menu-item {
         box-shadow: none;
         border-radius: 0;
-        padding: 30px 60px;
+        padding: 0;
       }
     }
     &-menu {
       width: 100%;
-      box-shadow: none;
-      border-radius: 0;
       margin-bottom: 20px;
+
       &--list {
         &---item {
           .menu-link {
@@ -550,8 +555,8 @@
     &-section {
       padding-bottom: 0;
       .menu-item {
-        padding: 2px 20px;
         &-box {
+          padding-right: 17px;
           .post-details {
             margin-right: 7px;
             .sub-title {
@@ -571,34 +576,7 @@
         }
       }
     }
-    &-menu {
-      figure {
-        text-align: center;
-        margin-bottom: 20px;
-        padding-top: 35px;
-      }
-      .header {
-        font-size: 16px;
-        margin-bottom: 5px;
-      }
-      p {
-        font-size: 13px;
-        margin-bottom: 35px;
-      }
-      &--list {
-        &---item {
-          .menu-link {
-            padding: 18px 15px;
-            i {
-              font-size: 20px;
-            }
-            h4 {
-              font-size: 14px;
-            }
-          }
-        }
-      }
-    }
+
     &-description {
       .sub-title {
         font-size: 15px;

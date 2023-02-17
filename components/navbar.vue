@@ -468,6 +468,54 @@
 
           <div class="navbar-item">
             <ul class="navbar-item__action" v-if="authUser">
+              <li v-on:click="showSearchbar()" ref="searchBoxSource">
+                <svg
+                  fill="currentColor"
+                  viewBox="0 0 16 16"
+                  height="19"
+                  width="24"
+                  class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6 xlup9mm x1kky2od"
+                >
+                  <g fill-rule="evenodd" transform="translate(-448 -544)">
+                    <g fill-rule="nonzero">
+                      <path
+                        d="M10.743 2.257a6 6 0 1 1-8.485 8.486 6 6 0 0 1 8.485-8.486zm-1.06 1.06a4.5 4.5 0 1 0-6.365 6.364 4.5 4.5 0 0 0 6.364-6.363z"
+                        transform="translate(448 544)"
+                      ></path>
+                      <path
+                        d="M10.39 8.75a2.94 2.94 0 0 0-.199.432c-.155.417-.23.849-.172 1.284.055.415.232.794.54 1.103a.75.75 0 0 0 1.112-1.004l-.051-.057a.39.39 0 0 1-.114-.24c-.021-.155.014-.356.09-.563.031-.081.06-.145.08-.182l.012-.022a.75.75 0 1 0-1.299-.752z"
+                        transform="translate(448 544)"
+                      ></path>
+                      <path
+                        d="M9.557 11.659c.038-.018.09-.04.15-.064.207-.077.408-.112.562-.092.08.01.143.034.198.077l.041.036a.75.75 0 0 0 1.06-1.06 1.881 1.881 0 0 0-1.103-.54c-.435-.058-.867.018-1.284.175-.189.07-.336.143-.433.2a.75.75 0 0 0 .624 1.356l.066-.027.12-.061z"
+                        transform="translate(448 544)"
+                      ></path>
+                      <path
+                        d="m13.463 15.142-.04-.044-3.574-4.192c-.599-.703.355-1.656 1.058-1.057l4.191 3.574.044.04c.058.059.122.137.182.24.249.425.249.96-.154 1.41l-.057.057c-.45.403-.986.403-1.411.154a1.182 1.182 0 0 1-.24-.182zm.617-.616.444-.444a.31.31 0 0 0-.063-.052c-.093-.055-.263-.055-.35.024l.208.232.207-.206.006.007-.22.257-.026-.024.033-.034.025.027-.257.22-.007-.007zm-.027-.415c-.078.088-.078.257-.023.35a.31.31 0 0 0 .051.063l.205-.204-.233-.209z"
+                        transform="translate(448 544)"
+                      ></path>
+                    </g>
+                  </g>
+                </svg>
+              </li>
+              <li>
+                <nuxt-link to="/message">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    data-supported-dps="24x24"
+                    fill="currentColor"
+                    class="mercado-match"
+                    width="24"
+                    height="24"
+                    focusable="false"
+                  >
+                    <path
+                      d="M16 4H8a7 7 0 000 14h4v4l8.16-5.39A6.78 6.78 0 0023 11a7 7 0 00-7-7zm-8 8.25A1.25 1.25 0 119.25 11 1.25 1.25 0 018 12.25zm4 0A1.25 1.25 0 1113.25 11 1.25 1.25 0 0112 12.25zm4 0A1.25 1.25 0 1117.25 11 1.25 1.25 0 0116 12.25z"
+                    ></path>
+                  </svg>
+                </nuxt-link>
+              </li>
               <li class="dropdown" id="connection">
                 <svg
                   viewBox="0 0 28 28"
@@ -545,9 +593,7 @@
                       </nuxt-link>
                       <nuxt-link
                         class="connection-item"
-                        v-else-if="
-                          authUser.id == connection.received_request_user
-                        "
+                        v-else-if="authUser.id == connection.received_request_user"
                         :to="`/profile/${connection.user1.slug}/overview`"
                       >
                         <img :src="connection.user1.image" />
@@ -577,36 +623,6 @@
                     <h1 class="mt-5 text-center">No data found!!</h1>
                   </div>
                 </div>
-              </li>
-              <li v-on:click="showSearchbar()" ref="searchBoxSource">
-                <svg
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                  height="19"
-                  width="24"
-                  class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6 xlup9mm x1kky2od"
-                >
-                  <g fill-rule="evenodd" transform="translate(-448 -544)">
-                    <g fill-rule="nonzero">
-                      <path
-                        d="M10.743 2.257a6 6 0 1 1-8.485 8.486 6 6 0 0 1 8.485-8.486zm-1.06 1.06a4.5 4.5 0 1 0-6.365 6.364 4.5 4.5 0 0 0 6.364-6.363z"
-                        transform="translate(448 544)"
-                      ></path>
-                      <path
-                        d="M10.39 8.75a2.94 2.94 0 0 0-.199.432c-.155.417-.23.849-.172 1.284.055.415.232.794.54 1.103a.75.75 0 0 0 1.112-1.004l-.051-.057a.39.39 0 0 1-.114-.24c-.021-.155.014-.356.09-.563.031-.081.06-.145.08-.182l.012-.022a.75.75 0 1 0-1.299-.752z"
-                        transform="translate(448 544)"
-                      ></path>
-                      <path
-                        d="M9.557 11.659c.038-.018.09-.04.15-.064.207-.077.408-.112.562-.092.08.01.143.034.198.077l.041.036a.75.75 0 0 0 1.06-1.06 1.881 1.881 0 0 0-1.103-.54c-.435-.058-.867.018-1.284.175-.189.07-.336.143-.433.2a.75.75 0 0 0 .624 1.356l.066-.027.12-.061z"
-                        transform="translate(448 544)"
-                      ></path>
-                      <path
-                        d="m13.463 15.142-.04-.044-3.574-4.192c-.599-.703.355-1.656 1.058-1.057l4.191 3.574.044.04c.058.059.122.137.182.24.249.425.249.96-.154 1.41l-.057.057c-.45.403-.986.403-1.411.154a1.182 1.182 0 0 1-.24-.182zm.617-.616.444-.444a.31.31 0 0 0-.063-.052c-.093-.055-.263-.055-.35.024l.208.232.207-.206.006.007-.22.257-.026-.024.033-.034.025.027-.257.22-.007-.007zm-.027-.415c-.078.088-.078.257-.023.35a.31.31 0 0 0 .051.063l.205-.204-.233-.209z"
-                        transform="translate(448 544)"
-                      ></path>
-                    </g>
-                  </g>
-                </svg>
               </li>
 
               <li class="dropdown" id="connection">
@@ -655,6 +671,7 @@
                       Unread
                     </button>
                   </div>
+
                   <ul v-if="isLoading == true">
                     <li class="skeleton nav-link">
                       <img />
@@ -684,81 +701,88 @@
                       notificationItem.length > 0
                     "
                   >
-                    <li
-                      v-for="(notification, index) in notificationItem"
-                      @click="markAsRead(index)"
-                      v-bind:class="{
-                        active: notification.read_at == null,
-                      }"
-                    >
-                      <nuxt-link
-                        class="connection-item"
-                        v-if="
-                          notification.data.msg == 'accepted your request' ||
-                          notification.data.msg == 'requested to connect you'
-                        "
-                        :to="`/profile/${notification.data.user_slug}/overview`"
+                    <div class="box">
+                      <li
+                        v-for="(notification, index) in notificationItem"
+                        @click="markAsRead(index)"
                       >
-                        <div>
-                          <img :src="notification.data.user_image" />
-                          <span
-                            class="connection-action connection-action__like"
-                            ><i class="fa-solid fa-user-group"></i
-                          ></span>
-                        </div>
-                        <div>
-                          <nuxt-link
-                            :to="`/profile/${notification.data.user_slug}/overview`"
-                            >{{ notification.data.user_name }}</nuxt-link
-                          >
-                          <span>{{ notification.data.msg }}</span>
-                        </div>
-                      </nuxt-link>
-                      <nuxt-link
-                        class="connection-item"
-                        v-else
-                        :to="`/description/${notification.data.post_slug}/overview`"
-                      >
-                        <div>
-                          <img :src="notification.data.user_image" />
-                          <span
-                            class="connection-action connection-action__like"
-                            v-if="notification.data.msg == 'liked your'"
-                            ><i class="fa-solid fa-thumbs-up"></i
-                          ></span>
-                          <span
-                            class="connection-action connection-action__upVote"
-                            v-else-if="notification.data.msg == 'up voted your'"
-                            ><i class="fa-solid fa-caret-up"></i
-                          ></span>
-                          <span
-                            class="connection-action connection-action__downVote"
-                            v-else-if="
-                              notification.data.msg == 'down voted your'
-                            "
-                            ><i class="fa-solid fa-caret-down"></i
-                          ></span>
-                          <span
-                            class="connection-action connection-action__like"
-                            v-else-if="
-                              notification.data.msg == 'commented your'
-                            "
-                            ><i class="fa-solid fa-comment"></i
-                          ></span>
-                        </div>
-                        <p>
-                          <nuxt-link
-                            :to="`/profile/${notification.data.user_slug}/overview`"
-                            >{{ notification.data.user_name }}</nuxt-link
-                          >
-                          {{
-                            notification.data.msg +
-                            " " +
-                            notification.data.post_type
-                          }}
-                        </p>
-                      </nuxt-link>
-                    </li>
+                        <nuxt-link
+                          class="connection-item"
+                          v-if="
+                            notification.data.msg == 'accepted your request' ||
+                            notification.data.msg == 'requested to connect you'
+                          "
+                          :to="`/profile/${notification.data.user_slug}/overview`"
+                          v-bind:class="{
+                            active: notification.read_at == null,
+                          }"
+                        >
+                          <div>
+                            <img :src="notification.data.user_image" />
+                            <span
+                              class="connection-action connection-action__like"
+                              ><i class="fa-solid fa-user-group"></i
+                            ></span>
+                          </div>
+                          <div>
+                            <nuxt-link
+                              :to="`/profile/${notification.data.user_slug}/overview`"
+                              >{{ notification.data.user_name }}</nuxt-link
+                            >
+                            <span>{{ notification.data.msg }}</span>
+                          </div>
+                        </nuxt-link>
+                        <nuxt-link
+                          class="connection-item"
+                          v-else
+                          :to="`/description/${notification.data.post_slug}/overview`"
+                          v-bind:class="{
+                            active: notification.read_at == null,
+                          }"
+                        >
+                          <div>
+                            <img :src="notification.data.user_image" />
+                            <span
+                              class="connection-action connection-action__like"
+                              v-if="notification.data.msg == 'liked your'"
+                              ><i class="fa-solid fa-thumbs-up"></i
+                            ></span>
+                            <span
+                              class="connection-action connection-action__upVote"
+                              v-else-if="
+                                notification.data.msg == 'up voted your'
+                              "
+                              ><i class="fa-solid fa-caret-up"></i
+                            ></span>
+                            <span
+                              class="connection-action connection-action__downVote"
+                              v-else-if="
+                                notification.data.msg == 'down voted your'
+                              "
+                              ><i class="fa-solid fa-caret-down"></i
+                            ></span>
+                            <span
+                              class="connection-action connection-action__like"
+                              v-else-if="
+                                notification.data.msg == 'commented your'
+                              "
+                              ><i class="fa-solid fa-comment"></i
+                            ></span>
+                          </div>
+                          <p>
+                            <nuxt-link
+                              :to="`/profile/${notification.data.user_slug}/overview`"
+                              >{{ notification.data.user_name }}</nuxt-link
+                            >
+                            {{
+                              notification.data.msg +
+                              " " +
+                              notification.data.post_type
+                            }}
+                          </p>
+                        </nuxt-link>
+                      </li>
+                    </div>
                     <div
                       class="justify-content-center d-flex"
                       @click="loadAllNotification(4)"
@@ -782,10 +806,7 @@
               </li>
               <li class="dropdown profile">
                 <nuxt-link :to="`/profile/${authUser.slug}/overview`">
-                  <img
-                    :src="authUser.image"
-                    alt="img"
-                    class="img-fluid nav-profile-img m-auto"
+                  <img :src="authUser.image" alt="img"
                 /></nuxt-link>
                 <i class="lni lni-chevron-down" style="color: #fff"></i>
                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -852,6 +873,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+const { io } = require("socket.io-client");
 
 export default {
   data() {
@@ -882,6 +904,7 @@ export default {
       user_id: -1,
       user_slug: "",
       limit: 3,
+      socket: null,
     };
   },
   watch: {
@@ -893,11 +916,13 @@ export default {
         this.hideNotification();
         this.hideSidebar();
         this.hideSearchbar();
+        this.hideConnection();
+
         this.hideConnectionBox();
         this.hideNotificationBox();
-        if (this.authUser) {
-          this.callCount();
-        }
+        // if (this.authUser) {
+        //   this.callCount();
+        // }
       }
     },
   },
@@ -930,6 +955,7 @@ export default {
     },
     hideConnectionBox() {
       this.isConnectionBox = false;
+      // this.isAllConnection = false;
       this.isRequest = false;
     },
     hideConnection() {
@@ -1124,7 +1150,10 @@ export default {
       this.isUnread = false;
       this.isRequest = false;
       this.isLoading = true;
-      const notification = await this.callApi("get", "/api/get_notification");
+      const notification = await this.callApi(
+        "get",
+        `/api/get_notification?limit=${this.limit}`
+      );
 
       if (notification.status == 200) {
         console.log(notification.data.data);
@@ -1251,6 +1280,16 @@ export default {
     //     this.callCount();
     //   }, 10000);
     // }
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
+
+    this.socket.on("get_notification", (data) => {
+      console.log(data);
+      if (data.id == this.authUser.id) this.callCount();
+    });
   },
   beforeDestroy() {
     document.removeEventListener("click", this.hideSearchbar);
@@ -1280,14 +1319,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.nav-profile-img {
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-}
-.scrollable {
-  overflow-y: scroll;
-}
-</style>

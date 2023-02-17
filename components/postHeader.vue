@@ -6,20 +6,19 @@
     <div v-else class="container pt-4 pb-4">
       <section class="post-section">
         <div class="post-menu">
-          <figure>
+          <div class="post-menu--header">
             <img :src="details.image" alt="" />
-          </figure>
-          <nuxt-link :to="`/profile/${details.user_slug}/overview`">
-            <h4 class="header">
-              {{ details.name }}
-            </h4>
-          </nuxt-link>
-
-          <p>
-            {{ details.designation }}
-            .
-            {{ details.department.department_name }}
-          </p>
+            <div class="content">
+              <nuxt-link :to="`/profile/${details.user_slug}/overview`">
+                {{ details.name }}
+              </nuxt-link>
+              <p>
+                {{ details.designation }}
+                .
+                {{ details.department.department_name }}
+              </p>
+            </div>
+          </div>
           <ul class="post-menu--list">
             <li class="post-menu--list---item">
               <nuxt-link
@@ -188,7 +187,7 @@
                 <p>
                   <a
                     v-if="details.attachment && authUser"
-                    class="main-btn main-btn__bg"
+                    class="main-btn main-btn__bg px-4"
                     :href="`http://localhost:8000/api/download_attachment/${details.attachment}`"
                     >Download <i class="fa-solid fa-download"
                   /></a>
@@ -202,7 +201,7 @@
                     <i class="fa-solid fa-arrow-up-right-from-square"></i>
                   </a>
                 </p>
-                <p>
+                <p v-if="authUser">
                   <a v-if="details.like_count" @click="getLikedUser">
                     {{ details.like_count }}
                   </a>
@@ -250,7 +249,10 @@
       </section>
       <!--***************Related Research Section****************-->
 
-      <section class="related-research__section">
+      <section
+        class="related-research__section"
+        v-if="relatedResearch.length > 0"
+      >
         <div class="container">
           <div class="dept-header">
             <h2>Related Research</h2>
@@ -408,6 +410,8 @@ import {
   Navigation as HooperNavigation,
 } from "hooper";
 import "hooper/dist/hooper.css";
+const { io } = require("socket.io-client");
+
 export default {
   components: {
     Hooper,
@@ -418,6 +422,8 @@ export default {
   },
   data() {
     return {
+      socket: null,
+
       hooperImage: {
         commentsToShow: 1,
         centerMode: false,
@@ -499,6 +505,11 @@ export default {
             this.avgVoteCount = upVoteCount1 + 1 - downVoteCount1;
             this.authUserVoteCount = "up";
           }
+          let notificationObj = {
+            id: this.details.user_id,
+          };
+
+          this.socket.emit("notification", notificationObj);
         } else {
           this.i("You can't vote your own post!");
         }
@@ -542,6 +553,11 @@ export default {
             this.downVoteCount = downVoteCount1 + 1;
             this.authUserVoteCount = "down";
           }
+          let notificationObj = {
+            id: this.details.user_id,
+          };
+
+          this.socket.emit("notification", notificationObj);
         } else {
           this.i("You can't vote your own post!");
         }
@@ -552,7 +568,7 @@ export default {
       }
     },
 
-    async like(index) {
+    async like() {
       if (this.details.user_id != this.authUser.id) {
         let obj = {
           id: this.details.id,
@@ -566,6 +582,11 @@ export default {
           this.details.like_count -= 1;
           this.details.authUserLike = "no";
         }
+        let notificationObj = {
+          id: this.details.user_id,
+        };
+
+        this.socket.emit("notification", notificationObj);
         const res = await this.callApi("post", "/api/like", obj);
       } else {
         this.i("You can't like your own post!!");
@@ -653,9 +674,13 @@ export default {
     // this.token = window.Laravel.csrfToken;
     this.getDetails();
   },
-  // mounted() {
-  //     document.addEventListener("click", this.hideButton);
-  // },
+  mounted() {
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
+  },
   // beforeDestroy() {
   //     document.removeEventListener("click", this.hideButton);
   // },

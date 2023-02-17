@@ -5,16 +5,18 @@
     <template
       v-if="isLoading == false && showProjectForm == false && posts == ''"
     >
-      <div
-        class="_card mb-2 p-3"
-        v-if="authUser.slug == this.$route.params.slug"
-      >
-        <button v-on:click="showForm()">
-          <i class="lni lni-folder"></i> Add Your Project
-        </button>
+      <div v-if="authUser.slug == route_slug">
+        <div class="_card" v-on:click="showForm()">
+          <button>
+            <h1>
+              No Project Found.<br />
+              <i class="lni lni-folder"></i> Add Your Project
+            </h1>
+          </button>
+        </div>
       </div>
       <div v-else>
-        <h1>No Project Found</h1>
+        <div class="_card"><h1>No Project Found</h1></div>
       </div>
     </template>
 

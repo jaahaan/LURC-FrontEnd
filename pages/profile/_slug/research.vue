@@ -5,10 +5,15 @@
     <template
       v-if="isLoading == false && showResearchForm == false && posts == ''"
     >
-      <div class="mb-2 p-3 _card" v-if="authUser.slug == route_slug">
-        <button v-on:click="showForm()">
-          <i class="lni lni-folder"></i> Add Your Research
-        </button>
+      <div v-if="authUser.slug == route_slug">
+        <div class="_card" v-on:click="showForm()">
+          <button>
+            <h1>
+              No Research Found.<br />
+              <i class="lni lni-folder"></i> Add Your Project
+            </h1>
+          </button>
+        </div>
       </div>
       <div v-else>
         <div class="_card"><h1>No Research Found</h1></div>

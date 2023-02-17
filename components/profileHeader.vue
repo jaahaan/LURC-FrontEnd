@@ -384,12 +384,15 @@
 </template>
 <script>
 import ProfileNav from "./profileNav";
+const { io } = require("socket.io-client");
 
 export default {
   name: "Profile",
 
   data() {
     return {
+      socket: null,
+
       isLoading: false,
       data: {
         image: "",
@@ -551,6 +554,7 @@ export default {
       );
       if (res.status == 201) {
         this.connection = res.data.data;
+        this.callNotification();
       } else {
         this.sendRequest = false;
       }
@@ -564,14 +568,8 @@ export default {
         `/api/accept_connection?id=${this.connection.id}&user_id=${this.connection.user1.id}`
       );
       if (res.status == 201) {
-        // this.approvedRequest = true;
-        // this.receivedRequest = false;
-        // this.responseModal = false;
-        console.log(this.connection.user2.id);
+        this.callNotification();
       } else {
-        // this.approvedRequest = true;
-        // this.receivedRequest = false;
-        // this.responseModal = false;
         this.swr();
       }
     },
@@ -589,12 +587,7 @@ export default {
       );
       if (res.status == 201) {
         console.log("success");
-        // this.approvedRequest = false;
-        // this.receivedRequest = false;
-        // this.approvedRequest = false;
-        // this.sendRequest = false;
-        // this.responseModal = false;
-        // this.removeModal = false;
+        this.callNotification();
       } else {
         this.swr();
       }
@@ -650,6 +643,12 @@ export default {
       }
       this.isLoading = false;
     },
+    callNotification() {
+      let notificationObj = {
+        id: this.profileInfo.id,
+      };
+      this.socket.emit("notification", notificationObj);
+    },
   },
 
   // to perform "side effects" in reaction to state changes
@@ -663,10 +662,15 @@ export default {
     },
   },
   async created() {
-    // this.token = window.Laravel.csrfToken;
     this.getProfileInfo();
-
     this.connectionStatus();
+  },
+  mounted() {
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
   },
 };
 </script>
