@@ -515,6 +515,11 @@
                     ></path>
                   </svg>
                 </nuxt-link>
+                <span
+                  class="navbar-item__action__badge"
+                  v-if="this.unseenMsgCount > 0"
+                  >{{ this.unseenMsgCount }}</span
+                >
               </li>
               <li class="dropdown" id="connection">
                 <svg
@@ -593,7 +598,9 @@
                       </nuxt-link>
                       <nuxt-link
                         class="connection-item"
-                        v-else-if="authUser.id == connection.received_request_user"
+                        v-else-if="
+                          authUser.id == connection.received_request_user
+                        "
                         :to="`/profile/${connection.user1.slug}/overview`"
                       >
                         <img :src="connection.user1.image" />
@@ -867,6 +874,18 @@
           </div>
         </div>
       </nav>
+      <div class="dropdown" id="connection">
+        <div
+          class="dropdown-menu"
+          id="box"
+          aria-labelledby="navbarDropdown"
+          v-bind:class="{ connectionMenuActive: isNotificationBox }"
+        >
+          <h1>Notifications</h1>
+
+          <div class="box"></div>
+        </div>
+      </div>
     </header>
   </div>
 </template>
@@ -930,8 +949,10 @@ export default {
   computed: {
     ...mapGetters({
       seenCount: "getSeenCount",
+      unseenMsgCount: "getUnseenMsgCount",
       notificationItem: "getNotificationItem",
       connectionItem: "getAuthUserConnection",
+      selectedUserInfo: "getSelectedUserInfo",
     }),
   },
   methods: {
@@ -1195,13 +1216,20 @@ export default {
       );
     },
     async callCount() {
-      const notification = await this.callApi(
+      const res = await this.callApi(
         "get",
         `/api/get_notification_count?count=${this.seenCount}`
       );
 
-      if (notification.status == 201) {
-        this.$store.dispatch("updateSeenCount", notification.data.count);
+      if (res.status == 200) {
+        this.$store.dispatch("updateSeenCount", res.data.data);
+      }
+    },
+    async callUnseenMsgCount() {
+      const res = await this.callApi("get", `/api/get_unseenmsg_count`);
+
+      if (res.status == 200) {
+        this.$store.dispatch("updateUnseenMsgCount", res.data.count);
       }
     },
     async getReadNotification() {
@@ -1290,6 +1318,10 @@ export default {
       console.log(data);
       if (data.id == this.authUser.id) this.callCount();
     });
+    this.socket.on("chatNotificationToClient", (data) => {
+      console.log(data);
+      if (data.to_id == this.authUser.id) this.callUnseenMsgCount();
+    });
   },
   beforeDestroy() {
     document.removeEventListener("click", this.hideSearchbar);
@@ -1311,7 +1343,7 @@ export default {
     // console.log(this.connectionItem);
     if (this.authUser) {
       this.callCount();
-      // this.callCount();
+      this.callUnseenMsgCount();
       // this.getConnection();
       // console.log(this.connectionItem);
     }

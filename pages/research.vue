@@ -812,9 +812,8 @@ export default {
           id: this.posts[index].user_id,
         };
 
-        this.socket.emit("notification", notificationObj);
-
         const res = await this.callApi("post", "/api/like", obj);
+        this.socket.emit("notification", notificationObj);
       } else {
         this.i("You can't like your own post!!");
       }

@@ -21,6 +21,7 @@ export const state = () => ({
     departmentInfo: [],
     peopleYouMayKnow:[],
     seenCount:0,
+    unseenMsgCount:0,
     token: '',
     passwordReset: { email: "" , token: ""},
     unauthorizedCredential: { email: "",  password: ""},
@@ -54,6 +55,9 @@ export const getters = {
   
   getSeenCount (state) {
     return state.seenCount
+  },
+  getUnseenMsgCount (state) {
+    return state.unseenMsgCount
   },
   getCallNotificationOb (state) {
     return state.callNotificationOb
@@ -122,7 +126,9 @@ export const mutations = {
   updateSeenCount(state, data) {
     state.seenCount = data
   },
-
+  updateUnseenMsgCount(state, data) {
+    state.unseenMsgCount = data
+  },
   removeConnectionItem (state, i) {
     state.connection.splice(i,1)
   },
@@ -279,6 +285,9 @@ export const actions = {
   },
   updateSeenCount ({ commit }, data) {
     commit('updateSeenCount', data)
+  },
+  updateUnseenMsgCount ({ commit }, data) {
+    commit('updateUnseenMsgCount', data)
   },
   setDepartmentInfo ({ commit }, data) {
     commit('setDepartmentInfo', data)

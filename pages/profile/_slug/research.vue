@@ -1150,7 +1150,12 @@ export default {
           this.posts[index].like_count -= 1;
           this.posts[index].authUserLike = "no";
         }
+        let notificationObj = {
+          id: this.posts[index].user_id,
+        };
         const res = await this.callApi("post", "/api/like", obj);
+        this.socket.emit("notification", notificationObj);
+
       } else {
         this.i("You can't like your own post!!");
       }

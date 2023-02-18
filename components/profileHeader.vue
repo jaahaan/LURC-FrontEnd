@@ -251,10 +251,13 @@
                   <i class="fa-solid fa-user-plus"></i>
                   Connect
                 </button>
-                <!-- <button class="main-btn main-btn__border col-5 mx-1">
+                <button
+                  class="main-btn main-btn__border col-5 mx-1"
+                  @click="message"
+                >
                   <i class="fa-solid fa-paper-plane"></i>
                   Message
-                </button> -->
+                </button>
               </div>
             </template>
           </div>
@@ -406,7 +409,6 @@ export default {
         Skills: "",
       },
       editModal: false,
-      // departments: [],
       profileInfo: [],
       editData: {
         image: "",
@@ -478,7 +480,6 @@ export default {
       };
       this.editModal = true;
       this.editData = obj;
-      // this.departments.push(this.profileInfo.department);
       this.isEditingItem = true;
     },
     handleSuccess(res, file) {
@@ -536,15 +537,6 @@ export default {
       this.editModal = false;
     },
 
-    async getDepartments() {
-      const res = await this.callApi("get", "/api/get_departments");
-      if (res.status == 200) {
-        this.departments = res.data;
-      } else {
-        this.swr();
-      }
-      this.isLoading = false;
-    },
     async connect() {
       console.log("inside connect");
       this.sendRequest = true;
@@ -648,6 +640,22 @@ export default {
         id: this.profileInfo.id,
       };
       this.socket.emit("notification", notificationObj);
+    },
+    async message() {
+      let info = {
+        selectedUserId: this.profileInfo.id,
+        selectedUserImage: this.profileInfo.image,
+        selectedUserSlug: this.profileInfo.slug,
+        selectedUserName: this.profileInfo.name,
+      };
+      let user = {
+        id: this.profileInfo.id,
+        image: this.profileInfo.image,
+        slug: this.profileInfo.slug,
+        name: this.profileInfo.name,
+      };
+      this.$store.commit("setSelectedUserInfo", info);
+      this.$router.push(`/message`);
     },
   },
 

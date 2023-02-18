@@ -149,6 +149,9 @@
         </div>
       </div>
     </div>
+    <div class="chat-head" v-if="isActive">
+      <img :src="this.selectedUserInfo.selectedUserImage" alt="" />
+    </div>
   </div>
 </template>
 
@@ -187,6 +190,7 @@ export default {
       selectedUserInfo: "getSelectedUserInfo",
       messages: "getMessages",
       isLoading: "getGlobalPostLoading",
+      unseenMsgCount: "getUnseenMsgCount",
     }),
   },
   watch: {
@@ -228,7 +232,7 @@ export default {
       };
       const res = await this.callApi("post", `/api/add_conversation`, obj);
       if (res.status == 200) {
-        this.conversations.push(res.data.data[0]);
+        this.conversations.unshift(res.data.data[0]);
         this.getSelectedUserChat(user, res.data.data[0].id);
         // this.Users = [];
         this.keyword = "";
@@ -238,47 +242,6 @@ export default {
         // this.Users = [];
         this.keyword = "";
       }
-      // if (this.conversations.length == 0) {
-      //   let obj1 = {
-      //     from_id: this.authUser.id,
-      //     to_id: this.Users[index].id,
-      //   };
-      //   const res = await this.callApi("post", `/api/add_conversation`, obj1);
-      //   if (res.status == 200) {
-      //     this.getSelectedUserChat(user, res.data.id);
-      //     // this.Users = [];
-      //     this.keyword = "";
-      //   } else {
-      //     this.swr();
-      //   }
-      // } else {
-      //   for (let conv of this.conversations) {
-      //     if (
-      //       this.selectedUserInfo.selectedUserId == conv.from_id ||
-      //       this.selectedUserInfo.selectedUserId == conv.to_id
-      //     ) {
-      //       this.getSelectedUserChat(user, conv.id);
-      //     } else {
-      //       let obj1 = {
-      //         from_id: this.authUser.id,
-      //         to_id: this.selectedUserInfo.selectedUserId,
-      //       };
-      //       const res = await this.callApi(
-      //         "post",
-      //         `/api/add_conversation`,
-      //         obj1
-      //       );
-      //       if (res.status == 200) {
-      //         // this.conversations = res.data;
-      //         this.getSelectedUserChat(user, res.data.id);
-      //         // this.Users = [];
-      //         this.keyword = "";
-      //       } else {
-      //         this.swr();
-      //       }
-      //     }
-      //   }
-      // }
     },
     handleUserScroll(e) {
       const scrollTop = e.target.scrollTop;
@@ -322,23 +285,8 @@ export default {
       };
       this.$store.commit("setSelectedUserInfo", info);
 
-      // this.selectedUserId = this.selectedUserInfo.selectedUserId;
-      // this.selectedUserImage = this.selectedUserInfo.selectedUserImage;
-      // this.selectedUserSlug = this.selectedUserInfo.selectedUserSlug;
-      // this.selectedUserName = this.selectedUserInfo.selectedUserName;
       let roomId = index;
       this.isActive = true;
-      // const res = await this.callApi(
-      //   "get",
-      //   `/api/get_chat?limit=${3}&roomId=${roomId}`
-      // );
-      // if (res.status == 200) {
-      //   this.selectedUserChat = res.data.data;
-      //   this.messages = res.data.data;
-      //   // for (let t of this.selectedUserChat) {
-      //   //   this.messages.push(t);
-      //   // }
-      // }
 
       window.history.pushState({}, null, `${this.$route.path}`);
       this.$store.commit("setGlobalPostLoading", true);
@@ -380,7 +328,7 @@ export default {
       console.log("Load more is finished! length", this.messages.length);
     },
     async sendMsg() {
-      //   console.log(this.data.msg);
+      if (this.data.msg.trim() == "") return;
       let obj = {
         room_id: this.selectedUserInfo.room_id,
         from_id: this.authUser.id,
@@ -390,6 +338,10 @@ export default {
         msg: this.data.msg,
       };
       this.socket.emit("sendChatToServer", obj);
+      let obj2 = {
+        room_id: this.selectedUserInfo.room_id,
+        to_id: this.selectedUserInfo.selectedUserId,
+      };
       let obj1 = {
         room_id: this.selectedUserInfo.room_id,
         from_id: this.authUser.id,
@@ -399,6 +351,9 @@ export default {
       };
       this.data.msg = "";
       const res = await this.callApi("post", `/api/add_chat`, obj1);
+      if (res.status == 201) {
+        this.socket.emit("chatNotificationToServer", obj2);
+      }
     },
 
     async getConversations() {
@@ -439,6 +394,13 @@ export default {
       this.loadMoreConversationLoading = false;
       console.log("Load more is finished! length", this.conversations.length);
     },
+    async callUnseenMsgCount() {
+      const res = await this.callApi("get", `/api/get_unseenmsg_count`);
+
+      if (res.status == 200) {
+        this.$store.dispatch("updateUnseenMsgCount", res.data.count);
+      }
+    },
   },
   async mounted() {
     this.socket = io("http://localhost:5000", {
@@ -450,22 +412,21 @@ export default {
     this.socket.on("sendChatToClient", (data) => {
       if (data.room_id == this.selectedUserInfo.room_id) {
         this.$store.commit("pushMessages", data);
-        // this.messages.push(data);
       }
-
-      // else if (
-      //   data.to_id == this.selectedUserInfo.selectedUserId &&
-      //   data.from_id == this.authUser.id
-      // ) {
-      //   this.messages.push(data);
-      // }
     });
+    // this.socket.on("chatNotificationToClient", (data) => {
+    //   console.log(data);
+    //   if (
+    //     data.to_id == this.authUser.id &&
+    //     data.room_id != this.selectedUserInfo.room_id
+    //   )
+    //     this.callUnseenMsgCount();
+    // });
     const el = this.$refs.scrollConv;
     el.onscroll = () => {
       this.bottomOfWindow =
         window.pageYOffset + window.innerHeight >
         document.body.scrollHeight - 100;
-
       if (this.bottomOfWindow) {
         if (!this.loadMoreConversationLoading) {
           this.loadMoreConversations(4);
@@ -474,24 +435,7 @@ export default {
     };
     if (this.isActive == true) {
       const el1 = this.$refs.scrollToMe;
-
-      // el1.onscroll = () => {
-      //   const scrollTop = e.target.scrollTop;
-      //   const scrollHeight = e.target.scrollHeight;
-      //   const elementHeight = e.target.offsetHeight;
-      //   if (scrollTop === 0 && elementHeight < scrollHeight) {
-      //     this.loadMoreChats(5);
-      //   }
-      // };
-      // this.$refs.scrollToMe.addEventListener("scroll", this.handleUserScroll);
     }
-
-    // this.$refs.scrollToMe.addEventListener("scroll", this.handleUserScroll);
-
-    // this.selectedUserId = this.selectedUserInfo.selectedUserId;
-    // this.selectedUserImage = this.selectedUserInfo.selectedUserImage;
-    // this.selectedUserSlug = this.selectedUserInfo.selectedUserSlug;
-    // this.selectedUserName = this.selectedUserInfo.selectedUserName;
   },
 
   updated() {
@@ -506,6 +450,30 @@ export default {
       transports: ["websocket"],
       credentials: true,
     });
+    if (this.selectedUserInfo.selectedUserId) {
+      let user = {
+        id: this.selectedUserInfo.selectedUserId,
+        image: this.selectedUserInfo.selectedUserImage,
+        slug: this.selectedUserInfo.selectedUserSlug,
+        name: this.selectedUserInfo.selectedUserName,
+      };
+      let obj = {
+        from_id: this.authUser.id,
+        to_id: this.selectedUserInfo.selectedUserId,
+      };
+      const res = await this.callApi("post", `/api/add_conversation`, obj);
+      if (res.status == 200) {
+        this.conversations.unshift(res.data.data[0]);
+        this.getSelectedUserChat(user, res.data.data[0].id);
+      } else if (res.status == 201) {
+        this.getSelectedUserChat(user, res.data.data[0].id);
+      }
+    }
+    console.log(this.unseenMsgCount);
+    if (this.unseenMsgCount > 0) {
+      this.$store.dispatch("updateUnseenMsgCount", 0);
+      const res = await this.callApi("post", `/api/mark_seen_msg`);
+    }
   },
   beforeDestroy() {
     // if (this.isActive == true) {

@@ -586,8 +586,10 @@ export default {
           id: this.details.user_id,
         };
 
-        this.socket.emit("notification", notificationObj);
         const res = await this.callApi("post", "/api/like", obj);
+        // if (res.status == 201) {
+        this.socket.emit("notification", notificationObj);
+        // }
       } else {
         this.i("You can't like your own post!!");
       }
