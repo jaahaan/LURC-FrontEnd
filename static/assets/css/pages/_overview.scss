@@ -11,9 +11,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 10px;
     h6 {
       font-size: 19px;
-      //   font-weight: 500;
+      font-weight: 500;
       color: black;
     }
     i {
@@ -27,6 +28,7 @@
   }
   .sub-title {
     font-size: 14px;
-    color: $gray;
+    color: $secondary-text;
+    font-weight: 500;
   }
 }

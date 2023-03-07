@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="authUser">
-      <Navbar />
+      <Navbar class="main" />
       <div
         v-if="
           $route.name == 'profile-slug-overview' ||
@@ -19,26 +19,24 @@
           $route.name == 'description-slug-overview' ||
           $route.name == 'description-slug-comments'
         "
-        class="main"
       >
         <postHeader />
       </div>
-      <div v-else class="main">
+      <div v-else>
         <Nuxt />
       </div>
     </div>
     <div v-else>
-      <Navbar />
+      <Navbar class="main" />
       <div
         v-if="
           $route.name == 'description-slug-overview' ||
           $route.name == 'description-slug-comments'
         "
-        class="main"
       >
         <postHeader />
       </div>
-      <Nuxt class="main" v-else />
+      <Nuxt v-else />
       <BottomContainer v-if="isFooterShow == true" />
     </div>
   </div>

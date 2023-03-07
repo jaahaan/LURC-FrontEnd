@@ -1,52 +1,37 @@
 <template>
-  <div class="bg">
-    <div class="container-fluid justify-content-center py-md-4 py-3">
-      <div class="row">
-        <div class="col-md-6 my-md-auto text-center justify-content-center">
-          <img
-            :src="'/assets/images/lurc.png'"
-            alt="img"
-            class="img-fluid scientific"
-          />
+  <div class="login-section">
+    <div class="left">
+      <img :src="'/assets/images/lurc.png'" alt="img" />
+    </div>
+
+    <div class="right">
+      <div class="form">
+        <div class="alert alert-dark">
+          <p>We have sent an OTP to your email.</p>
+        </div>
+        <div class="mb-2">
+          Enter OTP
+          <input type="number" class="form-control" v-model="data.token" />
+          <span class="alert-danger" v-if="errors.token">{{
+            errors.token[0]
+          }}</span>
+          <span class="alert-danger" v-if="errors.token">{{
+            errors.token[0]
+          }}</span>
         </div>
 
-        <div class="col-md-6 my-md-auto justify-content-center">
-          <div class="container-fluid">
-            <div class="container-fluid rt col-10 p-5">
-              <div class="alert alert-dark">
-                <p>We have sent an OTP to your email.</p>
-              </div>
-
-              <div class="mb-2">
-                Enter OTP
-                <input
-                  type="number"
-                  class="form-control"
-                  v-model="data.token"
-                />
-                <span class="alert-danger" v-if="errors.token">{{
-                  errors.token[0]
-                }}</span>
-                <span class="alert-danger" v-if="errors.token">{{
-                  errors.token[0]
-                }}</span>
-              </div>
-
-              <div class="mb-2">
-                <button
-                  :class="[
-                    data.token ? ' main-btn-change col-12' : ' main-btn col-12',
-                    ' main-btn col-12',
-                  ]"
-                  @click="submit"
-                  :disabled="isSubmitting"
-                  :loading="isSubmitting"
-                >
-                  {{ isSubmitting ? "Submitting..." : "Submit OTP" }}
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="mb-2">
+          <button
+            :class="[
+              data.token ? ' main-btn-change col-12' : ' main-btn col-12',
+              ' main-btn col-12',
+            ]"
+            @click="submit"
+            :disabled="isSubmitting"
+            :loading="isSubmitting"
+          >
+            {{ isSubmitting ? "Submitting..." : "Submit OTP" }}
+          </button>
         </div>
       </div>
     </div>

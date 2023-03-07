@@ -48,7 +48,10 @@
             <i class="fa-solid fa-user-plus"></i>
             Connect
           </button> -->
-          <button class="main-btn main-btn__border">
+          <button class="d-md-none d-sm-block btn btn__icon">
+            <i class="fa-solid fa-user-check"></i>
+          </button>
+          <button class="d-none d-md-block btn btn__border">
             <i class="fa-solid fa-user-check"></i>
             Connected
           </button>

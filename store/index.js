@@ -8,6 +8,7 @@ export const state = () => ({
     authUser: false,
     socket: null,
     messages:[],
+    conversations:[],
     userResearch:[],
     userProject:[],
     allGlobalResearch:[],
@@ -26,7 +27,10 @@ export const state = () => ({
     passwordReset: { email: "" , token: ""},
     unauthorizedCredential: { email: "",  password: ""},
     selectedUserInfo: {room_id: "", selectedUserId: "",selectedUserImage:"", selectedUserSlug:"",  selectedUserName: "" },
-
+    commentId: "",
+    selectedChat: [],
+    chatNotification: [],
+    chats:[],
 })
 // common getters
 export const getters = {
@@ -44,6 +48,9 @@ export const getters = {
   },
   passwordReset(state) {
     return state.passwordReset;
+  },
+  commentId(state) {
+    return state.commentId;
   },
   
   getSocket (state) {
@@ -80,9 +87,20 @@ export const getters = {
   getPeopleYouMayKnow (state) {
     return state.peopleYouMayKnow
   },
-
+  getSelectedChat (state) {
+    return state.selectedChat
+  },
+  getChatNotification (state) {
+    return state.chatNotification
+  },
+  getChats (state) {
+    return state.chats
+  },
   getMessages (state) {
     return state.messages
+  },
+  getConversations (state) {
+    return state.conversations
   },
   getUserResearch (state) {
     return state.userResearch
@@ -165,6 +183,15 @@ export const mutations = {
   updatePeopleYouMayKnow (state, data) {
     state.peopleYouMayKnow = data
   },
+  setSelectedChat (state, data) {
+    state.selectedChat = data
+  },
+  setChatNotification (state, data) {
+    state.chatNotification = data
+  },
+  setChats (state, data) {
+    state.chats = data
+  },
   setCallNotificationOb (state, data) {
     state.callNotificationOb = data
   },
@@ -178,8 +205,10 @@ export const mutations = {
   setPasswordReset(state, data) {
     state.passwordReset = data;
   },
-
-  //user research
+  setCommentId(state, data) {
+    state.commentId = data;
+  },
+  //user message
   setMessages (state, data) {
     state.messages = data
   },
@@ -188,6 +217,17 @@ export const mutations = {
     state.messages.push(data)
   },
 
+  //user Conversation
+  setConversations (state, data) {
+    state.conversations = data
+  },
+  
+  pushConversations (state, data) {
+    state.conversations.push(data)
+  },
+  unshiftConversations (state, data) {
+    state.conversations.unshift(data)
+  },
   //user research
   setUserResearch (state, data) {
     state.userResearch = data
@@ -238,7 +278,6 @@ export const actions = {
     $axios.setToken(session.token, 'Bearer');
     try {
       
-      // const notification = await $axios.get('/api/get_notification')
       const department  = await $axios.get('/api/get_departments')
       console.log(department.data)
       if(department.status == 200){
@@ -248,7 +287,6 @@ export const actions = {
       console.log(res.data)
       commit('setAuthInfo', res.data)
       
-
       const [notification, peopleYouMayKnow, connection] = await Promise.all([
         this.callApi("get", '/api/get_notification'),
         this.callApi("get", "/api/get_people_you_may_know"),
@@ -257,10 +295,11 @@ export const actions = {
       if(notification.status == 200 && peopleYouMayKnow.status==200 && connection.status==200){
         console.log(notification.data.data)
         // state.seenCount = notification.data.count
-        commit('updateNotification', notification.data.data)
-        commit('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
-        commit('updateAuthUserConnection', connection.data.data)
-      }
+        this.$store.dispatch('updateNotification', notification.data.data)
+        this.$store.dispatch('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
+        this.$store.dispatch('updateAuthUserConnection', connection.data.data)
+    }
+     
     } catch (e) {
         console.log('nuxt server error ')
     }

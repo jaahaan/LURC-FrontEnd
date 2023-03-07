@@ -61,6 +61,27 @@
           font-weight: 400;
         }
       }
+      .btn {
+        font-size: 1em;
+        font-weight: 500;
+        transition: 0.3s linear;
+        &__border {
+          background-color: transparent;
+          padding: 0.5em 1.5em;
+          border-radius: 20px;
+          background-color: $secondaryColor;
+          min-width: 125px;
+          color: $bgWhite;
+        }
+        &__icon {
+          i {
+            padding: 0.75rem 1rem;
+            border-radius: 20px;
+            background-color: $secondaryColor;
+            color: $bgWhite;
+          }
+        }
+      }
     }
   }
 

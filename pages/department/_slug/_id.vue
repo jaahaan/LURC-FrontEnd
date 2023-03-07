@@ -103,17 +103,7 @@
                           Data
                         </p>
                       </li>
-                      <li>
-                        <p
-                          class="dropdown-item"
-                          v-bind:class="{
-                            dactive: search == 'Resaerch',
-                          }"
-                          @click="addToFilterSearch('Resaerch')"
-                        >
-                          Resaerch
-                        </p>
-                      </li>
+
                       <li>
                         <p
                           class="dropdown-item"
@@ -253,11 +243,12 @@
                 v-for="(post, index) in posts"
                 :key="index"
               >
-                <h5 class="post-title">
-                  <nuxt-link :to="`/description/${post.slug}/overview`"
-                    ><h5>{{ post.title }}</h5></nuxt-link
-                  >
-                </h5>
+                <nuxt-link
+                  :to="`/description/${post.slug}/overview`"
+                  class="post-title"
+                >
+                  <h4>{{ post.title }}</h4>
+                </nuxt-link>
                 <div class="mt-2 mb-2">
                   <nuxt-link
                     :to="`/description/${post.slug}/overview`"
@@ -290,7 +281,7 @@
                     class="hooper-relatedResearch_button"
                   ></hooper-navigation>
                 </hooper>
-                <p v-if="post.abstract != null">
+                <p class="post-sub-title" v-if="post.abstract != null">
                   {{ post.abstract.substring(0, 190) }}
                   ...
                   <nuxt-link :to="`/description/${post.slug}/overview`"
@@ -301,7 +292,7 @@
                 <div v-if="post.authors.length">
                   <p
                     v-if="post.authors.length > 1 && post.type != 'Project'"
-                    class="mt-2"
+                    class="post-sub-title mt-2"
                   >
                     Authors:
                     <span v-for="author in post.authors">
@@ -318,7 +309,7 @@
                     v-else-if="
                       post.authors.length > 1 && post.type == 'Project'
                     "
-                    class="mt-2"
+                    class="post-sub-title mt-2"
                   >
                     Team Members:
                     <span v-for="author in post.authors">
@@ -332,7 +323,7 @@
                     </span>
                   </p>
                   <p
-                    class="mt-2"
+                    class="post-sub-title mt-2"
                     v-else-if="
                       post.authors.length == 1 && post.type == 'Project'
                     "
@@ -349,7 +340,7 @@
                     </span>
                   </p>
                   <p
-                    class="mt-2"
+                    class="post-sub-title mt-2"
                     v-else-if="
                       post.authors.length == 1 && post.type != 'Project'
                     "
@@ -367,7 +358,7 @@
                   </p>
                 </div>
                 <div v-else-if="post.authors.length && post.type == 'Project'">
-                  <p v-if="post.authors.length > 1" class="mt-2">
+                  <p v-if="post.authors.length > 1" class="post-sub-title mt-2">
                     Team Members:
                     <span
                       v-for="author in post.authors"
@@ -382,7 +373,7 @@
                       <span v-else> {{ author.name }} . </span>
                     </span>
                   </p>
-                  <p class="mt-2" v-else>
+                  <p class="post-sub-title mt-2" v-else>
                     Team Member:
                     <span
                       v-for="author in post.authors"
@@ -408,7 +399,7 @@
                     >
                     <span class="dot">.</span>
                     <a>{{ post.upVote }} UpVote</a>
-                    <span class="dot">.</span>s
+                    <span class="dot">.</span>
                     <a>{{ post.downVote }} DownVote</a>
                   </p>
                 </div>
@@ -416,12 +407,12 @@
                   <p>
                     <a
                       v-if="post.attachment && authUser"
-                      class="main-btn main-btn__bg px-4"
-                      :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
+                      class="main-btn main-btn__bg px-lg-4"
+                      :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${post.attachment}`"
                       >Download <i class="fa-solid fa-download"></i
                     ></a>
                     <a
-                      class="main-btn main-btn__border px-lg-5"
+                      class="main-btn main-btn__bg px-lg-5"
                       :href="`${post.url}`"
                       v-if="post.url"
                       target="_blank"
@@ -523,9 +514,12 @@
           </div> -->
         </div>
 
-        <div class="col-lg-4 d-none d-lg-block research-people" v-if="authUser">
+        <div
+          class="col-lg-4 d-none d-lg-block research-people"
+          v-if="authUser && peopleYouMayKnow.length > 0"
+        >
           <div class="research-post--item">
-            <h5 class="post-title">People you may know</h5>
+            <h4 class="post-title">People you may know</h4>
             <ul>
               <li v-for="(user, index) in peopleYouMayKnow">
                 <div class="content">
@@ -572,7 +566,7 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <nuxt-link :to="`/profile/${user.slug}/overview`">
+        <nuxt-link :to="`/profile/${user.user_slug}/overview`">
           {{ user.name }}
         </nuxt-link>
       </div>
@@ -648,7 +642,7 @@ export default {
       search: "",
       departmentName: "",
       type: "",
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
     };
   },
   computed: {
@@ -803,7 +797,6 @@ export default {
 
         const res = await this.callApi("post", "/api/like", obj);
         this.socket.emit("notification", notificationObj);
-
       } else {
         this.i("You can't like your own post!!");
       }

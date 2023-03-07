@@ -33,7 +33,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        transform: translateX(20%);
+        transform: translateY(20%);
         position: absolute;
         opacity: 0;
         pointer-events: none;
@@ -51,14 +51,14 @@
           input {
             flex: 1;
             border: 1px solid gray;
-            padding: 20px;
+            padding: 15px;
             border-radius: 6px;
-            height: 40px;
+            height: 35px;
           }
           button {
             font-size: 20px;
             top: 50%;
-            transform: translate(-40px, -2px);
+            transform: translate(-28px, 1px);
           }
         }
         &-cancel {
@@ -139,12 +139,11 @@
       }
       .post-title {
         font-weight: 500;
-        border-bottom: 2px dashed $secondaryColor;
+        border-bottom: 1px dashed $secondaryColor;
         padding-bottom: 15px;
         margin-bottom: 17px;
         display: flex;
         justify-content: space-between;
-        // align-items: center;
         i {
           font-size: 18px;
           color: $gray;
@@ -163,8 +162,7 @@
         font-weight: 400;
         color: #3e3e3e;
         margin: 5px 0px;
-        justify-content: space-between;
-        display: flex;
+
         i {
           color: $gray;
           cursor: pointer;
@@ -229,7 +227,7 @@
       .footer {
         display: flex;
         width: 100%;
-        border-top: 2px dashed $secondaryColor;
+        border-top: 1px dashed $secondaryColor;
         padding-top: 15px;
         margin-top: 17px;
         justify-content: space-between;
@@ -304,7 +302,7 @@
         background-color: #f4f4f4;
 
         .post-title-skeleton {
-          border-bottom: 2px dashed #c0c0c0;
+          border-bottom: 1px dashed #c0c0c0;
           padding-bottom: 15px;
           margin-bottom: 17px;
           p {
@@ -341,7 +339,7 @@
         .footer {
           display: flex;
           width: 100%;
-          border-top: 2px dashed #c0c0c0;
+          border-top: 1px dashed #c0c0c0;
           padding-top: 15px;
           margin-top: 17px;
           align-items: center;
@@ -379,14 +377,14 @@
       input {
         flex: 1;
         border: 1px solid gray;
-        padding: 20px;
+        padding: 18px;
         border-radius: 6px;
-        height: 40px;
+        height: 35px;
       }
       button {
         font-size: 20px;
         top: 50%;
-        transform: translate(-40px, -2px);
+        transform: translate(-28px, 1px);
       }
     }
     &-cancel {
@@ -420,8 +418,8 @@
         display: flex;
         align-items: center;
         img {
-          max-width: 40px;
-          max-height: 40px;
+          width: 40px;
+          height: 40px;
           margin-right: 0.75rem;
           border-radius: 50%;
         }
@@ -506,15 +504,26 @@
 
 @include breakpoint-max(767px) {
   .research {
-    padding: 1rem 0.5rem !important;
+    padding: 1.25rem 0.5rem !important;
     &-post {
       padding: 0 10px;
-
       &--display {
-        margin-bottom: 30px;
         margin-left: 0;
         margin-right: 0;
-
+        &--search {
+          &-input {
+            width: 400px;
+            button {
+              font-size: 18px;
+            }
+          }
+          &-cancel {
+            width: 18px;
+            i {
+              color: #000;
+            }
+          }
+        }
         &--icon {
           span {
             font-size: 13px;
@@ -552,19 +561,18 @@
     &-search {
       &-input {
         input {
-          padding: 18px 15px;
+          width: 400px;
+          padding: 15px;
           height: 25px;
         }
         button {
-          font-size: 18px;
+          font-size: 15px;
           transform: translate(-30px, -1px);
         }
       }
-      &-result {
-        width: 280px;
-      }
+
       &-cancel {
-        width: 18px;
+        width: 15px;
       }
     }
   }
@@ -572,12 +580,33 @@
 
 @include breakpoint-max(575px) {
   .research {
-    padding: 0.5rem 1rem !important;
+    padding: 1rem 0.5rem !important;
 
     &-post {
       &--item {
         .grid-item {
           width: 50%;
+        }
+      }
+      &--display {
+        &--search {
+          &-input {
+            width: 380px;
+
+            input {
+              padding: 15px;
+              height: 35px;
+            }
+            button {
+              font-size: 18px;
+            }
+          }
+          &-cancel {
+            width: 18px;
+            i {
+              color: #000;
+            }
+          }
         }
       }
     }
@@ -586,8 +615,34 @@
 
 @include breakpoint-max(400px) {
   .research {
-    padding: 0.5rem 1rem !important;
-
+    padding: 1rem !important;
+    &-post {
+      // &--item {
+      //   .grid-item {
+      //     width: 50%;
+      //   }
+      // }
+      &--display {
+        &--search {
+          &-input {
+            width: 350px;
+            input {
+              padding: 15px;
+              height: 30px;
+            }
+            button {
+              font-size: 16px;
+            }
+          }
+          &-cancel {
+            width: 16px;
+            i {
+              color: #000;
+            }
+          }
+        }
+      }
+    }
     &-search {
       &-input {
         width: auto;

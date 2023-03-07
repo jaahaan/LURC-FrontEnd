@@ -1,6 +1,6 @@
 <template>
   <div>
-    <nav class="navbar navbar-expand">
+    <nav class="navbar navbar-expand mb-2">
       <div>
         <ul class="navbar-nav">
           <li class="nav-item active">
@@ -27,8 +27,8 @@
           <li class="nav-item me-2">
             <nuxt-link
               class="nav-link profileNav"
-              :to="`/profile/${this.$route.params.slug}/post`"
-              >Posts</nuxt-link
+              :to="`/profile/${this.$route.params.slug}/connection`"
+              >Connections</nuxt-link
             >
           </li>
           <!-- <li class="nav-item">

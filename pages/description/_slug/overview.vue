@@ -1,14 +1,16 @@
 <template>
   <div>
-  <h4 class="menu-item--title">
-        {{ abstract.type != "Project" ? "Abstract" : "Description" }}
-      </h4>
+    <h4 class="menu-item--title">
+      {{ abstract.type != "Project" ? "Abstract" : "Description" }}
+    </h4>
 
     <div v-if="isLoading" class="loader">
- <h1 class="mb-1"/> <h1 class="mb-1"/> <h1 />    </div>
+      <h1 class="mb-1" />
+      <h1 class="mb-1" />
+      <h1 />
+    </div>
 
     <div v-else>
-      
       <h4 class="sub-title" v-if="abstract.abstract">
         {{ abstract.abstract }}
       </h4>

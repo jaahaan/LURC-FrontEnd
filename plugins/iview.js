@@ -1,7 +1,10 @@
 import iView from 'iview';
 import locale from 'iview/dist/locale/en-US'; // Change locale, check node_modules/iview/dist/locale
 import Vue from 'vue';
+import VueTyperPlugin from 'vue-typer';
 import { mapGetters } from 'vuex';
+ 
+Vue.use(VueTyperPlugin)
 
 Vue.use(iView, {
   locale
@@ -14,7 +17,6 @@ Vue.mixin({
     computed:{
         ...mapGetters({
             departmentInfo: "getDepartment",
-
         })
     },
     
@@ -26,6 +28,7 @@ Vue.mixin({
             });
         },
         s(msg, i = 'Great!') {
+            // this.$Message.success('This is a success tip');
             this.$Notice.success({
                 title: i,
                 desc: msg
@@ -37,83 +40,41 @@ Vue.mixin({
                 desc: msg
             });
         },
-        e(msg, i = 'Oops!') {
-            this.$Notice.error({
-                title: i,
-                desc: msg,
+        e(msg) {
+            this.$Message.error(msg);
+            // this.$Notice.error({
+            //     title: i,
+            //     desc: msg,
 
-            });
+            // });
         },
         swr() {
-            this.$Notice.error({
-                title: 'Oops',
-                desc: 'Something went wrong, please try again later'
-            });
+            this.$Message.error('Something went wrong, please try again later');
+
+            // this.$Notice.error({
+            //     title: 'Oops',
+            //     desc: 'Something went wrong, please try again later'
+            // });
         },
         async getNotificationItemsServer(){
-            const res = await this.callApi('get','/api/get_notification')
-            if(res.status == 200){
-                this.$store.dispatch('updateNotification', res.data.allNotifications)
+            const [notification, peopleYouMayKnow, connection] = await Promise.all([
+                this.callApi("get", '/api/get_notification'),
+                this.callApi("get", "/api/get_people_you_may_know"),
+                this.callApi("get", "/api/get_auth_user_connection"),
+              ]);
+              if(notification.status == 200 && peopleYouMayKnow.status==200 && connection.status==200){
+                console.log(notification.data.data)
+                // state.seenCount = notification.data.count
+                this.$store.dispatch('updateNotification', notification.data.data)
+                this.$store.dispatch('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
+                this.$store.dispatch('updateAuthUserConnection', connection.data.data)
             }
+            
             else {
                 this.swr();
             }
         },
-        async addToCartServer(p,qu=1){
-            console.log('Quantity',qu);
-            console.log('product',p);
-            if(!this.authUser){
-                p.quantity=qu;
-                this.$store.commit('setCallCartOb',p)
-                this.i("Please login to cart the product!")
-                this.$router.push('/signIn')
-                return
-            }
-            if(qu > p.stock){
-              return this.i("Product Stock Out!")
-            }
-            let cartItem = this.cartItem
-            for(let i in cartItem){
-              if(cartItem[i].productId===p.id){
-                  let tq = parseInt(cartItem[i].quantity) + parseInt(qu) ;
-                  if(p.stock< tq) {
-
-                      this.i('Product Out of Stock!!');
-                      return false;
-                  }
-              }
-            }
-            p.quantity=qu;
-
-            const res = await this.callApi("post",'/app/add_cart',p)
-            if(res.status == 200){
-              this.$store.commit('updateCart', res.data.allCarts);
-              if(res.data.isNew) this.s('Item added to cart.');
-              else this.s('Product Quantity increased  in cart ');
-            }
-            else if (res.status == 401){
-              this.e(res.data.message)
-            }
-            else {
-              this.swr();
-            }
-
-
-            return true;
-
-        },
-        async removeItemServer(id,index){
-            const res = await this.callApi('post','app/remove_cart',{id:id})
-            if(res.status == 200){
-              let cartItem = this.cartItem
-              cartItem.splice(index,1);
-              this.$store.dispatch('updateCart', cartItem)
-
-            }
-            else {
-              this.swr();
-            }
-        }
+        
     }
 })
 

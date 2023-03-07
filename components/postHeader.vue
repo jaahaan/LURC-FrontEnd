@@ -187,12 +187,12 @@
                 <p>
                   <a
                     v-if="details.attachment && authUser"
-                    class="main-btn main-btn__bg px-4"
-                    :href="`http://localhost:8000/api/download_attachment/${details.attachment}`"
+                    class="main-btn main-btn__bg px-lg-4"
+                    :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${details.attachment}`"
                     >Download <i class="fa-solid fa-download"
                   /></a>
                   <a
-                    class="main-btn main-btn__bg px-5"
+                    class="main-btn main-btn__bg px-lg-5"
                     :href="`${details.url}`"
                     v-if="details.url"
                     target="_blank"
@@ -255,7 +255,7 @@
       >
         <div class="container">
           <div class="dept-header">
-            <h2>Related Research</h2>
+            <h2>Related {{ this.details.type }}</h2>
           </div>
 
           <hooper :settings="hooperTrendingOffer" :wheelControl="false">
@@ -385,7 +385,7 @@
       >
         <div class="comment-liked" v-for="user in likedUser">
           <img :src="user.image" alt="img" />
-          <nuxt-link :to="`/profile/${user.slug}/${user.user_id}`">
+          <nuxt-link :to="`/profile/${user.user_slug}/overview`">
             {{ user.name }}
           </nuxt-link>
         </div>
@@ -461,7 +461,7 @@ export default {
           },
         },
       },
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
     };
   },
   methods: {
@@ -483,28 +483,43 @@ export default {
           let upVoteCount1 = parseInt(this.upVoteCount, 10);
           let avgVoteCount1 = parseInt(this.avgVoteCount, 10);
           let downVoteCount1 = parseInt(this.downVoteCount, 10);
+          if (this.authUserVoteCount == "none") {
+            this.upVoteCount = upVoteCount1 + 1;
+            this.avgVoteCount = upVoteCount1 + 1 - downVoteCount1;
+            this.authUserVoteCount = "up";
+          } else if (this.authUserVoteCount == "up") {
+            this.upVoteCount = upVoteCount1 - 1;
+            this.avgVoteCount = upVoteCount1 - 1 - downVoteCount1;
+            this.authUserVoteCount = "none";
+          } else if (this.authUserVoteCount == "down") {
+            this.upVoteCount = upVoteCount1 + 1;
+            this.avgVoteCount = upVoteCount1 + 1 - (downVoteCount1 - 1);
+            this.downVoteCount = downVoteCount1 - 1;
+            this.authUserVoteCount = "up";
+          }
+
           let obj = {
             id: this.details.id,
             upVote: 1,
           };
           console.log(obj);
           const res = await this.callApi("post", "/api/up_vote", obj);
-          if (res.status == 200) {
-            this.upVoteCount = upVoteCount1 - 1;
-            this.avgVoteCount = upVoteCount1 - 1 - downVoteCount1;
-            this.authUserVoteCount = "";
-          }
-          if (res.status == 201) {
-            this.upVoteCount = upVoteCount1 + 1;
-            this.avgVoteCount = upVoteCount1 + 1 - (downVoteCount1 - 1);
-            this.downVoteCount = downVoteCount1 - 1;
-            this.authUserVoteCount = "up";
-          }
-          if (res.status == 202) {
-            this.upVoteCount = upVoteCount1 + 1;
-            this.avgVoteCount = upVoteCount1 + 1 - downVoteCount1;
-            this.authUserVoteCount = "up";
-          }
+          // if (res.status == 200) {
+          //   this.upVoteCount = upVoteCount1 - 1;
+          //   this.avgVoteCount = upVoteCount1 - 1 - downVoteCount1;
+          //   this.authUserVoteCount = "none";
+          // }
+          // if (res.status == 201) {
+          //   this.upVoteCount = upVoteCount1 + 1;
+          //   this.avgVoteCount = upVoteCount1 + 1 - (downVoteCount1 - 1);
+          //   this.downVoteCount = downVoteCount1 - 1;
+          //   this.authUserVoteCount = "up";
+          // }
+          // if (res.status == 202) {
+          //   this.upVoteCount = upVoteCount1 + 1;
+          //   this.avgVoteCount = upVoteCount1 + 1 - downVoteCount1;
+          //   this.authUserVoteCount = "up";
+          // }
           let notificationObj = {
             id: this.details.user_id,
           };
@@ -528,7 +543,20 @@ export default {
           let upVoteCount1 = parseInt(this.upVoteCount, 10);
           let avgVoteCount1 = parseInt(this.avgVoteCount, 10);
           let downVoteCount1 = parseInt(this.downVoteCount, 10);
-
+          if (this.authUserVoteCount == "down") {
+            this.avgVoteCount = upVoteCount1 - (downVoteCount1 - 1);
+            this.downVoteCount = downVoteCount1 - 1;
+            this.authUserVoteCount = "none";
+          } else if (this.authUserVoteCount == "up") {
+            this.upVoteCount = upVoteCount1 - 1;
+            this.downVoteCount = downVoteCount1 + 1;
+            this.avgVoteCount = upVoteCount1 - 1 - (downVoteCount1 + 1);
+            this.authUserVoteCount = "down";
+          } else if (this.authUserVoteCount == "none") {
+            this.avgVoteCount = upVoteCount1 - (downVoteCount1 + 1);
+            this.downVoteCount = downVoteCount1 + 1;
+            this.authUserVoteCount = "down";
+          }
           let obj = {
             id: this.details.id,
             // user_id: authUser.id,
@@ -536,23 +564,23 @@ export default {
           };
           console.log(obj);
           const res = await this.callApi("post", "/api/down_vote", obj);
-          if (res.status == 200) {
-            this.avgVoteCount = upVoteCount1 - (downVoteCount1 - 1);
-            this.downVoteCount = downVoteCount1 - 1;
-            this.authUserVoteCount = "";
-          }
-          if (res.status == 201) {
-            this.upVoteCount = upVoteCount1 - 1;
-            this.downVoteCount = downVoteCount1 + 1;
-            this.avgVoteCount = upVoteCount1 - 1 - (downVoteCount1 + 1);
-            this.authUserVoteCount = "down";
-          }
+          // if (res.status == 200) {
+          //   this.avgVoteCount = upVoteCount1 - (downVoteCount1 - 1);
+          //   this.downVoteCount = downVoteCount1 - 1;
+          //   this.authUserVoteCount = "none";
+          // }
+          // if (res.status == 201) {
+          //   this.upVoteCount = upVoteCount1 - 1;
+          //   this.downVoteCount = downVoteCount1 + 1;
+          //   this.avgVoteCount = upVoteCount1 - 1 - (downVoteCount1 + 1);
+          //   this.authUserVoteCount = "down";
+          // }
 
-          if (res.status == 202) {
-            this.avgVoteCount = upVoteCount1 - (downVoteCount1 + 1);
-            this.downVoteCount = downVoteCount1 + 1;
-            this.authUserVoteCount = "down";
-          }
+          // if (res.status == 202) {
+          //   this.avgVoteCount = upVoteCount1 - (downVoteCount1 + 1);
+          //   this.downVoteCount = downVoteCount1 + 1;
+          //   this.authUserVoteCount = "down";
+          // }
           let notificationObj = {
             id: this.details.user_id,
           };

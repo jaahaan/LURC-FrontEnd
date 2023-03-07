@@ -10,7 +10,7 @@
           <button>
             <h1>
               No Research Found.<br />
-              <i class="lni lni-folder"></i> Add Your Project
+              <i class="lni lni-folder"></i> Add Your Research
             </h1>
           </button>
         </div>
@@ -137,20 +137,20 @@
               :multiple="true"
               :show-upload-list="false"
               :on-success="handleImageSuccess"
-              :on-error="handleError"
               :format="['jpg', 'jpeg', 'png']"
-              :max-size="2048"
               :on-format-error="handleFormatError"
+              :on-error="handleError"
               :on-exceeded-size="handleMaxSize"
-              action="http://localhost:8000/api/upload"
+              :max-size="2048"
+              action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
             >
-              <div style="padding: 20px 0">
+              <div style="padding: 5px 0">
                 <Icon
                   type="ios-cloud-upload"
-                  size="52"
+                  size="22"
                   style="color: #3399ff"
                 ></Icon>
-                <p>Click or drag files here to upload</p>
+                Upload Image
               </div>
             </Upload>
             <div
@@ -184,12 +184,11 @@
                 'mp3',
                 'zip',
               ]"
-              :max-size="21048"
               :on-format-error="handleFormatError"
               :on-exceeded-size="handleMaxSize"
               :on-remove="deleteAttachment"
               type="drag"
-              action="http://localhost:8000/api/upload_attachment"
+              action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
             >
               <div class="profile-main-btn">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -207,12 +206,17 @@
         <div class="footer">
           <div></div>
           <div>
-            <button class="main-btn main-btn__border" @click="reset()">
-              Cancel
-            </button>
-            <button class="main-btn main-btn__bg" @click="save">
-              <i class="fa-solid fa-floppy-disk"></i> Save
-            </button>
+            <Button class="main-btn main-btn__border" @click="reset">
+              Cancel</Button
+            >
+            <Button
+              class="main-btn main-btn__bg"
+              @click="save"
+              :disabled="loading"
+              :loading="loading"
+              ><i class="fa-solid fa-floppy-disk"></i>
+              {{ loading ? "Saving..." : "Save" }}</Button
+            >
           </div>
         </div>
       </div>
@@ -349,12 +353,11 @@
                   :multiple="true"
                   :show-upload-list="false"
                   :on-success="handleImageSuccess"
-                  :on-error="handleError"
                   :format="['jpg', 'jpeg', 'png']"
-                  :max-size="2048"
-                  :on-format-error="handleFormatError"
+                  :on-error="handleError"
                   :on-exceeded-size="handleMaxSize"
-                  action="http://localhost:8000/api/upload"
+                  :max-size="65535"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
                 >
                   <div style="padding: 5px 0">
                     <Icon
@@ -362,7 +365,7 @@
                       size="22"
                       style="color: #3399ff"
                     ></Icon>
-                    Click or drag files here to upload
+                    Upload Image
                   </div>
                 </Upload>
                 <div
@@ -386,23 +389,11 @@
                   :multiple="false"
                   :show-upload-list="false"
                   :on-success="handleSuccess"
-                  :format="[
-                    'jpg',
-                    'jpeg',
-                    'png',
-                    'pdf',
-                    'docx',
-                    'txt',
-                    'mp4',
-                    'mp3',
-                    'zip',
-                  ]"
-                  :max-size="21048"
+                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
                   :on-format-error="handleFormatError"
-                  :on-exceeded-size="handleMaxSize"
                   :on-remove="handleRemove"
                   type="drag"
-                  action="http://localhost:8000/api/upload_attachment"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -421,9 +412,14 @@
             <div class="footer">
               <div></div>
               <div>
-                <button class="main-btn main-btn__border" @click="deletePost">
-                  Delete
-                </button>
+                <Button
+                  class="main-btn main-btn__border"
+                  @click="deletePost"
+                  :disabled="deleting"
+                  :loading="deleting"
+                >
+                  {{ deleting ? "Deleting..." : "Delete" }}</Button
+                >
                 <Button
                   class="main-btn main-btn__bg"
                   @click="update"
@@ -631,12 +627,12 @@
               <p>
                 <a
                   v-if="research.attachment && authUser"
-                  class="main-btn main-btn__bg"
-                  :href="`http://localhost:8000/api/download_attachment/${research.attachment}`"
+                  class="main-btn main-btn__bg px-lg-4"
+                  :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${research.attachment}`"
                   >Download <i class="fa-solid fa-download"
                 /></a>
                 <a
-                  class="main-btn main-btn__bg px-5"
+                  class="main-btn main-btn__bg px-lg-5"
                   :href="`${research.url}`"
                   v-if="research.url"
                   target="_blank"
@@ -673,14 +669,14 @@
       >
         <div class="comment-liked" v-for="user in likedUser">
           <img :src="user.image" alt="img" />
-          <nuxt-link :to="`/profile/${user.slug}/overview`">
+          <nuxt-link :to="`/profile/${user.user_slug}/overview`">
             {{ user.name }}
           </nuxt-link>
         </div>
         <div slot="footer"></div>
       </Modal>
       <Modal v-model="visible">
-        <img :src="imgName" v-if="visible" style="width: 100%" />
+        <img :src="imgName" style="width: 100%" />
         <div slot="footer">Figure: {{ index + 1 }}</div>
       </Modal>
     </div>
@@ -752,6 +748,7 @@ export default {
       },
       visible: false,
       imgName: "",
+      deleting: false,
       loading: false,
       limit: 3,
       page: 1,
@@ -805,7 +802,7 @@ export default {
       iconImageName: "",
       imageName: [],
 
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
     };
   },
 
@@ -947,6 +944,7 @@ export default {
       this.showResearchForm = false;
       this.edit_id = "";
       this.index = "";
+      this.attachmentName = "";
       this.user_slug = this.$route.params.slug;
       this.data = {
         type: "",
@@ -996,8 +994,9 @@ export default {
       //     return this.e("Start date is required");
 
       console.log(this.user_id);
-      const res = await this.callApi("post", `/api/save_post`, this.data);
       this.loading = true;
+
+      const res = await this.callApi("post", `/api/save_post`, this.data);
       if (res.status === 200) {
         this.s(res.data.msg);
         // this.msg = res.data.msg;
@@ -1114,7 +1113,7 @@ export default {
       this.loading = false;
     },
     async deletePost() {
-      this.loading = true;
+      this.deleting = true;
       this.deleteAttachment();
       for (let t of this.editData.images) {
         const res = await this.callApi("post", "/api/delete_image", {
@@ -1134,7 +1133,7 @@ export default {
       } else {
         this.swr();
       }
-      this.loading = false;
+      this.deleting = false;
     },
     async like(index) {
       if (this.posts[index].user_id != this.authUser.id) {
@@ -1155,7 +1154,6 @@ export default {
         };
         const res = await this.callApi("post", "/api/like", obj);
         this.socket.emit("notification", notificationObj);
-
       } else {
         this.i("You can't like your own post!!");
       }

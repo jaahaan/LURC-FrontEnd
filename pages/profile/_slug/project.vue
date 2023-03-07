@@ -84,20 +84,20 @@
               :multiple="true"
               :show-upload-list="false"
               :on-success="handleImageSuccess"
-              :on-error="handleError"
               :format="['jpg', 'jpeg', 'png']"
-              :max-size="2048"
               :on-format-error="handleFormatError"
+              :on-error="handleError"
               :on-exceeded-size="handleMaxSize"
-              action="http://localhost:8000/api/upload"
+              :max-size="2048"
+              action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
             >
-              <div style="padding: 20px 0">
+              <div style="padding: 5px 0">
                 <Icon
                   type="ios-cloud-upload"
-                  size="52"
+                  size="22"
                   style="color: #3399ff"
                 ></Icon>
-                <p>Click or drag files here to upload</p>
+                Upload Image
               </div>
             </Upload>
             <div
@@ -131,12 +131,11 @@
                 'mp3',
                 'zip',
               ]"
-              :max-size="21048"
               :on-format-error="handleFormatError"
               :on-exceeded-size="handleMaxSize"
               :on-remove="handleRemove"
               type="drag"
-              action="http://localhost:8000/api/upload_attachment"
+              action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
             >
               <div class="profile-main-btn">
                 <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -150,12 +149,7 @@
               ></span>
             </div>
           </FormItem>
-          <FormItem label="Project URL">
-            <Input type="url" v-model="data.url" placeholder="Project URL" />
-            <span class="text-danger" v-if="errors.url">{{
-              errors.url[0]
-            }}</span>
-          </FormItem>
+
           <div class="row">
             <div class="col-6">
               <FormItem label="Start Date">
@@ -234,7 +228,7 @@
           <template v-if="edit_id == research.id">
             <h5 class="post-title">
               <div>Edit Project</div>
-              <div class="btn-edit text-danger" @click="reset()">
+              <div class="btn-edit text-danger" @click="reset">
                 <i class="fa-solid fa-xmark"></i>
               </div>
             </h5>
@@ -302,20 +296,20 @@
                   :multiple="true"
                   :show-upload-list="false"
                   :on-success="handleImageSuccess"
-                  :on-error="handleError"
                   :format="['jpg', 'jpeg', 'png']"
-                  :max-size="2048"
                   :on-format-error="handleFormatError"
+                  :on-error="handleError"
                   :on-exceeded-size="handleMaxSize"
-                  action="http://localhost:8000/api/upload"
+                  :max-size="65535"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
                 >
-                  <div style="padding: 20px 0">
+                  <div style="padding: 5px 0">
                     <Icon
                       type="ios-cloud-upload"
-                      size="52"
+                      size="22"
                       style="color: #3399ff"
                     ></Icon>
-                    <p>Click or drag files here to upload</p>
+                    Upload Image
                   </div>
                 </Upload>
                 <div
@@ -339,23 +333,11 @@
                   :multiple="false"
                   :show-upload-list="false"
                   :on-success="handleSuccess"
-                  :format="[
-                    'jpg',
-                    'jpeg',
-                    'png',
-                    'pdf',
-                    'docx',
-                    'txt',
-                    'mp4',
-                    'mp3',
-                    'zip',
-                  ]"
-                  :max-size="21048"
+                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
                   :on-format-error="handleFormatError"
-                  :on-exceeded-size="handleMaxSize"
                   :on-remove="handleRemove"
                   type="drag"
-                  action="http://localhost:8000/api/upload_attachment"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -604,12 +586,12 @@
               <p>
                 <a
                   v-if="research.attachment && authUser"
-                  class="main-btn main-btn__bg"
-                  :href="`http://localhost:8000/api/download_attachment/${research.attachment}`"
+                  class="main-btn main-btn__bg px-lg-4"
+                  :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${research.attachment}`"
                   >Download <i class="fa-solid fa-download"
                 /></a>
                 <a
-                  class="main-btn main-btn__bg px-5"
+                  class="main-btn main-btn__bg px-lg-5"
                   :href="`${research.url}`"
                   v-if="research.url"
                   target="_blank"
@@ -676,14 +658,14 @@
     >
       <div class="comment-liked" v-for="user in likedUser">
         <img :src="user.image" alt="img" />
-        <nuxt-link :to="`/profile/${user.slug}/overview`">
+        <nuxt-link :to="`/profile/${user.user_slug}/overview`">
           {{ user.name }}
         </nuxt-link>
       </div>
       <div slot="footer"></div>
     </Modal>
     <Modal v-model="visible">
-      <img :src="imgName" v-if="visible" style="width: 100%" />
+      <img :src="imgName" style="width: 100%" />
       <div slot="footer">Figure: {{ index + 1 }}</div>
     </Modal>
   </div>
@@ -773,7 +755,7 @@ export default {
       isDeletingAll: false,
       isIconImageNew: false,
       iconImageName: "",
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
       isAdd: false,
     };
   },
@@ -917,6 +899,7 @@ export default {
       this.edit_id = "";
       this.index = "";
       this.user_slug = this.$route.params.slug;
+      this.attachmentName = "";
       this.data = {
         type: "",
         title: "",

@@ -116,7 +116,7 @@
         </div>
         <div class="navbar-search-result">
           <ul
-            class="search-list card list-group bg-dark w-100 c-pointer"
+            class="search-list _card list-group bg-dark w-100 c-pointer"
             v-if="Users.length > 0 && keyword.length > 0"
           >
             <li

@@ -1,5 +1,5 @@
 <template>
-  <div class="chat">
+  <div class="chat col-lg-8">
     <div class="chat-section">
       <div class="menu">
         <div class="menu--header">
@@ -13,7 +13,12 @@
           <div class="searchForm">
             <input type="text" placeholder="Find a user" v-model="keyword" />
           </div>
-          <div class="menu--list">
+          <div
+            class="menu--list"
+            v-bind:class="{
+              isActive: isActive,
+            }"
+          >
             <ul
               v-if="
                 Users.length > 0 && keyword.length > 0 && authUser.id != user.id
@@ -47,8 +52,24 @@
                   active: selectedUserInfo.room_id == user.id,
                 }"
               >
-                <img :src="user.to_user.image" alt="" />
-                <h4>{{ user.to_user.name }}</h4>
+                <Tooltip
+                  :content="user.to_user.name"
+                  placement="right"
+                  class="d-md-none d-sm-block"
+                >
+                  <img :src="user.to_user.image" alt=""
+                /></Tooltip>
+                <img
+                  :src="user.to_user.image"
+                  alt=""
+                  class="d-none d-md-block"
+                />
+                <div>
+                  <h4>{{ user.to_user.name }}</h4>
+                  <p v-if="user.latest_message !== null">
+                    {{ user.latest_message.msg }}
+                  </p>
+                </div>
               </div>
             </li>
             <li
@@ -62,8 +83,24 @@
                   active: selectedUserInfo.room_id == user.id,
                 }"
               >
-                <img :src="user.from_user.image" alt="" />
-                <h4>{{ user.from_user.name }}</h4>
+                <Tooltip
+                  :content="user.from_user.name"
+                  placement="right"
+                  class="d-md-none d-sm-block"
+                >
+                  <img :src="user.from_user.image" alt=""
+                /></Tooltip>
+                <img
+                  :src="user.from_user.image"
+                  alt=""
+                  class="d-none d-md-block"
+                />
+                <div>
+                  <h4>{{ user.from_user.name }}</h4>
+                  <p v-if="user.latest_message !== null">
+                    {{ user.latest_message.msg }}
+                  </p>
+                </div>
               </div>
             </li>
           </ul>
@@ -75,16 +112,19 @@
           </div>
         </div>
       </div>
-      <div class="menu-item" v-if="isActive">
+      <div
+        class="menu-item"
+        v-if="isActive"
+        v-bind:class="{
+          isActive: isActive,
+        }"
+      >
         <div class="menu-item--header">
           <img :src="this.selectedUserInfo.selectedUserImage" alt="" />
-
-          <p>{{ this.selectedUserInfo.selectedUserName }}</p>
-          <!-- <div class="chatIcons">
-            <img src="/assets/profileImages/download.jpg" alt="" />
-            <img src="/assets/profileImages/download.jpg" alt="" />
-            <img src="/assets/profileImages/download.jpg" alt="" />
-          </div> -->
+          <div>
+            <h1>{{ this.selectedUserInfo.selectedUserName }}</h1>
+            <p v-if="isTyping">Typing...</p>
+          </div>
         </div>
 
         <div class="menu-item--box" ref="scrollToMe">
@@ -101,10 +141,7 @@
                 <img :src="msg.image" alt="" />
                 <span>just now</span>
               </div> -->
-                <div
-                  class="d-flex justify-content-end"
-                  v-if="msg.from_id == authUser.id"
-                >
+                <div v-if="msg.from_id == authUser.id">
                   <div class="messageContentRight">
                     <!-- <a>{{ msg.name }}</a> -->
 
@@ -124,20 +161,16 @@
             </div>
           </div>
         </div>
+
         <div class="menu-item--input">
           <input
             type="text"
             placeholder="Type something..."
             v-model="data.msg"
+            v-on:keyup="typingHandler"
+            v-on:keyup.enter="sendMsg"
           />
           <div class="send">
-            <!-- <img src="{Attach}" alt="" /> -->
-            <!-- <input type="file" style={{ display: "none" }}
-            id="file" onChange={(e) => setImg(e.target.files[0])} /> -->
-            <!-- <label htmlFor="file">
-              <img src="{Img}" alt="" />
-            </label> -->
-
             <Icon type="md-send" @click="sendMsg" />
           </div>
         </div>
@@ -149,9 +182,6 @@
         </div>
       </div>
     </div>
-    <div class="chat-head" v-if="isActive">
-      <img :src="this.selectedUserInfo.selectedUserImage" alt="" />
-    </div>
   </div>
 </template>
 
@@ -160,6 +190,8 @@ const { io } = require("socket.io-client");
 import { mapGetters } from "vuex";
 
 export default {
+  middleware: "auth",
+
   data() {
     return {
       isActive: false,
@@ -170,11 +202,11 @@ export default {
       data: {
         msg: "",
       },
-      // messages: [],
       Users: [],
       keyword: "",
       conversations: [],
       selectedUserChat: [],
+      selectedChat: [],
       room_id: "",
       selectedUserId: "",
       selectedUserImage: "",
@@ -182,6 +214,10 @@ export default {
       selectedUserName: "",
       index: -1,
       limit: 6,
+      socketConnected: false,
+      isTyping: false,
+      selectedChatCompare: "",
+      notification: "",
       socket: null,
     };
   },
@@ -266,12 +302,6 @@ export default {
               this.loadMoreChats(5);
             }
           }
-
-          // if (this.bottomTopWindow) {
-          //   if (!this.loadMoreChatLoading) {
-          //     this.loadMoreChats(5);
-          //   }
-          // }
         };
       }
     },
@@ -287,8 +317,8 @@ export default {
 
       let roomId = index;
       this.isActive = true;
-
-      window.history.pushState({}, null, `${this.$route.path}`);
+      this.selectedChatCompare = this.selectedUserInfo;
+      // window.history.pushState({}, null, `${this.$route.path}`);
       this.$store.commit("setGlobalPostLoading", true);
       const response = await this.callApi(
         "get",
@@ -296,6 +326,7 @@ export default {
       );
       if (response.status == 200) {
         this.$store.commit("setMessages", response.data.data);
+        this.socket.emit("join chat", roomId);
       } else this.swr();
       this.$store.commit("setGlobalPostLoading", false);
     },
@@ -327,32 +358,67 @@ export default {
       this.loadMoreChatLoading = false;
       console.log("Load more is finished! length", this.messages.length);
     },
+
+    async typingHandler() {
+      // if (!this.socketConnected) return;
+
+      if (!this.isTyping) {
+        console.log("typing");
+        this.isTyping = true;
+        this.socket.emit("typing", this.selectedUserInfo.room_id);
+      }
+      let lastTypingTime = new Date().getTime();
+      var timerLength = 3000;
+      setTimeout(() => {
+        var timeNow = new Date().getTime();
+        var timeDiff = timeNow - lastTypingTime;
+        if (timeDiff >= timerLength && this.isTyping) {
+          this.socket.emit("stop typing", this.selectedUserInfo.room_id);
+          this.isTyping = false;
+        }
+      }, timerLength);
+    },
     async sendMsg() {
-      if (this.data.msg.trim() == "") return;
-      let obj = {
-        room_id: this.selectedUserInfo.room_id,
-        from_id: this.authUser.id,
-        to_id: this.selectedUserInfo.selectedUserId,
-        image: this.authUser.image,
-        name: this.authUser.name,
-        msg: this.data.msg,
-      };
-      this.socket.emit("sendChatToServer", obj);
-      let obj2 = {
-        room_id: this.selectedUserInfo.room_id,
-        to_id: this.selectedUserInfo.selectedUserId,
-      };
-      let obj1 = {
-        room_id: this.selectedUserInfo.room_id,
-        from_id: this.authUser.id,
-        to_id: this.selectedUserInfo.selectedUserId,
-        msg: this.data.msg,
-        image: "",
-      };
-      this.data.msg = "";
-      const res = await this.callApi("post", `/api/add_chat`, obj1);
-      if (res.status == 201) {
-        this.socket.emit("chatNotificationToServer", obj2);
+      if (event.key === "Enter" && this.data.msg) {
+        this.socket.emit("stop typing", this.selectedUserInfo.room_id);
+        if (this.data.msg.trim() == "") return;
+        const msg = this.data.msg;
+        let obj2 = {
+          room_id: this.selectedUserInfo.room_id,
+          to_id: this.selectedUserInfo.selectedUserId,
+        };
+        let obj1 = {
+          room_id: this.selectedUserInfo.room_id,
+          from_id: this.authUser.id,
+          to_id: this.selectedUserInfo.selectedUserId,
+          msg: this.data.msg,
+          image: "",
+        };
+        let obj = {
+          room_id: this.selectedUserInfo.room_id,
+          from_id: this.authUser.id,
+          to_id: this.selectedUserInfo.selectedUserId,
+          image: this.authUser.image,
+          name: this.authUser.name,
+          msg: this.data.msg,
+        };
+        this.messages.push(obj);
+        this.data.msg = "";
+
+        const res = await this.callApi("post", `/api/add_chat`, obj1);
+
+        if (res.status == 200) {
+          let obj3 = {
+            room_id: this.selectedUserInfo.room_id,
+            from_id: this.authUser.id,
+            to_id: this.selectedUserInfo.selectedUserId,
+            image: this.authUser.image,
+            name: this.authUser.name,
+            msg: msg,
+            chat: res.data.data,
+          };
+          this.socket.emit("new message", obj3);
+        }
       }
     },
 
@@ -394,12 +460,18 @@ export default {
       this.loadMoreConversationLoading = false;
       console.log("Load more is finished! length", this.conversations.length);
     },
-    async callUnseenMsgCount() {
-      const res = await this.callApi("get", `/api/get_unseenmsg_count`);
+    async callUnseenMsgCount(newMessageRecieved) {
+      // const room_id = this.notification.room_id;
+      console.log("newMessageRecieved" + newMessageRecieved);
+      const res = await this.callApi(
+        "get",
+        `/api/add_unseenmsg_count`,
+        newMessageRecieved
+      );
 
-      if (res.status == 200) {
-        this.$store.dispatch("updateUnseenMsgCount", res.data.count);
-      }
+      // if (res.status == 200) {
+      this.$store.dispatch("updateUnseenMsgCount", res.data.count);
+      // }
     },
   },
   async mounted() {
@@ -408,20 +480,34 @@ export default {
       transports: ["websocket"],
       credentials: true,
     });
-    this.scrollToEnd();
-    this.socket.on("sendChatToClient", (data) => {
-      if (data.room_id == this.selectedUserInfo.room_id) {
-        this.$store.commit("pushMessages", data);
+    // this.socket.on("sendChatToClient", (data) => {
+    //   if (data.room_id == this.selectedUserInfo.room_id) {
+    //     this.$store.commit("pushMessages", data);
+    //   } else {
+    //     this.callUnseenMsgCount();
+    //   }
+    // });
+
+    this.socket.emit("setup", this.authUser);
+    this.socket.on("connected", () => (this.socketConnected = true));
+    this.socket.on("typing", () => (this.isTyping = true));
+    this.socket.on("stop typing", () => (this.isTyping = false));
+    this.socket.on("message recieved", (newMessageRecieved) => {
+      if (
+        !this.selectedChatCompare || // if chat is not selected or doesn't match current chat
+        this.selectedChatCompare.room_id !== newMessageRecieved.room_id
+      ) {
+        console.log("inside if");
+        if (!this.notification.includes(newMessageRecieved)) {
+          // this.notification = newMessageRecieved;
+          this.callUnseenMsgCount(newMessageRecieved);
+        }
+      } else {
+        console.log("inside else");
+
+        this.messages.push(newMessageRecieved);
       }
     });
-    // this.socket.on("chatNotificationToClient", (data) => {
-    //   console.log(data);
-    //   if (
-    //     data.to_id == this.authUser.id &&
-    //     data.room_id != this.selectedUserInfo.room_id
-    //   )
-    //     this.callUnseenMsgCount();
-    // });
     const el = this.$refs.scrollConv;
     el.onscroll = () => {
       this.bottomOfWindow =
@@ -436,6 +522,7 @@ export default {
     if (this.isActive == true) {
       const el1 = this.$refs.scrollToMe;
     }
+    this.scrollToEnd();
   },
 
   updated() {
@@ -445,11 +532,6 @@ export default {
   async created() {
     this.getConversations();
 
-    this.socket = io("http://localhost:5000", {
-      methods: ["GET", "POST"],
-      transports: ["websocket"],
-      credentials: true,
-    });
     if (this.selectedUserInfo.selectedUserId) {
       let user = {
         id: this.selectedUserInfo.selectedUserId,

@@ -3,7 +3,7 @@ export default {
   ** Nuxt rendering mode
   ** See https://nuxtjs.org/api/configuration-mode
   */
-  mode: 'universal',
+  // mode: 'universal',
   /*
   ** Nuxt target
   ** See https://nuxtjs.org/api/configuration-target
@@ -30,7 +30,7 @@ export default {
       { rel: 'stylesheet', href: "/assets/css/vendor/bootstrap.min.css" },
       { rel: 'stylesheet', href: "/assets/css/vendor/lineicons.css" },
       { rel: 'stylesheet', href: "/assets/css/vendor/line-awesome.min.css"},
-      
+
       { rel: 'stylesheet', href: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css"},
 
     ],
@@ -48,7 +48,7 @@ export default {
           src: "https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js",
           body: true
       },
-
+      {src:"https://unpkg.com/vue-typer/dist/vue-typer.min.js"}
     ]
   },
 
@@ -78,7 +78,10 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     '@nuxtjs/axios',
+
   ],
+  
+ 
 /*
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options

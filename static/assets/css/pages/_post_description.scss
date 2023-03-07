@@ -135,7 +135,8 @@
 
       &-section {
         display: flex;
-        padding-top: 1rem;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
         width: 100%;
         img {
           border-radius: 50%;
@@ -187,6 +188,11 @@
             }
           }
         }
+      }
+      .active {
+        background-color: #dddddd;
+        padding: 0.5rem;
+        border-radius: 10px;
       }
     }
 
@@ -586,6 +592,40 @@
 }
 
 @include breakpoint-max(400px) {
+  .post {
+    &-section {
+      padding-bottom: 0;
+      .menu-item {
+        &-box {
+          margin-bottom: 14px;
+          padding: 14px;
+          padding-right: 10px;
+          .post-details {
+            margin-right: 4px;
+            .sub-title {
+              font-size: 14px;
+            }
+          }
+          .vote {
+            i {
+              font-size: 1.5rem;
+            }
+          }
+        }
+        &--title {
+          font-size: 18px;
+          padding-bottom: 7px;
+          margin-bottom: 7px;
+        }
+      }
+    }
+
+    &-description {
+      .sub-title {
+        font-size: 14px;
+      }
+    }
+  }
   .related_research--section {
     flex-direction: column;
     justify-content: center;

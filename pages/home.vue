@@ -10,7 +10,7 @@
                 class="menu-item-box"
                 v-for="(post, index) in posts"
                 :key="index"
-                v-if="posts.length"
+                v-if="posts.length > 0"
               >
                 <div class="vote">
                   <span @click="upVote(index)">
@@ -39,9 +39,9 @@
                   <div class="header">
                     <img :src="post.image" alt="img" />
                     <div class="header-content">
-                      <router-link :to="`/profile/${post.user_slug}/overview`">
+                      <nuxt-link :to="`/profile/${post.user_slug}/overview`">
                         {{ post.name }}
-                      </router-link>
+                      </nuxt-link>
                       <!-- . {{ item.created_at }} -->
 
                       <p>
@@ -51,9 +51,9 @@
                     </div>
                   </div>
                   <h5 class="menu-item--title">
-                    <router-link :to="`/description/${post.slug}/overview`">{{
+                    <nuxt-link :to="`/description/${post.slug}/overview`">{{
                       post.title
-                    }}</router-link>
+                    }}</nuxt-link>
                   </h5>
                   <hooper
                     :settings="hooperImage"
@@ -82,16 +82,16 @@
                   <p v-if="post.abstract != null">
                     {{ post.abstract.substring(0, 190) }}
                     ...
-                    <router-link :to="`/description/${post.slug}/overview`"
-                      >See more</router-link
+                    <nuxt-link :to="`/description/${post.slug}/overview`"
+                      >See more</nuxt-link
                     >
                   </p>
                   <div class="mt-2 mb-2">
-                    <router-link
+                    <nuxt-link
                       :to="`/description/${post.slug}/overview`"
                       class="main-btn main-btn__type d-inline-block text-center"
                     >
-                      {{ post.type }}</router-link
+                      {{ post.type }}</nuxt-link
                     >
                   </div>
                   <div v-if="post.authors.length">
@@ -101,10 +101,10 @@
                     >
                       Authors:
                       <span v-for="author in post.authors">
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -116,10 +116,10 @@
                     >
                       Team Members:
                       <span v-for="author in post.authors">
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -131,10 +131,10 @@
                     >
                       Team Member:
                       <span v-for="author in post.authors">
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -146,10 +146,10 @@
                     >
                       Author:
                       <span v-for="author in post.authors">
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -163,10 +163,10 @@
                         v-for="author in post.authors"
                         v-if="post.authors.length"
                       >
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -176,10 +176,10 @@
                         v-for="author in post.authors"
                         v-if="post.authors.length"
                       >
-                        <router-link
+                        <nuxt-link
                           :to="`/profile/${author.slug}/overview`"
                           class="authors"
-                          >{{ author.name }}</router-link
+                          >{{ author.name }}</nuxt-link
                         >
                       </span>
                     </p>
@@ -200,12 +200,12 @@
                     <p>
                       <a
                         v-if="post.attachment && authUser"
-                        class="main-btn main-btn__bg px-4"
-                        :href="`http://localhost:8000/api/download_attachment/${post.attachment}`"
+                        class="main-btn main-btn__bg px-lg-4"
+                        :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${post.attachment}`"
                         >Download <i class="fa-solid fa-download"
                       /></a>
                       <a
-                        class="main-btn main-btn__bg px-5"
+                        class="main-btn main-btn__bg px-lg-5"
                         :href="`${post.url}`"
                         v-if="post.url"
                         target="_blank"
@@ -231,6 +231,9 @@
                   </div>
                 </div>
               </div>
+              <div class="_card" v-if="posts == ''">
+                <h1>No Data Found</h1>
+              </div>
             </div>
           </div>
           <div v-if="loadMoreLoading && !noPostRemaining" class="loader-lg">
@@ -243,7 +246,11 @@
             </div>
           </div> -->
         </div>
-        <div class="col-lg-4 d-none d-lg-block research-people" id="home">
+        <div
+          class="col-lg-4 d-none d-lg-block research-people"
+          id="home"
+          v-if="peopleYouMayKnow.length > 0"
+        >
           <div class="research-post--item">
             <h5 class="post-title">People you may know</h5>
             <ul>
@@ -289,14 +296,14 @@
         >
           <div class="comment-liked" v-for="user in likedUser">
             <img :src="user.image" alt="img" />
-            <router-link :to="`/profile/${user.slug}/overview`">
+            <nuxt-link :to="`/profile/${user.user_slug}/overview`">
               {{ user.name }}
-            </router-link>
+            </nuxt-link>
           </div>
           <div slot="footer"></div>
         </Modal>
         <Modal v-model="visible">
-          <img :src="imgName" v-if="visible" style="width: 100%" />
+          <img :src="imgName" style="width: 100%" />
           <div slot="footer">Figure: {{ index + 1 }}</div>
         </Modal>
       </div>
@@ -360,7 +367,7 @@ export default {
       like_count: 0,
       authUserLike: "",
       page: 1,
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
       socket: null,
     };
   },
@@ -391,11 +398,26 @@ export default {
             upVote: 1,
           };
           console.log(obj);
+          // if (this.posts[index].authUserVote == "up") {
+          //   this.posts[index].upVote = upVoteCount1 - 1;
+          //   this.posts[index].avgVote = upVoteCount1 - 1 - downVoteCount1;
+          //   this.posts[index].authUserVote = "none";
+          // }
+          // if (this.posts[index].authUserVote == "down") {
+          //   this.posts[index].upVote = upVoteCount1 + 1;
+          //   this.posts[index].avgVote = upVoteCount1 + 1 - (downVoteCount1 - 1);
+          //   this.posts[index].downVote = downVoteCount1 - 1;
+          //   this.posts[index].authUserVote = "up";
+          // } else {
+          //   this.posts[index].upVote = upVoteCount1 + 1;
+          //   this.posts[index].avgVote = upVoteCount1 + 1 - downVoteCount1;
+          //   this.posts[index].authUserVote = "up";
+          // }
           const res = await this.callApi("post", "/api/up_vote", obj);
           if (res.status == 200) {
             this.posts[index].upVote = upVoteCount1 - 1;
             this.posts[index].avgVote = upVoteCount1 - 1 - downVoteCount1;
-            this.posts[index].authUserVote = "";
+            this.posts[index].authUserVote = "none";
           }
           if (res.status == 201) {
             this.posts[index].upVote = upVoteCount1 + 1;
@@ -441,7 +463,7 @@ export default {
           if (res.status == 200) {
             this.posts[index].avgVote = upVoteCount1 - (downVoteCount1 - 1);
             this.posts[index].downVote = downVoteCount1 - 1;
-            this.posts[index].authUserVote = "";
+            this.posts[index].authUserVote = "none";
           }
           if (res.status == 201) {
             this.posts[index].upVote = upVoteCount1 - 1;
@@ -489,6 +511,8 @@ export default {
         const res = await this.callApi("post", "/api/like", obj);
         // if (res.status == 201) {
         this.socket.emit("notification", notificationObj);
+        // this.socket.emitP("notification", notificationObj);
+
         // }
       } else {
         this.i("You can't like your own post!!");

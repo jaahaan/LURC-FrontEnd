@@ -1,10 +1,10 @@
-<template>    
-    <div class="comment">
-      <h4 class="menu-item--title">Comments</h4>
-      <div v-if="isLoading" class="loader">
+<template>
+  <div class="comment">
+    <h4 class="menu-item--title">Comments</h4>
+    <div v-if="isLoading" class="loader">
       <h1 />
     </div>
-      <div v-else>
+    <div v-else>
       <div class="comment-box">
         <img :src="authUser.image" alt="img" />
         <textarea
@@ -20,11 +20,11 @@
         <Icon type="md-send" v-if="showbtn == true" @click="addComment" />
       </div>
       <div v-for="(comment, index) in comments" :key="index">
-        <div class="comment-section">
+        <div class="comment-section" v-bind:class="{ active: commentId }">
           <img :src="comment.image" alt="img" />
           <div class="comment-section-content">
             <div class="comment-section-content-main">
-              <nuxt-link :to="`/profile/${comment.slug}/${comment.user_id}`">
+              <nuxt-link :to="`/profile/${comment.user_slug}/overview`">
                 {{ comment.name }}
               </nuxt-link>
               <!-- . {{ comment.created_at }} -->
@@ -107,7 +107,7 @@
             <img :src="reply.image" alt="img" />
             <div class="comment-reply-section-content">
               <div class="comment-reply-section-content-main">
-                <nuxt-link :to="`/profile/${reply.slug}/${reply.user_id}`">
+                <nuxt-link :to="`/profile/${reply.user_slug}/overview`">
                   {{ reply.name }}
                 </nuxt-link>
                 <!-- . {{ comment.created_at }} -->
@@ -139,14 +139,18 @@
           </div>
         </div>
       </div>
-      </div>
     </div>
+  </div>
 </template>
 <script>
+const { io } = require("socket.io-client");
+import { mapGetters } from "vuex";
+
 export default {
   components: {},
   data() {
     return {
+      socket: null,
       details: [],
       comments: [],
       commentReplies: [],
@@ -186,6 +190,11 @@ export default {
       },
     };
   },
+  computed: {
+    ...mapGetters({
+      commentId: "commentId",
+    }),
+  },
   methods: {
     async addComment() {
       this.showreplybox = false;
@@ -209,7 +218,11 @@ export default {
       //     today.getMinutes() +
       //     ":" +
       //     today.getSeconds();
+      let notificationObj = {
+        id: this.details.user_id,
+      };
 
+      // if (res.status == 201) {
       const res = await this.callApi("post", "/api/add_comment", obj);
       if (res.status == 201) {
         let data = {
@@ -223,6 +236,7 @@ export default {
         };
         this.comments.unshift(data);
         this.data.comment = "";
+        this.socket.emit("notification", notificationObj);
       } else {
         this.swr();
       }
@@ -233,11 +247,14 @@ export default {
         let obj = {
           id: this.comments[index].id,
         };
-
+        let notificationObj = {
+          id: this.comments[index].user_id,
+        };
         const res = await this.callApi("post", "/api/comment_like", obj);
         if (res.status == 201) {
           this.comments[index].comment_like_count += 1;
           this.comments[index].authUserCommentLike = "yes";
+          // this.socket.emit("notification", notificationObj);
         } else {
           this.comments[index].comment_like_count -= 1;
           this.comments[index].authUserCommentLike = "no";
@@ -289,7 +306,9 @@ export default {
         comment_id: this.comments[index].id,
         commentReply: this.data.commentReply,
       };
-
+      let notificationObj = {
+        id: this.comments[index].user_id,
+      };
       const res = await this.callApi("post", "/api/add_comment_reply", obj);
       if (res.status == 201) {
         let data = {
@@ -305,6 +324,7 @@ export default {
         this.commentReplies.unshift(data);
         this.showCommentReplies(index);
         this.data.commentReply = "";
+        this.socket.emit("notification", notificationObj);
       } else {
         this.swr();
       }
@@ -345,10 +365,20 @@ export default {
       this.showbtn = false;
     },
   },
+  mounted() {
+    // document.addEventListener("click", this.hideSearchbar);
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
+  },
   async created() {
     // this.token = window.Laravel.csrfToken;
     this.post_slug = this.$route.params.slug;
     console.log(this.post_slug);
+    console.log("id" + this.commentId);
+
     const res = await this.callApi(
       "get",
       `/api/post_details/${this.post_slug}`

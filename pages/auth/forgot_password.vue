@@ -1,55 +1,45 @@
 <template>
-  <div class="bg">
-    <div class="container-fluid justify-content-center py-md-4 py-3">
-      <div class="row">
-        <div class="col-md-6 my-md-auto text-center justify-content-center">
-          <img
-            :src="'/assets/images/lurc.png'"
-            alt="img"
-            class="img-fluid scientific"
-          />
+  <div class="login-section">
+    <div class="left">
+      <img :src="'/assets/images/lurc.png'" alt="img" />
+    </div>
+
+    <!-- Login Form -->
+    <div class="right">
+      <div class="form">
+        <h1>Forgot Password!!</h1>
+        <div class="alert alert-dark">
+          <p>
+            Enter your email address and we will send an OTP to reset your
+            password.
+          </p>
         </div>
 
-        <div class="col-md-6 my-md-auto justify-content-center">
-          <div class="container-fluid">
-            <div class="container-fluid rt col-10 p-5">
-              <h2 class="p-3 text-center">Forgot Password!!</h2>
+        <div class="mb-2">
+          Email Address
+          <input
+            type="email"
+            class="form-control"
+            v-model="data.email"
+            placeholder="Email Address"
+          />
+          <span class="text-danger" v-if="errors.email">{{
+            errors.email[0]
+          }}</span>
+        </div>
 
-              <div class="alert alert-dark">
-                <p>
-                  Enter your email address and we will send an OTP to reset your
-                  password.
-                </p>
-              </div>
-
-              <div class="mb-2">
-                Email Address
-                <input
-                  type="email"
-                  class="form-control"
-                  v-model="data.email"
-                  placeholder="Email Address"
-                />
-                <span class="text-danger" v-if="errors.email">{{
-                  errors.email[0]
-                }}</span>
-              </div>
-
-              <div class="mb-2">
-                <button
-                  :class="[
-                    data.email ? ' main-btn-change col-12' : ' main-btn col-12',
-                    ' main-btn col-12',
-                  ]"
-                  @click="send"
-                  :disabled="isSending"
-                  :loading="isSending"
-                >
-                  {{ isSending ? "Sending" : "Send OTP" }}
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="mb-2">
+          <button
+            :class="[
+              data.email ? ' main-btn-change col-12' : ' main-btn col-12',
+              ' main-btn col-12',
+            ]"
+            @click="send"
+            :disabled="isSending"
+            :loading="isSending"
+          >
+            {{ isSending ? "Sending" : "Send OTP" }}
+          </button>
         </div>
       </div>
     </div>

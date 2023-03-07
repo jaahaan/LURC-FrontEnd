@@ -1,7 +1,6 @@
 <template>
   <div>
-    <!-- 1st row -->
-
+    <!--*************** Top Banner ***************-->
     <section class="hero-section">
       <hooper
         class="no-margin"
@@ -28,153 +27,77 @@
 
         <HooperPagination slot="hooper-addons"></HooperPagination>
       </hooper>
+      <div class="right">
+        <div class="right-details">
+          <div class="right-details--area">
+            <h4 class="right-details--area---subtitle">WELCOME TO</h4>
+            <h4 class="right-details--area---title">
+              <span>LU REASEARCH COMMUNITY</span>
+            </h4>
+            <h4 class="right-details--area---subtitle">
+              Find our
+
+              <vue-typer caret-animation="expand" :text="typer"> </vue-typer>
+            </h4>
+          </div>
+        </div>
+      </div>
     </section>
 
-    <!--*************** Top Banner ***************-->
-
     <!--*************** Random ***************-->
-    <div class="p-5 bg-card">
-      <div class="container-fluid justify-content-center">
-        <div class="row">
-          <div
-            class="col-12 col-md-6 my-md-auto text-center justify-content-center pb-3"
-          >
-            <h1 class="col-8 _card">
-              Science is a way of thinking much more than it is a body of
-              knowledge.
-            </h1>
-          </div>
-          <div
-            class="col-12 col-md-6 my-md-auto text-center justify-content-center"
-          >
-            <img
-              :src="'/assets/images/pixel.png'"
-              alt="img"
-              class="img-fluid slider h-70"
-            />
-          </div>
+    <div class="container-fluid">
+      <div class="quote-section row">
+        <div class="col-12 col-md-6">
+          <h1 class="col-lg-10 _card">
+            Science is a way of thinking much more than it is a body of
+            knowledge.
+          </h1>
+        </div>
+        <div class="col-12 col-md-6 image">
+          <img
+            :src="'/assets/images/pixel.png'"
+            alt="img"
+            class="img-fluid slider h-70"
+          />
         </div>
       </div>
     </div>
 
-    <!--*************** Research Interests Section ***************-->
-    <div class="pt-5 pb-5 bg-card">
-      <div class="justify-content-around">
-        <h5 class="text-center">Find Your Research Interests</h5>
-        <hooper :settings="hooperSettings">
-          <slide>
-            <div class="text-center rt-title m-2">
-              <h1 class="p-3">ENGINEERING</h1>
-            </div>
-          </slide>
-          <slide>
-            <div class="text-center rt-title m-2">
-              <h1 class="p-3">SCIENCE</h1>
-            </div>
-          </slide>
-          <slide>
-            <div class="text-center rt-title m-2">
-              <h1 class="p-3">MACHINE LEARNING</h1>
-            </div>
-          </slide>
-          <slide>
-            <div class="text-center rt-title m-2">
-              <h1 class="p-3">DATA SCIENCE</h1>
-            </div>
-          </slide>
-          <slide>
-            <div class="text-center rt-title m-2">
-              <h1 class="p-3">AI</h1>
-            </div>
-          </slide>
-        </hooper>
+    <!--*************** About ***************-->
+    <div class="container-fluid">
+      <div class="quote-section row" id="about">
+        <div class="col-12 col-md-6 image">
+          <img
+            :src="'/assets/images/stat.png'"
+            alt="img"
+            class="img-fluid slider h-50"
+          />
+        </div>
+        <div class="col-12 col-md-6">
+          <h1 class="col-lg-10 _card">
+            Our mission is to help the students gather knowledge about research
+            field and find the research works of our honourable teachers that
+            can guide them to find out their own research interest.
+          </h1>
+        </div>
       </div>
     </div>
 
-    <!-- <div class="p-5 bg-card">
-            <div class="container-fluid justify-content-around">
-                <div class="row">
-                    <div
-                        class="col-12 col-md-6 my-md-auto text-center justify-content-center pb-3"
-                    >
-                        <h5 class="text-center rt-title">
-                            Find Your Research Interests
-                        </h5>
-                    </div>
-
-                    <div class="col-12 col-md-6">
-                        <div class="container-fluid">
-                            <div class="row justify-content-center">
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">ENGINEERING</a>
-                                </div>
-
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">SCIENCE</a>
-                                </div>
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">Machine Learning</a>
-                                </div>
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">Data Science</a>
-                                </div>
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">AI</a>
-                                </div>
-
-                                <div
-                                    class="col-sm-4 col-md-4 m-2 card text-center rt"
-                                >
-                                    <a class="p-3">ANN</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> -->
-
-    <!--*************** About ***************-->
-    <div>
-      <h6 class="m-3 _card col-9 mx-auto text-center justify-content-center">
-        Our mission is to help the students gather knowledge about research
-        field and find the research works of our honourable teachers that can
-        guide them to find out their own research interest.
-      </h6>
-    </div>
-
     <!--*************** Random ***************-->
-    <div class="p-5 bg-card">
-      <div class="container-fluid justify-content-center">
-        <div class="row">
-          <div
-            class="col-12 col-md-6 my-md-auto text-center justify-content-center pb-3"
-          >
-            <h1 class="col-8 _card">
-              Connect with our research community to share your thoughts,
-              collaborate with your teachers, colleagues and friends.
-            </h1>
-          </div>
-
-          <div
-            class="col-12 col-md-6 my-md-auto text-center justify-content-center"
-          >
-            <img
-              :src="'/assets/images/remote.png'"
-              alt="img"
-              class="img-fluid slider w-50"
-            />
-          </div>
+    <div class="container-fluid">
+      <div class="quote-section row">
+        <div class="col-12 col-md-6">
+          <h1 class="col-lg-10 _card">
+            Connect with our research community to share your thoughts,
+            collaborate with your teachers, colleagues and friends.
+          </h1>
+        </div>
+        <div class="col-12 col-md-6 image">
+          <img
+            :src="'/assets/images/remote.png'"
+            alt="img"
+            class="img-fluid slider w-50"
+          />
         </div>
       </div>
     </div>
@@ -190,6 +113,7 @@ import {
   Navigation as HooperNavigation,
 } from "hooper";
 import "hooper/dist/hooper.css";
+
 export default {
   name: "index",
   middleware: "guest",
@@ -205,8 +129,17 @@ export default {
   data() {
     return {
       dataBanner: [],
-      isDataLoading: true,
+      typer: [
+        "Research",
+        "Publications",
+        "Articles",
+        "Preprint",
+        "Projects",
+        "Presentation",
+        "Poster",
+      ],
 
+      isDataLoading: true,
       hooperSettings: {
         infiniteScroll: true,
         centerMode: true,

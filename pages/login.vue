@@ -1,109 +1,95 @@
 <template>
-  <div class="bg">
-    <div class="container-fluid justify-content-center py-md-4 py-3">
-      <div class="row">
-        <div class="col-md-6 my-md-auto text-center justify-content-center">
-          <img :src="'/assets/images/lurc.png'" alt="img" class="login-logo" />
+  <div class="login-section">
+    <div class="left">
+      <img :src="'/assets/images/lurc.png'" alt="img" />
+    </div>
+
+    <!-- Two Factor Form -->
+    <div class="right" v-if="!isLoggingBlock">
+      <div class="container-fluid">
+        <div class="container-fluid rt col-10 p-2">
+          <h1 class="text-center mb-2">Two Factor Authentication</h1>
+          <div class="alert alert-dark" v-if="msg">
+            {{ msg }}
+          </div>
+
+          <div class="mb-2">
+            Enter OTP
+            <input
+              type="number"
+              class="form-control"
+              v-model="data.twoFactorCode"
+            />
+            <span class="text-danger" v-if="errors.twoFactorCode">{{
+              errors.twoFactorCode[0]
+            }}</span
+            ><span class="text-danger" v-if="errmsg">{{ errmsg }}</span>
+          </div>
+
+          <div class="mb-2">
+            <button
+              :class="[
+                data.twoFactorCode
+                  ? 'main-btn-change col-12'
+                  : 'main-btn col-12',
+                ' main-btn col-12',
+              ]"
+              @click="submit"
+              :disabled="isSubmitting"
+              :loading="isSubmitting"
+            >
+              {{ isSubmitting ? "Submitting..." : "Submit OTP" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Login Form -->
+    <div class="right" v-else-if="isLoggingBlock">
+      <div class="form">
+        <h1>Login</h1>
+        <div class="mb-2">
+          Email
+          <input type="email" v-model="data.email" placeholder="Email" />
+          <span class="text-danger" v-if="errors.email">{{
+            errors.email[0]
+          }}</span>
         </div>
 
-        <!-- Two Factor Form -->
-        <div
-          class="col-md-6 my-md-auto justify-content-center"
-          v-if="!isLoggingBlock"
-        >
-          <div class="container-fluid">
-            <div class="container-fluid rt col-10 p-2">
-              <h1 class="text-center mb-2">Two Factor Authentication</h1>
-              <div class="alert alert-dark" v-if="msg">
-                {{ msg }}
-              </div>
+        <div class="mb-2">
+          Password
+          <input
+            type="password"
+            v-model="data.password"
+            placeholder="Password"
+          />
+          <div class="d-block">
+            <span class="w-full text-danger float-start" v-if="errors.password"
+              >{{ errors.password }}
+            </span>
 
-              <div class="mb-2">
-                Enter OTP
-                <input
-                  type="number"
-                  class="form-control"
-                  v-model="data.twoFactorCode"
-                />
-                <span class="text-danger" v-if="errors.twoFactorCode">{{
-                  errors.twoFactorCode[0]
-                }}</span
-                ><span class="text-danger" v-if="errmsg">{{ errmsg }}</span>
-              </div>
-
-              <div class="mb-2">
-                <button
-                  :class="[
-                    data.twoFactorCode
-                      ? 'main-btn-change col-12'
-                      : 'main-btn col-12',
-                    ' main-btn col-12',
-                  ]"
-                  @click="submit"
-                  :disabled="isSubmitting"
-                  :loading="isSubmitting"
-                >
-                  {{ isSubmitting ? "Submitting..." : "Submit OTP" }}
-                </button>
-              </div>
-            </div>
+            <nuxt-link class="float-end" to="/auth/forgot_password"
+              >Forgot Password</nuxt-link
+            >
           </div>
         </div>
 
-        <!-- Login Form -->
-        <div
-          class="col-md-6 m-auto justify-content-center"
-          v-else-if="isLoggingBlock"
-        >
-          <div class="container-fluid">
-            <div class="container-fluid col-10 p-2">
-              <h1 class="p-3 text-center">Login</h1>
-              <div class="mb-2">
-                Email
-                <input type="email" v-model="data.email" placeholder="Email" />
-                <span class="text-danger" v-if="errors.email">{{
-                  errors.email[0]
-                }}</span>
-              </div>
-
-              <div class="mb-2">
-                Password
-                <input
-                  type="password"
-                  v-model="data.password"
-                  placeholder="Password"
-                />
-                <div class="d-block">
-                  <span
-                    class="w-full text-danger float-start"
-                    v-if="errors.password"
-                    >{{ errors.password }}
-                  </span>
-
-                  <nuxt-link class="float-end" to="/auth/forgot_password"
-                    >Forgot Password</nuxt-link
-                  >
-                </div>
-              </div>
-
-              <div class="mb-2">
-                <button
-                  type="button"
-                  :class="[
-                    data.email && data.password
-                      ? ' main-btn-change col-12'
-                      : ' main-btn col-12',
-                    ' main-btn  col-12',
-                  ]"
-                  @click="login"
-                  :disabled="isLogging"
-                  :loading="isLogging"
-                >
-                  {{ isLogging ? "Logging In.." : "Login" }}
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="mb-2">
+          <button
+            type="button"
+            :class="[
+              data.email && data.password
+                ? ' main-btn-change col-12'
+                : ' main-btn col-12',
+              ' main-btn  col-12',
+            ]"
+            @click="login"
+            :disabled="isLogging"
+            :loading="isLogging"
+          >
+            {{ isLogging ? "Logging In.." : "Login" }}
+          </button>
         </div>
       </div>
     </div>
@@ -144,10 +130,15 @@ export default {
       const res = await this.callApi("post", "/api/login", this.data);
 
       if (res.status == 200) {
+        console.log(res.data.user);
+        console.log(res.data.token);
+
         this.$store.dispatch("setAuthInfo", res.data.user);
         this.$store.dispatch("setToken", res.data.token);
         this.setCookie("token", res.data.token);
-        window.location = "/home";
+        // this.$router.push(`/home`);
+        this.$router.go(`/home`);
+
         this.s("You are logged In");
         this.getNotificationItemsServer();
         if (this.callNotificationOb) {
@@ -167,7 +158,7 @@ export default {
           // this.e(res.data.msg);
         } else if (res.status == 422) {
           if (res.data.email) {
-            this.errors.email = res.data.email;
+            this.errors.email = res.data.email[0];
             // this.e(res.data.email[0]);
           }
           if (res.data.password) {

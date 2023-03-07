@@ -1,74 +1,62 @@
 <template>
-  <div class="bg">
-    <div class="container-fluid justify-content-center py-md-4 py-3">
-      <div class="row">
-        <div class="col-md-6 my-md-auto text-center justify-content-center">
-          <img
-            :src="'/assets/images/lurc.png'"
-            alt="img"
-            class="img-fluid scientific"
+  <div class="login-section">
+    <div class="left">
+      <img :src="'/assets/images/lurc.png'" alt="img" />
+    </div>
+
+    <div class="right">
+      <div class="form">
+        <h1>Reset Password</h1>
+        <div class="mb-2">
+          Email Address
+          <Input
+            type="email"
+            v-model="data.email"
+            disabled
+            placeholder="Email Address"
           />
+          <span class="text-danger" v-if="errors.email">{{
+            errors.email[0]
+          }}</span>
+        </div>
+        <div class="mb-2">
+          Enter New Password
+          <Input
+            type="password"
+            v-model="data.password"
+            placeholder="Enter New Password"
+          />
+          <span class="w-full text-danger" v-if="errors.password"
+            >{{ errors.password[0] }}
+          </span>
         </div>
 
-        <div class="col-md-6 my-md-auto justify-content-center">
-          <div class="container-fluid">
-            <div class="container-fluid rt col-10 p-5">
-              <h2 class="p-3 text-center">Reset Password</h2>
-              <div class="mb-2">
-                Email Address
-                <Input
-                  type="email"
-                  v-model="data.email"
-                  disabled
-                  placeholder="Email Address"
-                />
-                <span class="text-danger" v-if="errors.email">{{
-                  errors.email[0]
-                }}</span>
-              </div>
-              <div class="mb-2">
-                Enter New Password
-                <Input
-                  type="password"
-                  v-model="data.password"
-                  placeholder="Enter New Password"
-                />
-                <span class="w-full text-danger" v-if="errors.password"
-                  >{{ errors.password[0] }}
-                </span>
-              </div>
+        <div class="mb-2">
+          Confirm New Password
+          <Input
+            type="password"
+            v-model="data.password_confirmation"
+            placeholder="Confirm New Password"
+          />
+          <span class="w-full text-danger" v-if="errors.password_confirmation"
+            >{{ errors.password[0] }}
+          </span>
+        </div>
 
-              <div class="mb-2">
-                Confirm New Password
-                <Input
-                  type="password"
-                  v-model="data.password_confirmation"
-                  placeholder="Confirm New Password"
-                />
-                <span
-                  class="w-full text-danger"
-                  v-if="errors.password_confirmation"
-                  >{{ errors.password[0] }}
-                </span>
-              </div>
-
-              <div class="mb-2">
-                <button
-                  :class="[
-                    data.email && data.password
-                      ? ' main-btn-change col-12'
-                      : ' main-btn col-12',
-                    ' main-btn col-12',
-                  ]"
-                  @click="submit"
-                  :disabled="isSubmitting"
-                  :loading="isSubmitting"
-                >
-                  {{ isSubmitting ? "Submitting..." : "Reset Password" }}
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="mb-2">
+          <button
+            :class="[
+              data.email && data.password
+                ? ' main-btn-change col-12'
+                : ' main-btn col-12',
+              ' main-btn col-12',
+            ]"
+            @click="submit"
+            :disabled="isSubmitting"
+            :loading="isSubmitting"
+          >
+            {{ isSubmitting ? "Submitting..." : "Reset Password" }}
+          </button>
         </div>
       </div>
     </div>

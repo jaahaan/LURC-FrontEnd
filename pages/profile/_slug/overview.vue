@@ -181,12 +181,12 @@
                       errors.grade[0]
                     }}</span>
                   </FormItem>
-                  <FormItem label="Activities">
+                  <FormItem label="Description">
                     <Input
                       v-model="editEducationData.activities"
                       type="textarea"
                       :autosize="{ minRows: 2, maxRows: 5 }"
-                      placeholder="Write activities..."
+                      placeholder="Write description..."
                     ></Input>
                     <span class="text-danger" v-if="errors.activities">{{
                       errors.activities[0]
@@ -228,8 +228,12 @@
                 </div>
               </div>
               <p class="sub-title">
-                {{ education.degree }}, {{ education.fieldOfStudy }}
+                {{ education.degree }} in {{ education.fieldOfStudy }}
               </p>
+              <p class="sub-title" v-if="education.grade">
+                CGPA: {{ education.grade }}
+              </p>
+              <p class="sub-title">{{ education.activities }}</p>
               <p class="sub-title" v-if="education.end_date">
                 {{ education.start_date }} - {{ education.end_date }}
               </p>
@@ -260,16 +264,16 @@
                 <i class="fa-solid fa-xmark"></i>
               </div>
             </h5>
-            <div v-if="loadingSkills" class="loader">
+            <!-- <div v-if="loadingSkills" class="loader">
               <h1 />
-            </div>
+            </div> -->
             <Select
-              v-else
               filterable
               multiple
               placeholder="Select Skills"
               v-model="editData.skill_id"
               :remote-method="getSkills"
+              :loading="isSkillLoading"
             >
               <Option v-for="(skill, i) in skills" :value="skill.id" :key="i">{{
                 skill.name
@@ -279,12 +283,22 @@
             <div class="footer">
               <div></div>
               <div>
-                <button class="main-btn main-btn__border" @click="updateSkills">
-                  <i class="fa-solid fa-floppy-disk"></i> Save
-                </button>
-                <!-- <button class="main-btn main-btn__border" @click="deleteSkills">
-                  Delete
-                </button> -->
+                <Button
+                  class="main-btn main-btn__border"
+                  @click="deleteSkills"
+                  :disabled="deleting"
+                  :loading="deleting"
+                >
+                  {{ deleting ? "Deleting..." : "Delete" }}</Button
+                >
+                <Button
+                  class="main-btn main-btn__bg"
+                  @click="updateSkills"
+                  :disabled="loadingSkills"
+                  :loading="loadingSkills"
+                  ><i class="fa-solid fa-floppy-disk"></i>
+                  {{ loadingSkills ? "Saving..." : "Save" }}</Button
+                >
               </div>
             </div>
           </div>
@@ -341,9 +355,6 @@
               </li>
               <li class="nav-item" @click="showSkillsModal">
                 <a class="nav-link">Skills</a>
-              </li>
-              <li class="nav-item" @click="showInterestsModal(profileInfo)">
-                <a class="nav-link">Interests</a>
               </li>
             </ul>
 
@@ -495,12 +506,12 @@
                   errors.grade[0]
                 }}</span>
               </FormItem>
-              <FormItem label="Activities">
+              <FormItem label="Description">
                 <Input
                   v-model="educationData.activities"
                   type="textarea"
                   :autosize="{ minRows: 2, maxRows: 5 }"
-                  placeholder="Write activities..."
+                  placeholder="Write description..."
                 ></Input>
                 <span class="text-danger" v-if="errors.activities">{{
                   errors.activities[0]
@@ -528,7 +539,7 @@
         </Modal>
 
         <!-- Skills modal -->
-        <Modal v-model="skillsModal" :closable="true">
+        <Modal v-model="skillsModal" :closable="true" :mask-closable="false">
           <div class="research-post--item" id="modal">
             <h5 class="post-title">
               <div>Add Skills</div>
@@ -650,6 +661,7 @@
                   placeholder="Select Authors"
                   v-model="researchData.author_id"
                   :remote-method="getAuthors"
+                  :loading="isSkillLoading"
                 >
                   <Option
                     v-for="(user, index) in users"
@@ -688,10 +700,10 @@
                   :on-success="handleImageSuccess"
                   :on-error="handleError"
                   :format="['jpg', 'jpeg', 'png']"
-                  :max-size="2048"
-                  :on-format-error="handleFormatError"
                   :on-exceeded-size="handleMaxSize"
-                  action="http://localhost:8000/api/upload"
+                  :max-size="65535"
+                  :on-format-error="handleFormatError"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
                 >
                   <div style="padding: 5px 0">
                     <Icon
@@ -699,7 +711,7 @@
                       size="22"
                       style="color: #3399ff"
                     ></Icon>
-                    Click or drag files here to upload
+                    Upload Image
                   </div>
                 </Upload>
                 <div
@@ -726,23 +738,11 @@
                   :multiple="false"
                   :show-upload-list="false"
                   :on-success="handleSuccess"
-                  :format="[
-                    'jpg',
-                    'jpeg',
-                    'png',
-                    'pdf',
-                    'docx',
-                    'txt',
-                    'mp4',
-                    'mp3',
-                    'zip',
-                  ]"
-                  :max-size="21048"
+                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
                   :on-format-error="handleFormatError"
-                  :on-exceeded-size="handleMaxSize"
                   :on-remove="handleRemove"
                   type="drag"
-                  action="http://localhost:8000/api/upload_attachment"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -816,6 +816,7 @@
                   placeholder="Select Team Member"
                   v-model="researchData.author_id"
                   :remote-method="getAuthors"
+                  :loading="isSkillLoading"
                 >
                   <Option
                     v-for="(user, index) in users"
@@ -854,18 +855,18 @@
                   :on-success="handleImageSuccess"
                   :on-error="handleError"
                   :format="['jpg', 'jpeg', 'png']"
-                  :max-size="2048"
-                  :on-format-error="handleFormatError"
                   :on-exceeded-size="handleMaxSize"
-                  action="http://localhost:8000/api/upload"
+                  :max-size="65535"
+                  :on-format-error="handleFormatError"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
                 >
-                  <div style="padding: 20px 0">
+                  <div style="padding: 5px 0">
                     <Icon
                       type="ios-cloud-upload"
-                      size="52"
+                      size="22"
                       style="color: #3399ff"
                     ></Icon>
-                    <p>Click or drag files here to upload</p>
+                    Upload Image
                   </div>
                 </Upload>
                 <div
@@ -888,23 +889,11 @@
                   :multiple="false"
                   :show-upload-list="false"
                   :on-success="handleSuccess"
-                  :format="[
-                    'jpg',
-                    'jpeg',
-                    'png',
-                    'pdf',
-                    'docx',
-                    'txt',
-                    'mp4',
-                    'mp3',
-                    'zip',
-                  ]"
-                  :max-size="21048"
+                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
                   :on-format-error="handleFormatError"
-                  :on-exceeded-size="handleMaxSize"
                   :on-remove="handleRemove"
                   type="drag"
-                  action="http://localhost:8000/api/upload_attachment"
+                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -918,16 +907,7 @@
                   ></span>
                 </div>
               </FormItem>
-              <FormItem label="Project URL">
-                <Input
-                  type="url"
-                  v-model="researchData.url"
-                  placeholder="Project URL"
-                />
-                <span class="text-danger" v-if="errors.url">{{
-                  errors.url[0]
-                }}</span>
-              </FormItem>
+
               <div class="row">
                 <div class="col-6">
                   <FormItem label="Start Date">
@@ -1041,7 +1021,6 @@ export default {
       user_slug: "",
       about_id: "",
       skill_id: "",
-      interests_id: "",
       token: "",
       data: {
         about: "",
@@ -1052,7 +1031,6 @@ export default {
       editData: {
         about: "",
         skill_id: [],
-        interests: "",
         id: "",
       },
       educationData: {
@@ -1098,7 +1076,6 @@ export default {
       aboutModal: false,
       educationModal: false,
       skillsModal: false,
-      interestsModal: false,
       publicationsModal: false,
       projectsModal: false,
       researchModal: false,
@@ -1113,7 +1090,7 @@ export default {
       isEditingItem: false,
       isIconImageNew: false,
       iconImageName: "",
-      http: "http://localhost:8000/images/",
+      http: "https://cameraworldapi.dreamsgallerybd.com",
     };
   },
 
@@ -1287,6 +1264,7 @@ export default {
       this.hideSidebar();
     },
     async saveEducation() {
+      this.isAdding = true;
       const res = await this.callApi(
         "post",
         "/api/save_education",
@@ -1304,6 +1282,7 @@ export default {
       } else {
         this.swr();
       }
+      this.isAdding = false;
     },
     showEditAllEducation() {
       this.errors = [];
@@ -1350,17 +1329,6 @@ export default {
       }
     },
     async updateEducation() {
-      // let validation = true;
-      // this.clearErrorMessage();
-      // if (this.editObj.email.trim() == "") {
-      //   this.editErrorMessages.email = "Email is required!";
-      //   validation = false;
-      // }
-      // if (validation == false) return this.$Message.error("Validation Failed!");
-      // new Date("2020-12-28").toLocaleString("en-us", {
-      //   month: "short",
-      //   year: "numeric",
-      // });
       var startDate = this.editEducationData.start_date.toLocaleString(
         "en-us",
         { month: "short", year: "numeric" }
@@ -1370,7 +1338,7 @@ export default {
         year: "numeric",
       });
 
-      this.deleting = true;
+      this.isAdding = true;
       const res = await this.callApi(
         "post",
         "/api/update_education",
@@ -1403,7 +1371,7 @@ export default {
           this.swr();
         }
       }
-      this.deleting = false;
+      this.isAdding = true;
     },
     cancelEducationModal() {
       this.editEducationData.id = "";
@@ -1433,13 +1401,11 @@ export default {
       if (response.status == 200) {
         this.educationInfo.splice(this.deleteValue.indexNumber, 1);
         this.s(this.deleteValue.title + " Deleted!!");
-        this.deleteModal = false;
-        this.deleting = false;
       } else {
-        this.deleting = false;
-        this.deleteModal = false;
         this.swr();
       }
+      this.deleteModal = false;
+      this.deleting = false;
     },
     showSkillsModal() {
       this.errors = [];
@@ -1488,6 +1454,8 @@ export default {
     },
     async updateSkills() {
       if (this.editData.skill_id == []) return this.e("required");
+      this.loadingSkills = true;
+
       const res = await this.callApi(
         "post",
         `/api/update_skills`,
@@ -1509,8 +1477,20 @@ export default {
           this.swr();
         }
       }
+      this.loadingSkills = false;
     },
+    async deleteSkills() {
+      this.deleting = true;
 
+      const res = await this.callApi("post", `/api/delete_skills`);
+      if (res.status === 200) {
+        this.s(res.data.msg);
+        this.reset();
+      } else {
+        this.swr();
+      }
+      this.deleting = false;
+    },
     showProjectModal() {
       this.errors = [];
       this.researchData.type = "Project";
@@ -1539,7 +1519,7 @@ export default {
         "/api/save_post",
         this.researchData
       );
-      this.isLoading = true;
+      this.isAdding = true;
       if (res.status === 200) {
         this.s("Updated");
         this.projectModal = false;
@@ -1553,7 +1533,7 @@ export default {
           this.swr();
         }
       }
-      this.isLoading = false;
+      this.isAdding = false;
     },
     async getSkills(query) {
       this.isSkillLoading = true;
@@ -1568,6 +1548,7 @@ export default {
     },
     async getAuthors(query) {
       console.log(query);
+      this.isSkillLoading = true;
       const response = await this.callApi(
         "get",
         `/api/search?keyword=${query}`
@@ -1575,6 +1556,7 @@ export default {
       if (response.status == 200) {
         this.users = response.data;
       }
+      this.isSkillLoading = false;
     },
 
     closeModal() {
@@ -1611,8 +1593,6 @@ export default {
       this.skillsModal = false;
       this.projectModal = false;
       this.researchModal = false;
-
-      //   this.token = window.Laravel.csrfToken;
 
       this.user_slug = this.$route.params.slug;
       const res = await this.callApi(
@@ -1664,13 +1644,6 @@ export default {
 </script>
 
 <style scoped>
-.card-bg {
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-.card {
-  border: 1px solid #cdcdcd;
-}
-
 .profile-info-skeleton h5 {
   width: 60%;
   height: 24px;

@@ -1,7 +1,6 @@
 <template>
-  <div class="container-fluid col-10 p-3">
+  <div>
     <div class="alert alert-dark p-2" v-if="msg">{{ msg }}</div>
-    <h1 class="text-center mb-3">Register As Student</h1>
     <div class="mb-2">
       <input type="text" v-model="data.name" placeholder="Name" />
       <span class="text-danger" v-if="errors.name">{{ errors.name[0] }}</span>

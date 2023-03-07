@@ -35,6 +35,7 @@ footer {
       &--icon {
         li {
           display: inline-block;
+          transition: 0.5s ease;
           &:not(:last-child) {
             margin-right: 10px;
             margin-bottom: 0;
