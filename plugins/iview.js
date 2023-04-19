@@ -17,6 +17,8 @@ Vue.mixin({
     computed:{
         ...mapGetters({
             departmentInfo: "getDepartment",
+            themeInfo: "getTheme",
+
         })
     },
     
@@ -34,6 +36,9 @@ Vue.mixin({
                 desc: msg
             });
         },
+        s_msg(msg) {
+            this.$Message.success(msg);
+        },
         w(msg, i = 'Hi!') {
             this.$Notice.warning({
                 title: i,
@@ -41,40 +46,54 @@ Vue.mixin({
             });
         },
         e(msg) {
+            // this.$Message.error(msg);
+            this.$Notice.error({
+                desc: msg,
+            });
+        },
+        e_msg(msg) {
             this.$Message.error(msg);
-            // this.$Notice.error({
-            //     title: i,
-            //     desc: msg,
-
-            // });
+            
         },
         swr() {
-            this.$Message.error('Something went wrong, please try again later');
+            // this.$Message.error('Something went wrong, please try again later');
 
-            // this.$Notice.error({
-            //     title: 'Oops',
-            //     desc: 'Something went wrong, please try again later'
-            // });
+            this.$Notice.error({
+                title: 'Oops',
+                desc: 'Something went wrong, please try again later'
+            });
         },
-        async getNotificationItemsServer(){
-            const [notification, peopleYouMayKnow, connection] = await Promise.all([
-                this.callApi("get", '/api/get_notification'),
-                this.callApi("get", "/api/get_people_you_may_know"),
-                this.callApi("get", "/api/get_auth_user_connection"),
-              ]);
-              if(notification.status == 200 && peopleYouMayKnow.status==200 && connection.status==200){
-                console.log(notification.data.data)
-                // state.seenCount = notification.data.count
-                this.$store.dispatch('updateNotification', notification.data.data)
-                this.$store.dispatch('updatePeopleYouMayKnow', peopleYouMayKnow.data.data)
-                this.$store.dispatch('updateAuthUserConnection', connection.data.data)
+        instance (type, msg) {
+            const title = msg;
+            // const content = '<p>Content of dialog</p><p>Content of dialog</p>';
+            switch (type) {
+                case 'info':
+                    this.$Modal.info({
+                        title: title,
+                        // content: content
+                    });
+                    break;
+                case 'success':
+                    this.$Modal.success({
+                        title: msg,
+                        // content: content
+                    });
+                    break;
+                case 'warning':
+                    this.$Modal.warning({
+                        title: title,
+                        // content: content
+                    });
+                    break;
+                case 'error':
+                    this.$Modal.error({
+                        title: title,
+                        // content: content
+                    });
+                    break;
             }
-            
-            else {
-                this.swr();
-            }
-        },
-        
+        }
+       
     }
 })
 

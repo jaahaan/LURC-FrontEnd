@@ -14,6 +14,17 @@
   color: #fbf7ff;
 }
 
+.background {
+  animation-name: fadeIn, rotate;
+  animation-duration: 5s, 360s;
+  animation-iteration-count: 1, infinite;
+  animation-timing-function: linear, linear;
+  -webkit-animation-name: fadeIn, rotate;
+  -webkit-animation-duration: 5s, 360s;
+  -webkit-animation-iteration-count: 1, infinite;
+  -webkit-animation-timing-function: linear, linear;
+}
+
 .quote-section {
   padding: 1rem;
   display: flex;

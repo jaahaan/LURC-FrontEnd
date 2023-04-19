@@ -26,7 +26,7 @@ export default {
       { name: 'format-detection', content: 'telephone=no' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'icon', type: 'image/x-icon', href: '/icon.png' },
       { rel: 'stylesheet', href: "/assets/css/vendor/bootstrap.min.css" },
       { rel: 'stylesheet', href: "/assets/css/vendor/lineicons.css" },
       { rel: 'stylesheet', href: "/assets/css/vendor/line-awesome.min.css"},
@@ -99,8 +99,9 @@ export default {
     host: 'localhost' // default: localhost
   },
   publicRuntimeConfig: {
-    // BASE_URL: process.env.BASE_URL,
-    SOCKET_URL: "http://127.0.0.1:8000",
+    BASE_URL: "http://127.0.0.1:8000",
+    IMAGE_URL: "http://127.0.0.1:8000/images/",
+    SOCKET_URL: "http://127.0.0.1:5000",
     // SITE_TITLE: process.env.SITE_TITLE,
     // SITE_URL: process.env.SITE_URL,
     // Stripe_Publishable_key: process.env.Stripe_Publishable_key,

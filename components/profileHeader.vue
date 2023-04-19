@@ -13,7 +13,11 @@
               "
             >
               <div class="profile-header m-auto" v-if="editData.image">
-                <img :src="`${editData.image}`" class="img-fluid" type="file" />
+                <img
+                  :src="`${http + editData.image}`"
+                  class="img-fluid"
+                  type="file"
+                />
                 <div class="profile-header-cover" @click="deleteImage()">
                   <i class="lni lni-trash-can"></i>
                 </div>
@@ -23,13 +27,15 @@
                 <Upload
                   ref="editDataUploads"
                   type="drag"
+                  :multiple="false"
+                  :show-upload-list="true"
                   :on-success="handleSuccess"
                   :on-error="handleError"
                   :format="['jpg', 'jpeg', 'png']"
                   :max-size="65535"
                   :on-format-error="handleFormatError"
                   :on-exceeded-size="handleMaxSize"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_profile_image"
+                  action="http://localhost:8000/api/upload_profile_image"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -102,7 +108,11 @@
           <template v-if="editModal && isLoading == false">
             <div class="container" v-if="profileInfo.userType == 'student'">
               <div class="profile-header m-auto" v-if="editData.image">
-                <img :src="`${editData.image}`" class="img-fluid" type="file" />
+                <img
+                  :src="`${http + editData.image}`"
+                  class="img-fluid"
+                  type="file"
+                />
                 <div class="profile-header-cover" @click="deleteImage()">
                   <i class="lni lni-trash-can"></i>
                 </div>
@@ -112,6 +122,8 @@
                 <Upload
                   ref="editDataUploads"
                   type="drag"
+                  :multiple="false"
+                  :show-upload-list="true"
                   :headers="{
                     'x-csrf-token': token,
                     'X-Requested-With': 'XMLHttpRequest',
@@ -122,7 +134,7 @@
                   :max-size="65535"
                   :on-format-error="handleFormatError"
                   :on-exceeded-size="handleMaxSize"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_profile_image"
+                  action="http://127.0.0.1:8000/api/upload_profile_image"
                 >
                   <div class="profile-main-btn">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
@@ -175,12 +187,22 @@
           <!--****** Profile Info ******-->
           <template v-else>
             <div class="profile-header m-auto">
-              <img :src="profileInfo.image" alt="img" class="img-fluid" />
+              <img
+                :src="`${http + profileInfo.image}`"
+                alt="img"
+                class="img-fluid"
+              />
               <div
                 class="profile-header-cover"
-                @click="showEditModal(profileInfo)"
                 v-if="authUser.slug == this.$route.params.slug"
               >
+                <i class="fa-solid fa-camera m-2" @click="showImage"></i>
+                <i
+                  class="fa-solid fa-pen-to-square m-2"
+                  @click="showEditModal(profileInfo)"
+                ></i>
+              </div>
+              <div class="profile-header-cover" @click="showImage" v-else>
                 <i class="fa-solid fa-camera"></i>
               </div>
             </div>
@@ -240,13 +262,17 @@
               </button>
               <button
                 class="main-btn main-btn__border col-5 mx-1"
-                @click="message"
+                @click="handleSelect"
               >
                 <i class="fa-solid fa-paper-plane"></i>
                 Message
               </button>
             </div>
           </template>
+          <Modal v-model="visible">
+            <img :src="`${http + profileInfo.image}`" style="width: 100%" />
+            <div slot="footer"></div>
+          </Modal>
         </div>
         <!---******* loader *******--->
         <div class="container mb-2" v-if="isLoading == true">
@@ -321,7 +347,7 @@
     </div>
     <div v-if="isLoading == false">
       <Modal v-model="responseModal">
-        <p slot="header" style="color: #7da2a9; text-align: center">
+        <p slot="header" style="color: #566d7e; text-align: center">
           <Icon type="close"></Icon>
           <span>Response</span>
         </p>
@@ -349,7 +375,7 @@
         </div>
       </Modal>
       <Modal v-model="removeModal">
-        <p slot="header" style="color: #7da2a9; text-align: center">
+        <p slot="header" style="color: #566d7e; text-align: center">
           <Icon type="close"></Icon>
           <span>Response</span>
         </p>
@@ -381,8 +407,9 @@ export default {
   data() {
     return {
       socket: null,
-
+      isChatLoading: false,
       isLoading: false,
+      visible: false,
       data: {
         image: "",
         name: "",
@@ -419,6 +446,8 @@ export default {
       removeModal: false,
       sending: false,
       errors: [],
+      selectedChatCompare: "",
+      http: this.$config.IMAGE_URL,
     };
   },
   components: {
@@ -457,6 +486,9 @@ export default {
         }
       }
     },
+    showImage() {
+      this.visible = true;
+    },
     showEditModal() {
       let obj = {
         id: this.profileInfo.id,
@@ -470,14 +502,10 @@ export default {
       this.isEditingItem = true;
     },
     handleSuccess(res, file) {
-      res = `https://cameraworldapi.dreamsgallerybd.com/profileImages/${res}`;
-      if (this.isEditingItem) {
-        console.log("inside");
-        this.$refs.editDataUploads.clearFiles();
-        return (this.editData.image = res);
-      }
-      console.log(res);
-      this.data.image = res;
+      res = `${res}`;
+
+      this.$refs.editDataUploads.clearFiles();
+      return (this.editData.image = res);
     },
     handleError(res, file) {
       this.$Notice.warning({
@@ -506,17 +534,15 @@ export default {
     },
     async deleteImage() {
       let image;
-      // for editing....
-      // this.isIconImageNew = true;
+
       image = this.editData.image;
-      this.editData.image =
-        "https://cameraworldapi.dreamsgallerybd.com/profileImages/download.jpg";
+      this.editData.image = "download.jpg";
       this.$refs.editDataUploads.clearFiles();
-      const res = await this.callApi("post", "/api/delete__profile_image", {
+      const res = await this.callApi("post", "/api/delete_profile_image", {
         imageName: image,
       });
       if (res.status != 200) {
-        this.data.image = image;
+        this.editData.image = image;
         this.swr();
       }
     },
@@ -589,11 +615,15 @@ export default {
     async connectionStatus() {
       this.user_slug = this.$route.params.slug;
       this.isLoading = true;
-
+      this.approvedRequest = false;
+      this.receivedRequest = false;
+      this.sendRequest = false;
       const res = await this.callApi(
         "get",
         `/api/connection_status?slug=${this.user_slug}`
       );
+      // if (res.status == 200) {
+      // }
       if (res.status == 201) {
         this.approvedRequest = true;
       }
@@ -629,7 +659,7 @@ export default {
       };
       this.socket.emit("notification", notificationObj);
     },
-    async message() {
+    async handleSelect() {
       let info = {
         selectedUserId: this.profileInfo.id,
         selectedUserImage: this.profileInfo.image,
@@ -643,7 +673,42 @@ export default {
         name: this.profileInfo.name,
       };
       this.$store.commit("setSelectedUserInfo", info);
-      this.$router.push(`/message`);
+      let obj = {
+        from_id: this.authUser.id,
+        to_id: this.profileInfo.id,
+      };
+      const res = await this.callApi("post", `/api/add_conversation`, obj);
+      if (res.status == 200) {
+        this.getSelectedUserChat(user, res.data.data[0].id);
+      } else if (res.status == 201) {
+        this.getSelectedUserChat(user, res.data.data[0].id);
+      }
+    },
+    async getSelectedUserChat(user, index) {
+      this.$store.commit("setIsChatBox", true);
+      let info = {
+        room_id: index,
+        selectedUserId: user.id,
+        selectedUserImage: user.image,
+        selectedUserSlug: user.slug,
+        selectedUserName: user.name,
+      };
+      this.$store.commit("setSelectedUserInfo", info);
+
+      let roomId = index;
+      this.isActive = true;
+      this.selectedChatCompare = this.selectedUserInfo;
+      // window.history.pushState({}, null, `${this.$route.path}`);
+      this.isChatLoading = true;
+      const response = await this.callApi(
+        "get",
+        `/api/get_chat?limit=${3}&roomId=${roomId}`
+      );
+      if (response.status == 200) {
+        this.$store.commit("setMessages", response.data.data);
+        this.socket.emit("join chat", roomId);
+      } else this.swr();
+      this.isChatLoading = false;
     },
   },
 

@@ -16,7 +16,6 @@ button {
 .main-btn {
   padding: 0.5em 1.5em;
   border-radius: 20px;
-  border: 1px solid;
   font-size: 1em;
   font-weight: 500;
   min-width: 125px;
@@ -34,12 +33,14 @@ button {
       color: $bgWhite;
     }
   }
+
   &__type {
     border-radius: 6px;
     padding: 0.25em 1.5em;
     // background-color: #c2c2c2;
     // color:$gray;
   }
+
   &:hover {
     // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7);
     background-color: $btnHover;
@@ -50,6 +51,11 @@ button {
     // box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.7);
     color: $bgWhite;
     background-color: $primaryColor;
+  }
+  &__people {
+    background-color: transparent;
+    color: $secondaryColor;
+    min-width: 80px;
   }
   &--skeleton {
     border-radius: 20px;
@@ -67,7 +73,45 @@ button {
     color: #5a606d;
   }
 }
-
+.tf {
+  padding: 0.4em 1.2em;
+  margin-top: 0.75rem;
+  border-radius: 20px;
+  border: 1px solid;
+  font-size: 0.9em;
+  font-weight: 500;
+  min-width: 125px;
+  transition: 0.3s linear;
+  &__success {
+    border: 1px solid $upVote;
+    color: $upVote;
+    &:hover {
+      background-color: $upVote;
+      color: $bgWhite;
+    }
+  }
+  &__danger {
+    border: 1px solid $downVote;
+    color: $downVote;
+    &:hover {
+      background-color: $downVote;
+      color: $bgWhite;
+    }
+  }
+}
+.can {
+  padding: 0.6em;
+  border-radius: 10px;
+  font-size: 1em;
+  color: $secondaryColor;
+  border: 1px solid;
+  font-weight: 900;
+  transition: 0.3s linear;
+  &:hover {
+    background-color: $secondaryColor;
+    color: $bgWhite;
+  }
+}
 .profile-main-btn {
   border: 1px solid;
   border-radius: 20px;
@@ -95,11 +139,21 @@ button {
 
     font-size: 0.9em;
   }
+  .tf {
+    padding: 0.4em 1em;
+    font-size: 0.85em;
+  }
 }
 @include breakpoint-max(540px) {
   // Button CSS
   .main-btn {
     padding: 0.4em 0.8em;
     font-size: 0.8em;
+  }
+  .tf {
+    padding: 0.3em;
+    font-size: 0.7em;
+    min-width: 40px;
+    margin-left: 10px;
   }
 }

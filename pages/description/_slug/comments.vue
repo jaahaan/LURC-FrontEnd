@@ -19,8 +19,15 @@
         ></textarea>
         <Icon type="md-send" v-if="showbtn == true" @click="addComment" />
       </div>
-      <div v-for="(comment, index) in comments" :key="index">
-        <div class="comment-section" v-bind:class="{ active: commentId }">
+      <div
+        v-if="comments.length > 0"
+        v-for="(comment, index) in comments"
+        :key="index"
+      >
+        <div
+          class="comment-section"
+          v-bind:class="{ commentActive: commentId == comment.id }"
+        >
           <img :src="comment.image" alt="img" />
           <div class="comment-section-content">
             <div class="comment-section-content-main">
@@ -76,11 +83,20 @@
               "
             ></i></span
           ><span class="reply-item"
-            ><a class="reply-item-count" v-on:click="showCommentReplies(index)"
+            ><a
+              class="reply-item-count"
+              v-on:click="showCommentReplies(comment.id)"
+              v-if="comment.comment_reply_count > 1"
               >{{ comment.comment_reply_count }} Replies</a
+            ><a
+              class="reply-item-count"
+              v-on:click="showCommentReplies(comment.id)"
+              v-else
+              >{{ comment.comment_reply_count }} Reply</a
             ></span
           >
         </div>
+
         <div class="comment-reply">
           <div
             class="comment-reply-box"
@@ -96,7 +112,13 @@
               @focus="resizeTextarea"
               @keyup="resizeTextarea"
             ></textarea>
-            <Icon type="md-send" @click="addCommentReply(index)" />
+            <Icon type="md-send" @click="addCommentReply(comment)" />
+          </div>
+          <div
+            v-if="isReplyLoading && comment_id == comment.id"
+            class="loader-sm"
+          >
+            <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
           </div>
           <div
             class="comment-reply-section"
@@ -139,6 +161,21 @@
           </div>
         </div>
       </div>
+
+      <Modal
+        v-model="commentLikedUserModal"
+        title="People Who Liked"
+        :mask-closable="true"
+        :closable="true"
+      >
+        <div class="comment-liked" v-for="user in commentLikedUser">
+          <img :src="user.image" alt="img" />
+          <nuxt-link :to="`/profile/${user.user_slug}/overview`">
+            {{ user.name }}
+          </nuxt-link>
+        </div>
+        <div slot="footer"></div>
+      </Modal>
     </div>
   </div>
 </template>
@@ -148,11 +185,13 @@ import { mapGetters } from "vuex";
 
 export default {
   components: {},
+  middleware: "auth",
   data() {
     return {
+      isReplyLoading: false,
       socket: null,
       details: [],
-      comments: [],
+      // comments: [],
       commentReplies: [],
       commentLikedUser: [],
       commentReplyLikedUser: [],
@@ -193,6 +232,7 @@ export default {
   computed: {
     ...mapGetters({
       commentId: "commentId",
+      comments: "getAllComments",
     }),
   },
   methods: {
@@ -225,23 +265,36 @@ export default {
       // if (res.status == 201) {
       const res = await this.callApi("post", "/api/add_comment", obj);
       if (res.status == 201) {
-        let data = {
-          id: res.data.id,
+        let d = {
+          id: res.data.data.id,
+          post_id: this.details.id,
           user_id: this.authUser.id,
           comment: this.data.comment,
           image: this.authUser.image,
           name: this.authUser.name,
+          user_slug: this.authUser.slug,
           // created_at: date + " " + time,
           comment_like_count: 0,
         };
-        this.comments.unshift(data);
+        this.$store.commit("pushAllComments", d);
+        // this.comments.unshift(data);
         this.data.comment = "";
         this.socket.emit("notification", notificationObj);
       } else {
         this.swr();
       }
     },
+    async getComment() {
+      const res = await this.callApi(
+        "get",
+        `/api/get_comments/${this.post_slug}`
+      );
 
+      if (res.status == 200) {
+        this.$store.commit("setAllComments", res.data.data);
+        // this.comments = res1.data.data;
+      }
+    },
     async CommentLike(index) {
       if (this.comments[index].user_id != this.authUser.id) {
         let obj = {
@@ -254,7 +307,7 @@ export default {
         if (res.status == 201) {
           this.comments[index].comment_like_count += 1;
           this.comments[index].authUserCommentLike = "yes";
-          // this.socket.emit("notification", notificationObj);
+          this.socket.emit("notification", notificationObj);
         } else {
           this.comments[index].comment_like_count -= 1;
           this.comments[index].authUserCommentLike = "no";
@@ -298,16 +351,16 @@ export default {
         }
       });
     },
-    async addCommentReply(index) {
+    async addCommentReply(comment) {
       if (this.data.commentReply.trim() == "")
         return this.e("Field is empty!!!");
       let obj = {
         post_id: this.details.id,
-        comment_id: this.comments[index].id,
+        comment_id: comment.id,
         commentReply: this.data.commentReply,
       };
       let notificationObj = {
-        id: this.comments[index].user_id,
+        id: comment.user_id,
       };
       const res = await this.callApi("post", "/api/add_comment_reply", obj);
       if (res.status == 201) {
@@ -315,31 +368,44 @@ export default {
           id: res.data.id,
           user_id: this.authUser.id,
           post_id: this.details.id,
-          comment_id: this.comments[index].id,
+          comment_id: comment.id,
           comment: this.data.commentReply,
           image: this.authUser.image,
           name: this.authUser.name,
           comment_reply_like_count: 0,
         };
         this.commentReplies.unshift(data);
-        this.showCommentReplies(index);
+        this.showCommentReplies1(comment.id);
         this.data.commentReply = "";
         this.socket.emit("notification", notificationObj);
       } else {
         this.swr();
       }
     },
-
-    async showCommentReplies(index) {
+    async showCommentReplies1(id) {
       this.showcommentreplies = true;
-      this.comment_id = this.comments[index].id;
+      this.comment_id = id;
       const res = await this.callApi(
         "get",
-        `/api/get_comment_replies?comment_id=${this.comments[index].id}`
+        `/api/get_comment_replies?comment_id=${id}`
       );
       if (res.status == 200) {
         this.commentReplies = res.data.data;
       }
+    },
+
+    async showCommentReplies(id) {
+      this.showcommentreplies = true;
+      this.comment_id = id;
+      this.isReplyLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_comment_replies?comment_id=${id}`
+      );
+      if (res.status == 200) {
+        this.commentReplies = res.data.data;
+      }
+      this.isReplyLoading = false;
     },
 
     async CommentReplyLike(index) {
@@ -347,17 +413,35 @@ export default {
         let obj = {
           id: this.commentReplies[index].id,
         };
-
+        let notificationObj = {
+          id: this.commentReplies[index].user_id,
+        };
         const res = await this.callApi("post", "/api/comment_reply_like", obj);
         if (res.status == 201) {
           this.commentReplies[index].comment_reply_like_count += 1;
           this.commentReplies[index].authUserReplyCommentLike = "yes";
+          this.socket.emit("notification", notificationObj);
         } else {
           this.commentReplies[index].comment_reply_like_count -= 1;
           this.commentReplies[index].authUserReplyCommentLike = "no";
         }
       } else {
         this.i("You can't like your own reply");
+      }
+    },
+    async getCommentReplyLikedUser(index) {
+      let obj = {
+        id: this.commentReplies[index].id,
+      };
+      const res = await this.callApi(
+        "get",
+        `/api/get_comment_reply_liked_user?id=${this.commentReplies[index].id}`
+      );
+      if (res.status == 200) {
+        this.commentLikedUser = res.data.data;
+        this.commentLikedUserModal = true;
+      } else {
+        this.swr();
       }
     },
 
@@ -394,7 +478,8 @@ export default {
       );
 
       if (res1.status == 200) {
-        this.comments = res1.data.data;
+        this.$store.commit("setAllComments", res1.data.data);
+        // this.comments = res1.data.data;
       }
     }
     if (res.status == 200) {

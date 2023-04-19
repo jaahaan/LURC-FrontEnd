@@ -13,7 +13,7 @@
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
     border-radius: 50%;
     img {
-      width: 100%;
+      width: auto;
       height: 100%;
       background-size: cover;
     }
@@ -30,7 +30,6 @@
         color: #fff;
         font-size: 40px;
         cursor: pointer;
-        margin: auto;
       }
     }
     &:hover .profile-header-cover {
@@ -178,8 +177,10 @@
 
 .profile-menu {
   width: 45%;
+  height: fit-content;
   box-shadow: 0px 0px 3px $headerBg;
-
+  border-radius: 10px !important;
+  overflow: hidden;
   /*background-image: linear-gradient(angle, color-stop1, color-stop2);*/
   background: linear-gradient(
     180deg,
@@ -205,6 +206,25 @@
     font-weight: 500;
     margin-top: 15px;
   }
+  .settings {
+    font-size: 25px;
+    font-weight: 500;
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+
+    i {
+      font-size: 1em;
+      line-height: 1;
+      margin-left: 10px;
+      color: $bgWhite;
+    }
+    a {
+      i {
+        font-size: 0.8em;
+      }
+    }
+  }
   p {
     text-align: center;
     font-size: 16px;
@@ -227,15 +247,26 @@
     }
   }
   &--list {
-    margin-top: 20px;
-    border-top: 1px solid #cdcdcd;
-
+    margin-top: 15px;
+    // border-top: 1px solid #cdcdcd;
+    background: $bgWhite;
+    border-radius: 10px !important;
+    overflow: hidden;
     &---item {
+      padding-top: 10px;
+      padding-right: 10px;
+      padding-left: 10px;
+
+      &:last-child {
+        padding-bottom: 10px;
+      }
       .menu-link {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
-        padding: 25px 45px;
+        padding: 20px 25px;
+        border-radius: 10px;
+
         &:hover {
           background-color: $primaryColor;
           i {

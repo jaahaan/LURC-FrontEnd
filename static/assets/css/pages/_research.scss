@@ -155,6 +155,7 @@
         }
         h5 {
           font-size: 22px;
+          color: $link;
         }
       }
       .post-sub-title {
@@ -238,7 +239,7 @@
               margin-left: 0.25em !important;
               font-size: 1.25em;
               font-weight: 500;
-              color: $gray;
+              color: $secondary-text;
 
               img {
                 width: 1em;
@@ -254,7 +255,7 @@
         }
 
         .active {
-          color: $btnHover !important;
+          color: $link !important;
           font-weight: bolder;
         }
       }
@@ -417,19 +418,29 @@
       .content {
         display: flex;
         align-items: center;
-        img {
+        &--image {
           width: 40px;
           height: 40px;
-          margin-right: 0.75rem;
+          text-align: center;
+          background: $bgWhite;
+          box-shadow: 0px 0px 3px #cdcdcd;
           border-radius: 50%;
+          margin-right: 8px;
+          overflow: hidden;
+          img {
+            width: auto;
+            height: 100%;
+            background-size: cover;
+            // border-radius: 50%;
+          }
         }
 
         h4 {
-          font-size: 16px;
+          font-size: 14px;
           color: #000;
         }
         p {
-          font-size: 13px;
+          font-size: 12px;
           color: $gray;
         }
       }

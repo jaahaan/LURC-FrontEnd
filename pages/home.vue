@@ -37,7 +37,9 @@
                 </div>
                 <div class="post-details">
                   <div class="header">
-                    <img :src="post.image" alt="img" />
+                    <div class="header--image">
+                      <img :src="`${http + post.image}`" alt="img" />
+                    </div>
                     <div class="header-content">
                       <nuxt-link :to="`/profile/${post.user_slug}/overview`">
                         {{ post.name }}
@@ -86,113 +88,99 @@
                       >See more</nuxt-link
                     >
                   </p>
-                  <div class="mt-2 mb-2">
+                  <div class="mb-2">
                     <nuxt-link
                       :to="`/description/${post.slug}/overview`"
-                      class="main-btn main-btn__type d-inline-block text-center"
+                      class="main-btn main-btn__border d-inline-block text-center"
                     >
                       {{ post.type }}</nuxt-link
                     >
                   </div>
+                  <div class="post-sub-title" v-if="post.affiliation">
+                    <p>
+                      <i class="fa-solid fa-graduation-cap"></i> Associated with
+                      {{ post.affiliation }}
+                    </p>
+                  </div>
                   <div v-if="post.authors.length">
-                    <p
-                      v-if="post.authors.length > 1 && post.type != 'Project'"
-                      class="mt-2"
-                    >
-                      Authors:
-                      <span v-for="author in post.authors">
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
-                        >
-                      </span>
-                    </p>
-                    <p
-                      v-else-if="
-                        post.authors.length > 1 && post.type == 'Project'
-                      "
-                      class="mt-2"
-                    >
-                      Team Members:
-                      <span v-for="author in post.authors">
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
-                        >
-                      </span>
-                    </p>
-                    <p
-                      class="mt-2"
-                      v-else-if="
-                        post.authors.length == 1 && post.type == 'Project'
-                      "
-                    >
-                      Team Member:
-                      <span v-for="author in post.authors">
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
-                        >
-                      </span>
-                    </p>
-                    <p
-                      class="mt-2"
-                      v-else-if="
-                        post.authors.length == 1 && post.type != 'Project'
-                      "
-                    >
-                      Author:
-                      <span v-for="author in post.authors">
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
-                        >
-                      </span>
-                    </p>
-                  </div>
-                  <div
-                    v-else-if="post.authors.length && post.type == 'Project'"
-                  >
-                    <p v-if="post.authors.length > 1" class="mt-2">
-                      Team Members:
-                      <span
-                        v-for="author in post.authors"
-                        v-if="post.authors.length"
+                    <div v-if="post.authors.length > 1">
+                      <div
+                        v-if="post.type == 'Project'"
+                        class="post-sub-title mt-2"
                       >
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
-                        >
-                      </span>
-                    </p>
-                    <p class="mt-2" v-else>
-                      Team Member:
-                      <span
-                        v-for="author in post.authors"
-                        v-if="post.authors.length"
+                        Team Members:
+                        <span v-for="(author, index) in post.authors">
+                          <nuxt-link
+                            :to="`/profile/${author.slug}/overview`"
+                            class="authors"
+                            >{{ author.name }} </nuxt-link
+                          ><span
+                            class="dot"
+                            v-if="post.authors.length - 1 > index"
+                            >•</span
+                          >
+                        </span>
+                      </div>
+                      <div v-else class="post-sub-title mt-2">
+                        Authors:
+                        <span v-for="(author, index) in post.authors">
+                          <nuxt-link
+                            :to="`/profile/${author.slug}/overview`"
+                            class="authors"
+                            >{{ author.name }} </nuxt-link
+                          ><span
+                            class="dot"
+                            v-if="post.authors.length - 1 > index"
+                            >•</span
+                          >
+                        </span>
+                      </div>
+                    </div>
+                    <div v-else>
+                      <p
+                        class="post-sub-title mt-2"
+                        v-if="post.type == 'Project'"
                       >
-                        <nuxt-link
-                          :to="`/profile/${author.slug}/overview`"
-                          class="authors"
-                          >{{ author.name }}</nuxt-link
+                        Team Member:
+                        <span v-for="(author, index) in post.authors">
+                          <nuxt-link
+                            :to="`/profile/${author.slug}/overview`"
+                            class="authors"
+                            >{{ author.name }}</nuxt-link
+                          ><span
+                            class="dot"
+                            v-if="post.authors.length - 1 > index"
+                            >•</span
+                          ></span
                         >
-                      </span>
-                    </p>
+                      </p>
+                      <p class="post-sub-title mt-2" v-else>
+                        Author:
+                        <span v-for="(author, index) in post.authors">
+                          <nuxt-link
+                            :to="`/profile/${author.slug}/overview`"
+                            class="authors"
+                            >{{ author.name }}
+                          </nuxt-link>
+                          <span
+                            class="dot"
+                            v-if="post.authors.length - 1 > index"
+                            >•</span
+                          >
+                        </span>
+                      </p>
+                    </div>
                   </div>
+
                   <div class="sub-title">
                     <p>
-                      {{ post.formatedDateTime }}<span class="dot">.</span
+                      {{ post.formatedDateTime }}<span class="dot">•</span
                       ><a v-if="post.read_count > 1"
                         >{{ post.read_count }} Reads</a
                       ><a v-else-if="post.read_count <= 1"
                         >{{ post.read_count }} Read</a
-                      ><span class="dot">.</span><a>{{ post.upVote }} UpVote</a
-                      ><span class="dot">.</span
+                      ><span class="dot">•</span><a>{{ post.upVote }} UpVote</a
+                      ><span class="dot">•</span
                       ><a>{{ post.downVote }} DownVote</a>
                     </p>
                   </div>
@@ -231,7 +219,7 @@
                   </div>
                 </div>
               </div>
-              <div class="_card" v-if="posts == ''">
+              <div class="_card mb-4" v-if="posts == ''">
                 <h1>No Data Found</h1>
               </div>
             </div>
@@ -247,7 +235,7 @@
           </div> -->
         </div>
         <div
-          class="col-lg-4 d-none d-lg-block research-people"
+          class="col-lg-4 research-people"
           id="home"
           v-if="peopleYouMayKnow.length > 0"
         >
@@ -256,7 +244,9 @@
             <ul>
               <li v-for="(user, index) in peopleYouMayKnow">
                 <div class="content">
-                  <img :src="user.image" alt="img" />
+                  <div class="content--image">
+                    <img :src="`${http + user.image}`" alt="img" />
+                  </div>
                   <div>
                     <nuxt-link :to="`/profile/${user.slug}/overview`">
                       {{ user.name }}
@@ -276,7 +266,7 @@
                   Pending
                 </button>
                 <button
-                  class="main-btn main-btn__border"
+                  class="main-btn main-btn__people"
                   @click="connect(index)"
                   v-else-if="user.status == 'connect'"
                 >
@@ -295,7 +285,7 @@
           :closable="true"
         >
           <div class="comment-liked" v-for="user in likedUser">
-            <img :src="user.image" alt="img" />
+                    <img :src="`${http + user.image}`" alt="img" />
             <nuxt-link :to="`/profile/${user.user_slug}/overview`">
               {{ user.name }}
             </nuxt-link>
@@ -304,7 +294,7 @@
         </Modal>
         <Modal v-model="visible">
           <img :src="imgName" style="width: 100%" />
-          <div slot="footer">Figure: {{ index + 1 }}</div>
+          <div slot="footer"></div>
         </Modal>
       </div>
       <div v-if="isLoading == true" class="loader-lg">
@@ -358,7 +348,7 @@ export default {
       noPostRemaining: false,
       sendRequest: false,
       page: 1,
-      limit: 4,
+      limit: 3,
       users: [],
       likedUser: [],
       url: "",
@@ -367,7 +357,7 @@ export default {
       like_count: 0,
       authUserLike: "",
       page: 1,
-      http: "https://cameraworldapi.dreamsgallerybd.com",
+      http: this.$config.IMAGE_URL,
       socket: null,
     };
   },
@@ -398,21 +388,7 @@ export default {
             upVote: 1,
           };
           console.log(obj);
-          // if (this.posts[index].authUserVote == "up") {
-          //   this.posts[index].upVote = upVoteCount1 - 1;
-          //   this.posts[index].avgVote = upVoteCount1 - 1 - downVoteCount1;
-          //   this.posts[index].authUserVote = "none";
-          // }
-          // if (this.posts[index].authUserVote == "down") {
-          //   this.posts[index].upVote = upVoteCount1 + 1;
-          //   this.posts[index].avgVote = upVoteCount1 + 1 - (downVoteCount1 - 1);
-          //   this.posts[index].downVote = downVoteCount1 - 1;
-          //   this.posts[index].authUserVote = "up";
-          // } else {
-          //   this.posts[index].upVote = upVoteCount1 + 1;
-          //   this.posts[index].avgVote = upVoteCount1 + 1 - downVoteCount1;
-          //   this.posts[index].authUserVote = "up";
-          // }
+
           const res = await this.callApi("post", "/api/up_vote", obj);
           if (res.status == 200) {
             this.posts[index].upVote = upVoteCount1 - 1;
@@ -684,17 +660,19 @@ export default {
       transports: ["websocket"],
       credentials: true,
     });
-    window.onscroll = () => {
-      this.bottomOfWindow =
-        window.pageYOffset + window.innerHeight >
-        document.body.scrollHeight - 100;
+    if (this.authUser) {
+      window.onscroll = () => {
+        this.bottomOfWindow =
+          window.pageYOffset + window.innerHeight >
+          document.body.scrollHeight - 100;
 
-      if (this.bottomOfWindow) {
-        if (!this.loadMoreLoading) {
-          this.loadMore(4);
+        if (this.bottomOfWindow) {
+          if (!this.loadMoreLoading) {
+            this.loadMore(4);
+          }
         }
-      }
-    };
+      };
+    }
   },
   // beforeDestroy() {
   //   document.removeEventListener("click", this.hideSearchbar);

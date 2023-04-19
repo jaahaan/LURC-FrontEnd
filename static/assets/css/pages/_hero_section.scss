@@ -61,20 +61,29 @@
           }
 
           &---subtitle {
-            font-size: 35px;
-            font-weight: 400;
+            // font-size: 35px;
             margin-bottom: 20px;
-            color: #101820ff;
+            // color: #101820ff;
+            color: #26302b;
+
+            font-weight: 600;
+            font-size: 40px;
+            text-transform: uppercase;
           }
 
           &---title {
-            font-size: 44px;
-            font-weight: 400;
-            margin-bottom: 40px;
-            color: #101820ff;
-
+            margin-bottom: 20px;
+            // color: #101820ff;
+            background: -webkit-linear-gradient($primaryColor, $linkActive);
+            -webkit-background-clip: text;
+            -webkit-text-stroke: 6px transparent;
+            color: #f2f8f5;
+            font-family: Poppins, sans-serif;
+            font-weight: 600;
+            font-size: 50px;
+            // line-height: 127px;
+            text-transform: uppercase;
             span {
-              font-weight: 600;
               display: block;
             }
           }
@@ -116,15 +125,22 @@
 
 .vue-typer .custom.char.typed {
   // color: #607D8B;
-  color: #195190ff;
+  // color: #195190ff;
   font-weight: 700;
+  // font-size: 30px;
+  // line-height: 70px;
+  background: -webkit-linear-gradient(-66deg, #195190ff 10%, $linkActive 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke-width: 0;
+  -webkit-text-stroke-color: transparent;
 }
 .vue-typer .custom.char.selected {
   // color: #607D8B;
   color: #195190ff;
   font-weight: 700;
-  background-color: transparent;
-  text-decoration: line-through;
+  background-color: $headerBg;
+  // text-decoration: line-through;
 }
 
 .vue-typer .custom.caret {
@@ -155,17 +171,12 @@
 
             &---subtitle {
               font-size: 30px;
-              font-weight: 400;
-              margin-bottom: 20px;
+              // margin-bottom: 20px;
             }
 
             &---title {
               font-size: 35px;
-              font-weight: 400;
-              margin-bottom: 40px;
-
               span {
-                font-weight: 600;
                 display: block;
               }
             }
@@ -224,7 +235,8 @@
 
             &---title {
               font-size: 25px;
-              margin-bottom: 20px;
+              margin-bottom: 10px;
+              font-weight: 100;
             }
           }
 
@@ -270,8 +282,7 @@
           }
 
           &---title {
-            font-size: 26px;
-            margin-bottom: 15px;
+            font-weight: 100;
           }
         }
 

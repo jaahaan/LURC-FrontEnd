@@ -13,6 +13,8 @@ Vue.mixin({
           departmentInfo: "getDepartment",
           authUser: "getAuthUser",
           isLoggedIn:'getIsLoggedIn',
+          themeInfo: "getTheme",
+
         }),
     },
     methods: {

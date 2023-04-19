@@ -15,7 +15,9 @@
             v-if="user_slug == connection.user1.slug"
             :to="`/profile/${connection.user2.slug}/overview`"
           >
-            <img :src="connection.user2.image" />
+            <div class="content--image">
+              <img :src="connection.user2.image" />
+            </div>
             <div>
               <h4>{{ connection.user2.name }}</h4>
               <p>{{ connection.user2.designation }}</p>
@@ -26,7 +28,9 @@
             v-else-if="user_slug == connection.user2.slug"
             :to="`/profile/${connection.user1.slug}/overview`"
           >
-            <img :src="connection.user1.image" />
+            <div class="content--image">
+              <img :src="connection.user1.image" />
+            </div>
             <div>
               <h4>{{ connection.user1.name }}</h4>
               <p>{{ connection.user1.designation }}</p>
@@ -48,9 +52,9 @@
             <i class="fa-solid fa-user-plus"></i>
             Connect
           </button> -->
-          <button class="d-md-none d-sm-block btn btn__icon">
+          <!-- <button class="d-md-none d-sm-block btn btn__icon">
             <i class="fa-solid fa-user-check"></i>
-          </button>
+          </button> -->
           <button class="d-none d-md-block btn btn__border">
             <i class="fa-solid fa-user-check"></i>
             Connected
@@ -72,7 +76,7 @@ export default {
     return {
       loadMoreLoading: false,
       noPostRemaining: false,
-      limit: 10,
+      limit: 5,
       user_slug: this.$route.params.slug,
     };
   },
@@ -139,7 +143,7 @@ export default {
 
       if (this.bottomOfWindow) {
         if (!this.loadMoreLoading) {
-          this.loadMore(4);
+          this.loadMore(5);
         }
       }
     };

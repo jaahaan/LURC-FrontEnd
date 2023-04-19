@@ -76,19 +76,19 @@
                 margin-left: 0.25em !important;
                 font-size: 1.25em;
                 font-weight: 500;
-                color: $grayColor !important;
+                color: $secondary-text !important;
                 img {
                   width: 1em;
                 }
                 &:hover {
                   text-decoration: underline;
                   img {
-                    color: $secondaryColor !important;
+                    color: $secondary-text !important;
                   }
                 }
               }
               .active {
-                color: $btnHover !important;
+                color: $link !important;
                 font-weight: bolder;
               }
             }
@@ -120,6 +120,7 @@
           border-radius: 20px;
           overflow: hidden;
           margin: 0rem 0.5rem !important;
+          width: calc(100% - 2 * 50px) !important;
         }
         i {
           border-radius: 50%;
@@ -189,7 +190,7 @@
           }
         }
       }
-      .active {
+      .commentActive {
         background-color: #dddddd;
         padding: 0.5rem;
         border-radius: 10px;
@@ -213,11 +214,12 @@
           margin: 0rem 0.5rem !important;
           min-height: 30px !important;
           padding: 0.25rem 1rem;
-          width: 100%;
+          width: calc(100% - 2 * 40px) !important;
           ::placeholder {
             font-size: 0.1em;
           }
         }
+
         i {
           border-radius: 50%;
           background-color: $secondaryColor;
@@ -311,10 +313,21 @@
       display: flex;
       padding: 20px;
       align-items: center;
-      img {
-        border-radius: 50%;
+      &--image {
         width: 90px;
         height: 90px;
+        text-align: center;
+        background: $bgWhite;
+        box-shadow: 0px 0px 3px #cdcdcd;
+        // border: 1px solid #cdcdcd;
+        border-radius: 50%;
+        overflow: hidden;
+        img {
+          width: auto;
+          height: 100%;
+          background-size: cover;
+          // border-radius: 50%;
+        }
       }
       .content {
         margin-left: 0.75rem !important;
@@ -401,9 +414,11 @@
   }
   &-image {
     // margin: 5px 0px;
-    // justify-content: flex-start;
-    // display: flex;
-    display: inline-block;
+    justify-content: center;
+    align-items: center;
+
+    display: flex;
+    // display: inline-block;
     width: 150px !important;
     height: 150px;
     text-align: center;

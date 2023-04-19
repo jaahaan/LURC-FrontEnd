@@ -14,17 +14,9 @@
               v-if="authUser"
             >
               <img src="/assets/images/logo.png" alt="Brand" />
-              <!-- <span class="lurc"
-                ><span class="lurc1">RESEARCH</span
-                ><span class="lurc2">COMMUNITY</span>
-              </span> -->
             </nuxt-link>
             <nuxt-link class="nav-link" aria-current="page" to="/" v-else>
               <img src="/assets/images/logo.png" alt="Brand" />
-              <!-- <span class="lurc"
-                ><span class="lurc1">RESEARCH</span
-                ><span class="lurc2">COMMUNITY</span>
-              </span> -->
             </nuxt-link>
             <button type="button" v-on:click="hideSidebar()">
               <i class="lni lni-close"></i>
@@ -71,7 +63,7 @@
                 </li>
               </ul>
             </li>
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <nuxt-link
                 class="nav-link"
                 aria-current="page"
@@ -79,7 +71,7 @@
                 to="/admin/teachers"
                 >Add Teacher</nuxt-link
               >
-            </li>
+            </li> -->
           </ul>
         </div>
       </div>
@@ -134,6 +126,127 @@
             <div class="send">
               <Icon type="md-send" @click="sendMsg" />
             </div>
+          </div>
+        </div>
+      </div>
+      <!-- ****message list box**** -->
+      <div
+        class="navbar-message--dropdown"
+        v-bind:class="{ active: isChatListBox }"
+      >
+        <div class="navbar-message--dropdown--header">
+          <p>Chats</p>
+        </div>
+        <div class="navbar-message--dropdown--input">
+          <input
+            type="text"
+            placeholder="Find a user"
+            v-model="keyword"
+            ref="chatBoxSearch"
+          />
+
+          <div
+            class="navbar-message--dropdown--input---item"
+            v-if="
+              Users.length > 0 && keyword.length > 0 && authUser.id != user.id
+            "
+            :key="user.id"
+            v-for="(user, index) in Users"
+            @click="handleSelect(index)"
+          >
+            <div class="menu-link">
+              <div class="menu-link--image">
+                <img :src="user.image" alt="" />
+              </div>
+              <h4>{{ user.name }}</h4>
+            </div>
+          </div>
+        </div>
+
+        <div class="navbar-message--dropdown--list" ref="scrollConv">
+          <div v-if="isConversationLoading" class="loader-lg">
+            <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+          </div>
+          <div
+            v-else-if="conversations.length > 0"
+            v-for="(user, index) in conversations"
+            :key="index"
+          >
+            <div
+              class="navbar-message--dropdown--list---item profile"
+              v-if="user.from_id == authUser.id"
+              @click="getSelectedUserChat(user.to_user, user.id)"
+            >
+              <div
+                class="menu-link"
+                v-bind:class="{
+                  active: selectedUserInfo.room_id == user.id,
+                }"
+              >
+                <div class="menu-link--image">
+                  <img :src="user.to_user.image" alt="" />
+                </div>
+                <div>
+                  <h4>{{ user.to_user.name }}</h4>
+                  <p
+                    v-if="user.latest_message !== null"
+                    v-bind:class="{
+                      unseen:
+                        user.is_seen == null &&
+                        user.last_msg_to_id == authUser.id,
+                    }"
+                  >
+                    <!-- <i
+                                class="las la-check-circle"
+                                v-if="user.last_msg_to_id !== authUser.id"
+                              ></i> -->
+                    {{ user.latest_message.msg }}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div
+              class="navbar-message--dropdown--list---item"
+              v-if="user.to_id == authUser.id"
+              @click="getSelectedUserChat(user.from_user, user.id)"
+            >
+              <div
+                class="menu-link"
+                v-bind:class="{
+                  active: selectedUserInfo.room_id == user.id,
+                }"
+              >
+                <div class="menu-link--image">
+                  <img :src="user.from_user.image" alt="img" />
+                </div>
+                <div>
+                  <h4>{{ user.from_user.name }}</h4>
+                  <p
+                    v-if="user.latest_message !== null"
+                    v-bind:class="{
+                      unseen:
+                        user.is_seen == null &&
+                        user.last_msg_to_id == authUser.id,
+                    }"
+                  >
+                    <!-- <i
+                                class="las la-check-circle"
+                                v-if="user.last_msg_to_id !== authUser.id"
+                              ></i> -->
+                    {{ user.latest_message.msg }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- <div v-else-if="isConversationLoading" class="loader-sm">
+            <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+          </div> -->
+          <div
+            v-if="loadMoreConversationLoading && !noConversationRemaining"
+            class="loader-sm"
+          >
+            <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
           </div>
         </div>
       </div>
@@ -338,7 +451,7 @@
         </div>
       </div> -->
       <!-- ****connection box**** -->
-      <div
+      <!-- <div
         class="navbar-notification--wrapper"
         v-bind:class="{ active: isConnectionBox }"
       >
@@ -394,8 +507,9 @@
                 :to="`/profile/${connection.user2.slug}/overview`"
               >
                 <li class="nav-link" v-on:click="hideConnectionBox()">
-                  <img :src="connection.user2.image" />
-
+                  <div class="nav-link--image">
+                    <img :src="connection.user2.image" />
+                  </div>
                   <div>
                     <p>{{ connection.user2.name }}</p>
                     <p>{{ connection.user2.designation }}</p>
@@ -408,8 +522,9 @@
                 :to="`/profile/${connection.user1.slug}/overview`"
               >
                 <li class="nav-link" v-on:click="hideConnectionBox()">
-                  <img :src="connection.user1.image" />
-
+                  <div class="nav-link--image">
+                    <img :src="connection.user1.image" />
+                  </div>
                   <div>
                     <p>{{ connection.user1.name }}</p>
                     <p>{{ connection.user1.designation }}</p>
@@ -419,184 +534,327 @@
             </ul>
 
             <div v-else>
-              <h2 class="mt-5 text-center">No connection Found!!</h2>
+              <h2 class="mt-5 text-center">No Data Found!!</h2>
+            </div>
+          </div>
+        </div>
+      </div> -->
+      <div
+        class="navbar-notification"
+        v-bind:class="{ active: isConnectionBox }"
+      >
+        <div class="navbar-notification--header">
+          <p>Connections</p>
+        </div>
+        <div class="navbar-notification--button" ref="connectionBoxBtn1">
+          <button
+            @click="getConnection"
+            v-bind:class="{ btnActive: isConnection }"
+            class="px-3"
+          >
+            Connections
+          </button>
+          <button @click="getRequest" v-bind:class="{ btnActive: isRequest }">
+            Requests
+          </button>
+        </div>
+        <div class="navbar-notification--body" ref="scrollConn">
+          <ul v-if="isLoading == true">
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+          </ul>
+          <ul
+            v-for="(connection, index) in connectionItem"
+            v-if="
+              isLoading == false &&
+              connectionItem != undefined &&
+              connectionItem.length > 0
+            "
+          >
+            <nuxt-link
+              class="nav-item"
+              v-if="authUser.id == connection.sent_request_user"
+              :to="`/profile/${connection.user2.slug}/overview`"
+            >
+              <li class="nav-link">
+                <div class="nav-link--image">
+                  <img :src="connection.user2.image" />
+                </div>
+                <div>
+                  <p>{{ connection.user2.name }}</p>
+                  <p>{{ connection.user2.designation }}</p>
+                </div>
+              </li>
+            </nuxt-link>
+            <nuxt-link
+              class="nav-item"
+              v-else-if="authUser.id == connection.received_request_user"
+              :to="`/profile/${connection.user1.slug}/overview`"
+            >
+              <li class="nav-link">
+                <div class="nav-link--image">
+                  <img :src="connection.user1.image" />
+                </div>
+                <div>
+                  <p>{{ connection.user1.name }}</p>
+                  <p>{{ connection.user1.designation }}</p>
+                </div>
+              </li>
+            </nuxt-link>
+          </ul>
+
+          <div v-if="connectionItem.length == 0">
+            <h2 class="mt-5 text-center">No Data Found!!</h2>
+          </div>
+          <div ref="connectionBoxBtn2">
+            <div class="navbar-notification--body--btn">
+              <div
+                class="navbar-notification--body--btn__main"
+                @click="loadMoreConnection(5)"
+                v-if="
+                  isLoading == false &&
+                  connectionItem.length > 4 &&
+                  !loadMoreConnectionLoading &&
+                  !noConnectionDataRemaining
+                "
+              >
+                Load More
+              </div>
+              <div
+                v-if="loadMoreConnectionLoading && !noConnectionDataRemaining"
+                class="navbar-notification--body--loader"
+              >
+                <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+              </div>
+              <div
+                v-if="!loadMoreConnectionLoading && noConnectionDataRemaining"
+              >
+                <h6 class="text-center">No Connection Remaining!!</h6>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <!-- ****notification box**** -->
+
       <div
-        class="navbar-notification--wrapper"
+        class="navbar-notification"
         v-bind:class="{ active: isNotificationBox }"
       >
-        <div class="navbar-notification">
-          <div class="navbar-notification--head">
-            <h5>Notification</h5>
-            <button type="button" v-on:click="hideNotificationBox()">
-              <i class="lni lni-close"></i>
-            </button>
+        <div class="navbar-notification--header">
+          <p>Notification</p>
+        </div>
+        <div class="navbar-notification--button" ref="notificationBoxBtn1">
+          <button @click="getNotification" v-bind:class="{ btnActive: isAll }">
+            All
+          </button>
+          <button
+            @click="getReadNotification"
+            v-bind:class="{ btnActive: isRead }"
+          >
+            Read
+          </button>
+          <button
+            @click="getUnreadNotification"
+            v-bind:class="{ btnActive: isUnread }"
+          >
+            Unread
+          </button>
+        </div>
+        <div class="navbar-notification--body" ref="scrollNotification">
+          <ul v-if="isLoading == true">
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+            <li class="skeleton nav-link">
+              <img />
+              <p></p>
+            </li>
+          </ul>
+          <div v-if="isLoading == false && notificationItem.length == 0">
+            <h2 class="mt-5 text-center">No Notification Found!!</h2>
           </div>
-          <div class="navbar-notification--body">
-            <button
-              @click="getNotification"
-              v-bind:class="{ btnActive: isAll }"
-            >
-              All
-            </button>
-            <button
-              @click="getReadNotification"
-              v-bind:class="{ btnActive: isRead }"
-            >
-              Read
-            </button>
-            <button
-              @click="getUnreadNotification"
-              v-bind:class="{ btnActive: isUnread }"
-            >
-              Unread
-            </button>
-
-            <ul v-if="isLoading == true">
-              <li class="skeleton nav-link">
-                <img />
-                <p></p>
-              </li>
-              <li class="skeleton nav-link">
-                <img />
-                <p></p>
-              </li>
-              <li class="skeleton nav-link">
-                <img />
-                <p></p>
-              </li>
-              <li class="skeleton nav-link">
-                <img />
-                <p></p>
-              </li>
-            </ul>
-            <ul
-              v-for="(notification, index) in notificationItem"
-              v-else-if="
-                isLoading == false &&
-                notificationItem != undefined &&
-                notificationItem.length > 0
+          <ul
+            v-for="(notification, index) in notificationItem"
+            v-if="
+              isLoading == false &&
+              notificationItem != undefined &&
+              notificationItem.length > 0
+            "
+          >
+            <nuxt-link
+              class="nav-item"
+              :to="`/profile/${notification.user_slug}/overview`"
+              v-if="
+                notification.msg == 'accepted your request' ||
+                notification.msg == 'requested to connect you'
               "
             >
-              <nuxt-link
-                class="nav-item"
-                :to="`/profile/${notification.data.user_slug}/overview`"
+              <li
+                class="nav-link"
+                @click="markAsRead(index)"
+                v-bind:class="{
+                  active: notification.read_at == null,
+                }"
+              >
+                <div>
+                  <div class="nav-link--image">
+                    <img :src="notification.user_image" />
+                  </div>
+                  <span class="nav-action nav-action__like"
+                    ><i class="fa-solid fa-user-group"></i
+                  ></span>
+                </div>
+                <div>
+                  <nuxt-link
+                    :to="`/profile/${notification.user_slug}/overview`"
+                    >{{ notification.user_name }}</nuxt-link
+                  >
+                  <span>{{ notification.msg }}</span>
+                </div>
+              </li>
+            </nuxt-link>
+            <nuxt-link
+              class="nav-item"
+              :to="`/description/${notification.post_slug}/comments`"
+              v-else-if="
+                notification.msg == 'commented your' ||
+                notification.msg == 'replied your comment' ||
+                notification.msg == 'replied a comment you are following' ||
+                notification.msg == 'liked your comment' ||
+                notification.msg == 'liked your reply'
+              "
+            >
+              <li
+                class="nav-link"
+                @click="markAsRead(index)"
+                v-bind:class="{
+                  active: notification.read_at == null,
+                }"
+              >
+                <div>
+                  <div class="nav-link--image">
+                    <img :src="notification.user_image" />
+                  </div>
+                  <span class="nav-action nav-action__like"
+                    ><i class="fa-solid fa-comment"></i
+                  ></span>
+                </div>
+                <div v-if="notification.msg == 'commented your'">
+                  <nuxt-link
+                    :to="`/profile/${notification.user_slug}/overview`"
+                    >{{ notification.user_name }}</nuxt-link
+                  >
+                  {{ notification.msg + " " + notification.post_type }}
+                </div>
+                <div v-else>
+                  <nuxt-link
+                    :to="`/profile/${notification.user_slug}/overview`"
+                    >{{ notification.user_name }}</nuxt-link
+                  >
+                  {{ notification.msg }}
+                </div>
+              </li>
+            </nuxt-link>
+            <nuxt-link
+              class="nav-item"
+              :to="`/description/${notification.post_slug}/overview`"
+              v-else
+            >
+              <li
+                class="nav-link"
+                @click="markAsRead(index)"
+                v-bind:class="{
+                  active: notification.read_at == null,
+                }"
+              >
+                <div>
+                  <div class="nav-link--image">
+                    <img :src="notification.user_image" />
+                  </div>
+                  <span
+                    class="nav-action nav-action__like"
+                    v-if="notification.msg == 'liked your'"
+                    ><i class="fa-solid fa-thumbs-up"></i
+                  ></span>
+                  <span
+                    class="nav-action nav-action__upVote"
+                    v-else-if="notification.msg == 'up voted your'"
+                    ><i class="fa-solid fa-caret-up"></i
+                  ></span>
+                  <span
+                    class="nav-action nav-action__downVote"
+                    v-else-if="notification.msg == 'down voted your'"
+                    ><i class="fa-solid fa-caret-down"></i
+                  ></span>
+                </div>
+                <div>
+                  <nuxt-link
+                    :to="`/profile/${notification.user_slug}/overview`"
+                    >{{ notification.user_name }}</nuxt-link
+                  >
+                  {{ notification.msg + " " + notification.post_type }}
+                </div>
+              </li>
+            </nuxt-link>
+          </ul>
+          <div ref="notificationBoxBtn2">
+            <div class="navbar-notification--body--btn">
+              <div
+                class="navbar-notification--body--btn__main"
+                @click="loadMoreNotification(5)"
                 v-if="
-                  notification.data.msg == 'accepted your request' ||
-                  notification.data.msg == 'requested to connect you'
+                  isLoading == false &&
+                  notificationItem.length !== 0 &&
+                  notificationItem.length > 4 &&
+                  !loadMoreNotificationLoading &&
+                  !noNotificationDataRemaining &&
+                  isAll
                 "
               >
-                <li
-                  class="nav-link"
-                  @click="markAsRead(index)"
-                  v-bind:class="{
-                    active: notification.read_at == null,
-                  }"
-                >
-                  <div>
-                    <img :src="notification.data.user_image" />
-                    <span class="nav-action nav-action__like"
-                      ><i class="fa-solid fa-user-group"></i
-                    ></span>
-                  </div>
-                  <div>
-                    <nuxt-link
-                      :to="`/profile/${notification.data.user_slug}/overview`"
-                      >{{ notification.data.user_name }}</nuxt-link
-                    >
-                    <span>{{ notification.data.msg }}</span>
-                  </div>
-                </li>
-              </nuxt-link>
-              <nuxt-link
-                class="nav-item"
-                :to="`/description/${notification.data.post_slug}/comments`"
-                v-else-if="
-                  notification.data.msg == 'commented your' ||
-                  notification.data.msg == 'replied your comment' ||
-                  notification.data.msg == 'liked your comment'
+                Load More
+              </div>
+              <div
+                v-if="
+                  loadMoreNotificationLoading && !noNotificationDataRemaining
+                "
+                class="navbar-notification--body--loader"
+              >
+                <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+              </div>
+              <div
+                v-if="
+                  !loadMoreNotificationLoading && noNotificationDataRemaining
                 "
               >
-                <li
-                  class="nav-link"
-                  @click="markAsRead(index)"
-                  v-bind:class="{
-                    active: notification.read_at == null,
-                  }"
-                >
-                  <div>
-                    <img :src="notification.data.user_image" />
-                    <span class="nav-action nav-action__like"
-                      ><i class="fa-solid fa-comment"></i
-                    ></span>
-                  </div>
-                  <div v-if="notification.data.msg == 'commented your'">
-                    <nuxt-link
-                      :to="`/profile/${notification.data.user_slug}/overview`"
-                      >{{ notification.data.user_name }}</nuxt-link
-                    >
-                    {{
-                      notification.data.msg + " " + notification.data.post_type
-                    }}
-                  </div>
-                  <div v-else>
-                    <nuxt-link
-                      :to="`/profile/${notification.data.user_slug}/overview`"
-                      >{{ notification.data.user_name }}</nuxt-link
-                    >
-                    {{ notification.data.msg }}
-                  </div>
-                </li>
-              </nuxt-link>
-              <nuxt-link
-                class="nav-item"
-                :to="`/description/${notification.data.post_slug}/overview`"
-                v-else
-              >
-                <li
-                  class="nav-link"
-                  @click="markAsRead(index)"
-                  v-bind:class="{
-                    active: notification.read_at == null,
-                  }"
-                >
-                  <div>
-                    <img :src="notification.data.user_image" />
-                    <span
-                      class="nav-action nav-action__like"
-                      v-if="notification.data.msg == 'liked your'"
-                      ><i class="fa-solid fa-thumbs-up"></i
-                    ></span>
-                    <span
-                      class="nav-action nav-action__upVote"
-                      v-else-if="notification.data.msg == 'up voted your'"
-                      ><i class="fa-solid fa-caret-up"></i
-                    ></span>
-                    <span
-                      class="nav-action nav-action__downVote"
-                      v-else-if="notification.data.msg == 'down voted your'"
-                      ><i class="fa-solid fa-caret-down"></i
-                    ></span>
-                  </div>
-                  <div>
-                    <nuxt-link
-                      :to="`/profile/${notification.data.user_slug}/overview`"
-                      >{{ notification.data.user_name }}</nuxt-link
-                    >
-                    {{
-                      notification.data.msg + " " + notification.data.post_type
-                    }}
-                  </div>
-                </li>
-              </nuxt-link>
-            </ul>
-
-            <div v-else>
-              <h2 class="mt-5 text-center">No Notification Found!!</h2>
+                <h6 class="text-center">No Notification Remaining!!</h6>
+              </div>
             </div>
           </div>
         </div>
@@ -640,7 +898,9 @@
               :key="user.id"
               @click="getSearchedUser(user)"
             >
-              <img :src="user.image" />
+              <div class="search-list--image">
+                <img :src="user.image" />
+              </div>
               <div>
                 <h4>{{ user.name }}</h4>
                 <p>{{ user.designation }}</p>
@@ -726,7 +986,7 @@
                   </li>
                 </ul>
               </li>
-              <li class="nav-item" v-if="authUser.userType == 'teacher'">
+              <!-- <li class="nav-item" v-if="authUser.userType == 'teacher'">
                 <nuxt-link
                   class="nav-link"
                   aria-current="page"
@@ -734,7 +994,7 @@
                   style="--i: 4"
                   >Add Teacher</nuxt-link
                 >
-              </li>
+              </li> -->
             </ul>
           </div>
 
@@ -770,7 +1030,7 @@
                   </g>
                 </svg>
               </li>
-              <li v-on:click="showChatListBox()">
+              <li v-on:click="showChatListBox()" ref="chatBoxSource">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -790,127 +1050,8 @@
                   v-if="this.unseenMsgCount > 0"
                   >{{ this.unseenMsgCount }}</span
                 >
-                <div
-                  class="navbar-message--dropdown"
-                  v-bind:class="{ active: isChatListBox }"
-                >
-                  <div class="navbar-message--dropdown--header">
-                    <p>Chats</p>
-                  </div>
-                  <div class="navbar-message--dropdown--search">
-                    <div class="searchForm">
-                      <input
-                        type="text"
-                        placeholder="Find a user"
-                        v-model="keyword"
-                      />
-                    </div>
-                    <div
-                      class="menu--list"
-                      v-bind:class="{
-                        isActive: isActive,
-                      }"
-                    >
-                      <ul
-                        v-if="
-                          Users.length > 0 &&
-                          keyword.length > 0 &&
-                          authUser.id != user.id
-                        "
-                        :key="user.id"
-                        v-for="(user, index) in Users"
-                      >
-                        <li
-                          class="menu--list---item"
-                          @click="handleSelect(index)"
-                        >
-                          <div class="menu-link">
-                            <img :src="user.image" alt="" />
-                            <h4>{{ user.name }}</h4>
-                          </div>
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                  <div v-if="isConversationLoading == true" class="loader-sm">
-                    <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
-                  </div>
-                  <div class="navbar-message--dropdown--list" ref="scrollConv">
-                    <div
-                      v-if="conversations.length > 0"
-                      v-for="(user, index) in conversations"
-                      :key="index"
-                    >
-                      <div
-                        class="navbar-message--dropdown--list---item profile"
-                        v-if="user.from_id == authUser.id"
-                        @click="getSelectedUserChat(user.to_user, user.id)"
-                      >
-                        <div
-                          class="menu-link"
-                          v-bind:class="{
-                            active: selectedUserInfo.room_id == user.id,
-                          }"
-                        >
-                          <img :src="user.to_user.image" alt="" />
-                          <div>
-                            <h4>{{ user.to_user.name }}</h4>
-                            <p
-                              v-if="user.latest_message !== null"
-                              v-bind:class="{
-                                unseen:
-                                  user.is_seen == null &&
-                                  user.last_msg_to_id == authUser.id,
-                              }"
-                            >
-                              {{ user.latest_message.msg }}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                      <div
-                        class="navbar-message--dropdown--list---item"
-                        v-if="user.to_id == authUser.id"
-                        @click="getSelectedUserChat(user.from_user, user.id)"
-                      >
-                        <div
-                          class="menu-link"
-                          v-bind:class="{
-                            active: selectedUserInfo.room_id == user.id,
-                          }"
-                        >
-                          <img :src="user.from_user.image" alt="" />
-                          <div>
-                            <h4>{{ user.from_user.name }}</h4>
-                            <p
-                              v-if="user.latest_message !== null"
-                              v-bind:class="{
-                                unseen:
-                                  user.is_seen == null &&
-                                  user.last_msg_to_id == authUser.id,
-                              }"
-                            >
-                              {{ user.latest_message.msg }}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      v-if="
-                        loadMoreConversationLoading && !noConversationRemaining
-                      "
-                      class="loader-sm"
-                    >
-                      <i
-                        class="ivu-load-loop ivu-icon ivu-icon-ios-loading"
-                      ></i>
-                    </div>
-                  </div>
-                </div>
               </li>
-              <li v-on:click="showConnectionBox()">
+              <li v-on:click="showConnectionBox()" ref="connectionBoxSource">
                 <svg
                   viewBox="0 0 28 28"
                   class="x1lliihq x1k90msu x2h7rmj x1qfuztq xcza8v6"
@@ -923,7 +1064,10 @@
                   ></path>
                 </svg>
               </li>
-              <li v-on:click="showNotificationBox()">
+              <li
+                v-on:click="showNotificationBox()"
+                ref="notificationBoxSource"
+              >
                 <svg
                   viewBox="0 0 28 28"
                   alt=""
@@ -931,7 +1075,6 @@
                   fill="currentColor"
                   height="24"
                   width="24"
-                  @click="showNotificationBox"
                 >
                   <path
                     d="M7.847 23.488C9.207 23.488 11.443 23.363 14.467 22.806 13.944 24.228 12.581 25.247 10.98 25.247 9.649 25.247 8.483 24.542 7.825 23.488L7.847 23.488ZM24.923 15.73C25.17 17.002 24.278 18.127 22.27 19.076 21.17 19.595 18.724 20.583 14.684 21.369 11.568 21.974 9.285 22.113 7.848 22.113 7.421 22.113 7.068 22.101 6.79 22.085 4.574 21.958 3.324 21.248 3.077 19.976 2.702 18.049 3.295 17.305 4.278 16.073L4.537 15.748C5.2 14.907 5.459 14.081 5.035 11.902 4.086 7.022 6.284 3.687 11.064 2.753 15.846 1.83 19.134 4.096 20.083 8.977 20.506 11.156 21.056 11.824 21.986 12.355L21.986 12.356 22.348 12.561C23.72 13.335 24.548 13.802 24.923 15.73Z"
@@ -943,11 +1086,18 @@
                   >{{ this.seenCount }}</span
                 >
               </li>
-              <li class="profile" v-on:click="showProfileBox()">
-                <img :src="authUser.image" alt="img" />
+              <li class="profile">
+                <div
+                  class="image"
+                  v-on:click="showProfileBox()"
+                  ref="profileImageSource"
+                >
+                  <img :src="`${http + authUser.image}`" alt="img" />
+                </div>
                 <div
                   class="navbar-message--dropdown"
                   v-bind:class="{ active: isProfileBox }"
+                  ref="profileBoxSource"
                 >
                   <div class="navbar-message--dropdown--list">
                     <div class="navbar-message--dropdown--list---item profile">
@@ -955,7 +1105,9 @@
                         class="menu-link active"
                         :to="`/profile/${authUser.slug}/overview`"
                       >
-                        <img :src="authUser.image" alt="" />
+                        <div class="menu-link--image">
+                          <img :src="`${http + authUser.image}`" alt="" />
+                        </div>
                         <div>
                           <h4>{{ authUser.name }}</h4>
                           <p>
@@ -964,12 +1116,46 @@
                         </div>
                       </nuxt-link>
                     </div>
-                    <div class="navbar-message--dropdown--list---item profile">
-                      <a class="menu-link" @click="changePass">
+                    <div v-if="authUser.userType == 'admin'">
+                      <div
+                        class="navbar-message--dropdown--list---item profile"
+                      >
+                        <nuxt-link class="menu-link" to="/admin/teachers">
+                          <i class="fa-solid fa-user-tie"></i>
+                          <h4>Faculty Members</h4>
+                        </nuxt-link>
+                      </div>
+                      <!-- <div
+                        class="navbar-message--dropdown--list---item profile"
+                      >
+                        <nuxt-link class="menu-link" to="/admin/banners">
+                          <i class="fa-solid fa-image"></i>
+                          <h4>Banners</h4>
+                        </nuxt-link>
+                      </div> -->
+                    </div>
+                    <!-- <div class="navbar-message--dropdown--list---item profile">
+                      <nuxt-link class="menu-link" to="/auth/change_password">
                         <i class="fa-solid fa-key"></i>
                         <h4>Change Password</h4>
-                      </a>
+                      </nuxt-link>
                     </div>
+                    <div class="navbar-message--dropdown--list---item profile">
+                      <nuxt-link class="menu-link" to="/auth/twoFactorAuth">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div>
+                          <h4>Use two-factor authentication</h4>
+                          <p>On</p>
+                        </div>
+                      </nuxt-link>
+                    </div> -->
+                    <div class="navbar-message--dropdown--list---item profile">
+                      <nuxt-link class="menu-link" to="/settings/account">
+                        <i class="fa-solid fa-gear"></i>
+                        <h4>Settings</h4>
+                      </nuxt-link>
+                    </div>
+
                     <div class="navbar-message--dropdown--list---item profile">
                       <a class="menu-link" @click="logout">
                         <i class="fa-solid fa-right-from-bracket"></i>
@@ -1004,19 +1190,7 @@
                 <nuxt-link class="nav-link" to="/register">Register</nuxt-link>
               </li>
               <li v-on:click="showSidebar()" class="d-lg-none">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="25"
-                  height="25"
-                  fill="currentColor"
-                  class="bi bi-list"
-                  viewBox="0 0 16 16"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"
-                  />
-                </svg>
+                <i class="fa-solid fa-bars"></i>
               </li>
             </ul>
           </div>
@@ -1043,7 +1217,7 @@
               type="password"
             ></Input>
             <span class="text-danger" v-if="errors.old_password">{{
-              errors.old_password[0]
+              errors.old_password
             }}</span>
             <span class="text-danger" v-if="errmsg">{{ errmsg }}</span>
           </FormItem>
@@ -1054,7 +1228,7 @@
               type="password"
             />
             <span class="text-danger" v-if="errors.password">{{
-              errors.password[0]
+              errors.password
             }}</span>
           </FormItem>
           <FormItem label="Confirm New Password *">
@@ -1064,7 +1238,7 @@
               type="password"
             />
             <span class="text-danger" v-if="errors.password_confirmation">{{
-              errors.password_confirmation[0]
+              errors.password_confirmation
             }}</span>
           </FormItem>
         </Form>
@@ -1092,7 +1266,7 @@
 <script>
 import { mapGetters } from "vuex";
 const { io } = require("socket.io-client");
-
+import _ from "lodash";
 export default {
   data() {
     return {
@@ -1104,10 +1278,9 @@ export default {
       isChatListBox: false,
       isProfileBox: false,
       isConversationLoading: false,
-      isChatBox: false,
+      // isChatBox: false,
       isConnectionBox: false,
       isConnection: true,
-      isAllConnection: false,
       isRequest: false,
       isNotification: false,
       isNotificationBox: false,
@@ -1122,13 +1295,17 @@ export default {
       sending: false,
       ignored: false,
       loadMoreLoading: false,
-      noConnectionDataRemaining: false,
+      loadMoreNotificationLoading: false,
       noNotificationDataRemaining: false,
+      noReadNotificationRemaining: false,
+      loadMoreConnectionLoading: false,
+      noConnectionDataRemaining: false,
       keyword: "",
       Users: [],
       user_id: -1,
       user_slug: "",
-      limit: 10,
+      limit: 6,
+      userlimit: 10,
       socket: null,
       isActive: false,
       loadMoreConversationLoading: false,
@@ -1154,11 +1331,11 @@ export default {
       selectedUserSlug: "",
       selectedUserName: "",
       index: -1,
-      limit: 6,
       socketConnected: false,
       isTyping: false,
       selectedChatCompare: "",
       notification: "",
+      http: this.$config.IMAGE_URL,
     };
   },
   watch: {
@@ -1168,12 +1345,11 @@ export default {
     "$route.params"(oldValue, newValue) {
       if (oldValue != newValue) {
         this.hideSidebar();
-        this.hideSearchbar();
-        this.hideConnectionBox();
-        this.hideNotificationBox();
-        this.hideChatListBox();
+
+        this.isProfileBox = false;
         if (this.authUser) {
           this.callCount();
+          this.callUnseenMsgCount();
         }
       }
     },
@@ -1188,23 +1364,21 @@ export default {
       messages: "getMessages",
       isGlobalPostLoading: "getGlobalPostLoading",
       unseenMsgCount: "getUnseenMsgCount",
+      isChatBox: "getIsChatBox",
     }),
   },
   methods: {
     showSidebar() {
       this.isSidebar = true;
-      this.hideConnectionBox();
     },
     hideSidebar() {
       this.isSidebar = false;
     },
     async showChatListBox() {
-      this.isProfileBox = false;
+      this.keyword = "";
       if (this.isChatListBox == false) {
-        this.isConversationLoading = true;
         this.isChatListBox = true;
         this.getConversations();
-        this.isConversationLoading = false;
         if (this.unseenMsgCount > 0) {
           const res = await this.callApi("post", "/api/mark_seen_msg");
           if (res.status == 200) {
@@ -1218,19 +1392,41 @@ export default {
     },
 
     async showProfileBox() {
-      this.isChatListBox = false;
       if (this.isProfileBox == false) {
         this.isProfileBox = true;
       } else {
         this.isProfileBox = false;
       }
     },
-    hideChatListBox() {
-      this.isChatListBox = false;
-      this.isProfileBox = false;
+    hideChatListBox(e) {
+      if (this.isChatListBox) {
+        let target = e.target;
+        var container = this.$refs.chatBoxSearch;
+        var source = this.$refs.chatBoxSource;
+
+        if (!source.contains(target) && !container.contains(target)) {
+          this.isChatListBox = false;
+        }
+      }
+      // this.isChatListBox = false;
+      // this.isProfileBox = false;
+    },
+    hideProfileBox(e) {
+      if (this.isProfileBox) {
+        let target = e.target;
+        // var container = this.$refs.ProfileBox;
+        var source = this.$refs.profileImageSource;
+
+        if (!source.contains(target)) {
+          this.isProfileBox = false;
+        }
+      }
+      // this.isChatListBox = false;
+      // this.isProfileBox = false;
     },
     hideChatBox() {
-      this.isChatBox = false;
+      this.$store.commit("setIsChatBox", false);
+      this.isActive = false;
       let info = {
         room_id: "",
         selectedUserId: "",
@@ -1239,27 +1435,90 @@ export default {
         selectedUserName: "",
       };
       this.$store.commit("setSelectedUserInfo", info);
-      this.isActive = false;
       this.selectedChatCompare = [];
     },
     showConnectionBox() {
-      this.isConnectionBox = true;
-      this.getConnection();
+      if (this.isConnectionBox == false) {
+        this.isConnectionBox = true;
+        this.getConnection();
+      } else {
+        this.isConnectionBox = false;
+      }
     },
-    hideConnectionBox() {
-      this.isConnectionBox = false;
-      // this.isAllConnection = false;
-      this.isRequest = false;
+    hideConnectionBox(e) {
+      if (this.isConnectionBox) {
+        let target = e.target;
+        var container1 = this.$refs.connectionBoxBtn1;
+        var container2 = this.$refs.connectionBoxBtn2;
+
+        var source = this.$refs.connectionBoxSource;
+
+        if (
+          !source.contains(target) &&
+          !container1.contains(target) &&
+          !container2.contains(target)
+        ) {
+          this.isConnectionBox = false;
+          // this.isRequest = false;
+        }
+      }
     },
 
     showSearchbar() {
-      this.hideConnectionBox();
       this.isSearchbar = true;
       this.$nextTick(() => {
         if (this.$refs["search" + this.keyword]) {
           this.$refs["search" + this.keyword].focus();
         }
       });
+    },
+    hideSearchbar(e) {
+      if (this.isSearchbar) {
+        let target = e.target;
+        var container = this.$refs.searchBox;
+        var source = this.$refs.searchBoxSource;
+
+        if (!source.contains(target) && !container.contains(target)) {
+          this.isSearchbar = false;
+          this.keyword = "";
+        }
+      }
+    },
+    async showNotificationBox() {
+      console.log("inside showNotificationBox");
+      this.isAll = true;
+      this.isUnread = false;
+      this.isRead = false;
+      this.isProfileBox = false;
+      if (this.isNotificationBox == false) {
+        this.isNotificationBox = true;
+        this.getNotification();
+        if (this.seenCount > 0) {
+          const res = await this.callApi("post", "/api/mark_as_seen");
+          if (res.status == 200) {
+            this.$store.dispatch("updateSeenCount", 0);
+          }
+        }
+      } else {
+        this.isNotificationBox = false;
+      }
+    },
+    hideNotificationBox(e) {
+      if (this.isNotificationBox) {
+        let target = e.target;
+        var container1 = this.$refs.notificationBoxBtn1;
+        var container2 = this.$refs.notificationBoxBtn2;
+
+        var source = this.$refs.notificationBoxSource;
+
+        if (
+          !source.contains(target) &&
+          !container1.contains(target) &&
+          !container2.contains(target)
+        ) {
+          this.isNotificationBox = false;
+        }
+      }
     },
     cancelSearchBar() {
       this.isSearchbar = false;
@@ -1281,7 +1540,7 @@ export default {
     async getResults() {
       const res = await this.callApi(
         "get",
-        `/api/search?keyword=${this.keyword}&limit=${this.limit}`
+        `/api/search?keyword=${this.keyword}&limit=${this.userlimit}`
       );
       if (res.status == 200) {
         this.Users = res.data;
@@ -1290,11 +1549,11 @@ export default {
       }
     },
     async loadMoreUser(more) {
-      this.limit = this.limit + more;
+      this.userlimit = this.userlimit + more;
       this.loadMoreLoading = true;
       const res = await this.callApi(
         "get",
-        `/api/search?keyword=${this.keyword}&limit=${this.limit}`
+        `/api/search?keyword=${this.keyword}&limit=${this.userlimit}`
       );
       if (res.status == 200) {
         this.Users = res.data;
@@ -1309,43 +1568,14 @@ export default {
       }
       this.loadMoreLoading = false;
     },
-    hideSearchbar(e) {
-      if (this.isSearchbar) {
-        let target = e.target;
-        var container = this.$refs.searchBox;
-        var source = this.$refs.searchBoxSource;
-
-        if (!source.contains(target) && !container.contains(target)) {
-          this.isSearchbar = false;
-          this.keyword = "";
-        }
-      }
-    },
-    async showNotificationBox() {
-      console.log("inside showNotificationBox");
-      this.isNotificationBox = true;
-      this.isAll = true;
-      this.isUnread = false;
-      this.isRead = false;
-      this.getNotification();
-      if (this.seenCount > 0) {
-        const res = await this.callApi("post", "/api/mark_as_seen");
-        if (res.status == 200) {
-          this.$store.dispatch("updateSeenCount", 0);
-        }
-      }
-    },
-    hideNotificationBox() {
-      this.isNotificationBox = false;
-    },
 
     async markAsRead(index) {
       this.isNotificationBox = false;
-      if (this.notificationItem[index].data.comment_id) {
-        console.log(this.notificationItem[index].data.comment_id);
+      if (this.notificationItem[index].comment_id) {
+        console.log(this.notificationItem[index].comment_id);
         this.$store.commit(
           "setCommentId",
-          this.notificationItem[index].data.comment_id
+          this.notificationItem[index].comment_id
         );
       }
       if (this.notificationItem[index].read_at == null) {
@@ -1373,19 +1603,15 @@ export default {
 
       if (connection.status == 200) {
         this.$store.commit("updateAuthUserConnection", connection.data.data);
-        // if (connection.data.data.length < 6)
-        //   this.noConnectionDataRemaining = true;
       }
       this.isLoading = false;
     },
     async loadMoreConnection(more) {
       console.log("Load more is calling! length", this.connectionItem.length);
-      this.hideConnectionBox();
-      this.isAllConnection = true;
       if (this.noConnectionDataRemaining) return;
 
       this.limit = this.limit + more;
-      this.loadMoreLoading = true;
+      this.loadMoreConnectionLoading = true;
       const res = await this.callApi(
         "get",
         `/api/get_auth_user_connection?limit=${this.limit}`
@@ -1403,7 +1629,7 @@ export default {
           }
         }
       }
-      this.loadMoreLoading = false;
+      this.loadMoreConnectionLoading = false;
       console.log("Load more is finished! length", this.connectionItem.length);
     },
     async getRequest() {
@@ -1430,6 +1656,7 @@ export default {
         "get",
         `/api/get_notification?limit=${this.limit}`
       );
+      // const notification = await this.callApi("get", `/api/get_notification`);
 
       if (notification.status == 200) {
         console.log(notification.data.data);
@@ -1438,19 +1665,18 @@ export default {
       }
       this.isLoading = false;
     },
-    async loadAllNotification(more) {
+    async loadMoreNotification(more) {
       console.log("Load more is calling! length", this.notificationItem.length);
-      this.hideNotificationBox();
-      this.isNotification = true;
 
       if (this.noNotificationDataRemaining) return;
 
       this.limit = this.limit + more;
-      this.loadMoreLoading = true;
+      this.loadMoreNotificationLoading = true;
       const res = await this.callApi(
         "get",
         `/api/get_notification?limit=${this.limit}`
       );
+
       if (res.status == 200) {
         let prevLength = this.notificationItem.length;
         if (this.notificationItem.length == res.data.data.length) {
@@ -1460,11 +1686,12 @@ export default {
           console.log("pushing data");
           let d = res.data.data[i];
           if (i >= prevLength) {
-            this.$store.commit("pushNotification", d);
+            this.notificationItem.push(d);
+            // this.$store.commit("pushAllGlobalPost", d);
           }
         }
       }
-      this.loadMoreLoading = false;
+      this.loadMoreNotificationLoading = false;
       console.log(
         "Load more is finished! length",
         this.notificationItem.length
@@ -1482,7 +1709,6 @@ export default {
     },
     async callUnseenMsgCount() {
       const res = await this.callApi("get", `/api/get_unseenmsg_count`);
-
       if (res.status == 200) {
         this.$store.dispatch("updateUnseenMsgCount", res.data.count);
       }
@@ -1496,7 +1722,7 @@ export default {
 
       const notification = await this.callApi(
         "get",
-        "/api/get_read_notification"
+        `/api/get_read_notification?limit=${this.limit}`
       );
 
       if (notification.status == 200) {
@@ -1504,6 +1730,38 @@ export default {
         this.$store.dispatch("updateNotification", notification.data.data);
       }
       this.isLoading = false;
+    },
+    async loadMoreReadNotification(more) {
+      console.log("Load more is calling! length", this.notificationItem.length);
+
+      if (this.noReadNotificationRemaining) return;
+
+      this.limit = this.limit + more;
+      this.loadMoreNotificationLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_read_notification?limit=${this.limit}`
+      );
+
+      if (res.status == 200) {
+        let prevLength = this.notificationItem.length;
+        if (this.notificationItem.length == res.data.data.length) {
+          this.noReadNotificationRemaining = true;
+        }
+        for (let i in res.data.data) {
+          console.log("pushing data");
+          let d = res.data.data[i];
+          if (i >= prevLength) {
+            this.notificationItem.push(d);
+            // this.$store.commit("pushAllGlobalPost", d);
+          }
+        }
+      }
+      this.loadMoreNotificationLoading = false;
+      console.log(
+        "Load more is finished! length",
+        this.notificationItem.length
+      );
     },
     async getUnreadNotification() {
       this.isAll = false;
@@ -1513,7 +1771,7 @@ export default {
       this.isLoading = true;
       const notification = await this.callApi(
         "get",
-        "/api/get_unread_notification"
+        `/api/get_unread_notificationlimit=${this.limit}`
       );
       if (notification.status == 200) {
         console.log(notification.data.data);
@@ -1522,13 +1780,22 @@ export default {
       this.isLoading = false;
     },
     async getConversations() {
+      this.isConversationLoading = true;
       const res = await this.callApi(
         "get",
         `/api/get_conversation?limit=${this.limit}`
       );
       if (res.status == 200) {
-        this.conversations = res.data.data;
+        this.conversations = _.orderBy(
+          res.data.data,
+          "latest_message.created_at",
+          "desc"
+        );
       }
+      this.isConversationLoading = false;
+    },
+    sortArrays(arrays) {
+      return _.orderBy(arrays, "latest_message.created_at", "desc");
     },
     async loadMoreConversations(more) {
       console.log("Load more is calling! length", this.conversations.length);
@@ -1619,7 +1886,7 @@ export default {
       }
     },
     async getSelectedUserChat(user, index) {
-      this.isChatBox = true;
+      this.$store.commit("setIsChatBox", true);
       let info = {
         room_id: index,
         selectedUserId: user.id,
@@ -1679,7 +1946,7 @@ export default {
 
       if (!this.isTyping) {
         console.log("typing");
-        this.isTyping = true;
+        // this.isTyping = true;
         this.socket.emit("typing", this.selectedUserInfo.room_id);
       }
       let lastTypingTime = new Date().getTime();
@@ -1694,9 +1961,10 @@ export default {
       }, timerLength);
     },
     async sendMsg() {
-      if (event.key === "Enter" && this.data.msg) {
+      if (this.data.msg.trim() == "") return;
+
+      if (this.data.msg) {
         this.socket.emit("stop typing", this.selectedUserInfo.room_id);
-        if (this.data.msg.trim() == "") return;
         const msg = this.data.msg;
         let obj2 = {
           room_id: this.selectedUserInfo.room_id,
@@ -1737,15 +2005,6 @@ export default {
       }
     },
 
-    async getConversations() {
-      const res = await this.callApi(
-        "get",
-        `/api/get_conversation?limit=${this.limit}`
-      );
-      if (res.status == 200) {
-        this.conversations = res.data.data;
-      }
-    },
     async loadMoreConversations(more) {
       console.log("Load more is calling! length", this.conversations.length);
 
@@ -1781,12 +2040,15 @@ export default {
       const obj = {
         room_id: newMessageRecieved.room_id,
         to_id: newMessageRecieved.to_id,
+        from_id: newMessageRecieved.from_id,
       };
       const res = await this.callApi("post", `/api/add_unseenmsg_count`, obj);
       if (res.status == 200) {
         this.conversations = res.data.data;
       }
-      this.callUnseenMsgCount();
+      if (this.authUser) {
+        this.callUnseenMsgCount();
+      }
       // // if (res.status == 200) {
       // this.$store.dispatch("updateUnseenMsgCount", res.data.count);
       // // }
@@ -1800,7 +2062,7 @@ export default {
       //   return this.e("Confirm New Password is required");
       // if (this.data.password.trim() !== this.data.password_confirmation.trim())
       //   return this.e("Password Mismatch!!");
-
+      this.errors = [];
       this.isAdding = true;
       const res = await this.callApi("post", "/api/update_pass", this.data);
       if (res.status == 201) {
@@ -1809,12 +2071,22 @@ export default {
       } else {
         if (res.status == 422) {
           this.errmsg = "";
-
-          for (let i in res.data.errors) {
-            this.errors = res.data.errors;
-            console.log(this.errors);
-            // this.e(res.data.errors[i][0]);
+          if (res.data.old_password) {
+            this.errors.old_password = res.data.old_password[0];
+            // this.e(res.data.email[0]);
           }
+          if (res.data.password) {
+            this.errors.password = res.data.password[0];
+          }
+          if (res.data.password_confirmation) {
+            this.errors.password_confirmation =
+              res.data.password_confirmation[0];
+          }
+          // for (let i in res.data.errors) {
+          //   this.errors = res.data.errors;
+          //   console.log(this.errors);
+          //   // this.e(res.data.errors[i][0]);
+          // }
         } else if (res.status == 401) {
           this.errmsg = res.data.msg;
         } else {
@@ -1824,6 +2096,12 @@ export default {
       this.isAdding = false;
     },
     changePass() {
+      this.$store.commit("setGlobalPostLoading", false);
+      this.errors = [];
+      this.errmsg = "";
+      this.data.old_password = "";
+      this.data.password = "";
+      this.data.password_confirmation = "";
       this.isPassChangeModal = true;
     },
     closeModal() {
@@ -1855,12 +2133,12 @@ export default {
         const res = await this.callApi("get", "/api/logout");
         if (res.status == 200) {
           // this.$router.push(`/`);
-          this.$router.go(`/`);
-
+          this.hideChatBox();
           this.$store.commit("setAuthInfo", false);
           this.setCookie("token", null);
+          this.$router.push(`/`);
+
           this.s("You Are Logged Out");
-          // this.$router.push("/");
         } else {
           this.swr();
         }
@@ -1872,8 +2150,12 @@ export default {
 
   mounted() {
     document.addEventListener("click", this.hideSearchbar);
+    document.addEventListener("click", this.hideChatListBox);
+    document.addEventListener("click", this.hideProfileBox);
+    document.addEventListener("click", this.hideNotificationBox);
+    document.addEventListener("click", this.hideConnectionBox);
 
-    this.socket = io("http://localhost:5000", {
+    this.socket = io(this.$config.SOCKET_URL, {
       methods: ["GET", "POST"],
       transports: ["websocket"],
       credentials: true,
@@ -1902,7 +2184,6 @@ export default {
         }
       } else {
         console.log("inside else");
-
         this.messages.push(newMessageRecieved);
       }
     });
@@ -1911,21 +2192,56 @@ export default {
       el.onscroll = () => {
         this.bottomOfWindow =
           window.pageYOffset + window.innerHeight >
-          document.body.scrollHeight - 100;
+          document.body.scrollHeight - 200;
         if (this.bottomOfWindow) {
           if (!this.loadMoreConversationLoading) {
             this.loadMoreConversations(4);
           }
         }
       };
-      if (this.isActive == true) {
-        const el1 = this.$refs.scrollToMe;
-      }
+
+      // const el2 = this.$refs.scrollNotification;
+      // el2.onscroll = () => {
+      //   this.bottomOfWindow =
+      //     window.pageYOffset + window.innerHeight >
+      //     document.body.scrollHeight - 200;
+      //   if (this.bottomOfWindow) {
+      //     if (!this.loadMoreConversationLoading) {
+      //       this.loadMoreNotification(4);
+      //     }
+      //   }
+      // };
+
+      // const el3 = this.$refs.scrollConn;
+      // el3.onscroll = () => {
+      //   this.bottomOfWindow =
+      //     window.pageYOffset + window.innerHeight >
+      //     document.body.scrollHeight - 200;
+      //   if (this.bottomOfWindow) {
+      //     if (!this.loadMoreConversationLoading) {
+      //       this.loadMoreConnection(4);
+      //     }
+      //   }
+      // };
+      // if (this.isActive == true) {
+      const el1 = this.$refs.scrollToMe;
+      // }
       this.scrollToEnd();
       this.callCount();
       this.callUnseenMsgCount();
       // this.getConnection();
-      // console.log(this.connectionItem);
+      // const scrollNotification = this.$refs.scrollNotification;
+      // scrollNotification.onscroll = () => {
+      //   this.bottomOfWindow =
+      //     window.pageYOffset + window.innerHeight >
+      //     document.body.scrollHeight - 100;
+
+      //   if (this.bottomOfWindow) {
+      //     if (!this.loadMoreNotificationLoading) {
+      //       this.loadMoreNotification(5);
+      //     }
+      //   }
+      // };
     }
   },
   updated() {
@@ -1935,6 +2251,9 @@ export default {
   beforeDestroy() {
     document.removeEventListener("click", this.hideSearchbar);
     document.removeEventListener("click", this.hideChatListBox);
+    document.removeEventListener("click", this.hideProfileBox);
+    document.removeEventListener("click", this.hideNotificationBox);
+    document.removeEventListener("click", this.hideConnectionBox);
   },
   // async asyncData({ app, store, redirect, params }) {
   //   try {
@@ -1950,6 +2269,8 @@ export default {
   // },
   async created() {
     if (this.authUser) {
+      this.isProfileBox = false;
+
       this.callCount();
       this.callUnseenMsgCount();
     }

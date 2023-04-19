@@ -24,7 +24,7 @@
             placeholder="Email Address"
           />
           <span class="text-danger" v-if="errors.email">{{
-            errors.email[0]
+            errors.email
           }}</span>
         </div>
 
@@ -38,7 +38,7 @@
             :disabled="isSending"
             :loading="isSending"
           >
-            {{ isSending ? "Sending" : "Send OTP" }}
+            {{ isSending ? "Sending OTP..." : "Send OTP" }}
           </button>
         </div>
       </div>
@@ -76,9 +76,8 @@ export default {
         if (res.status == 401) {
           this.e(res.data.msg);
         } else if (res.status == 422) {
-          for (let i in res.data.errors) {
-            this.errors = res.data.errors;
-            // this.e(res.data.errors[i][0]);
+          if (res.data.email) {
+            this.errors.email = res.data.email[0];
           }
         } else {
           this.swr();

@@ -32,7 +32,7 @@
           </div>
         </h5>
         <Form label-position="top">
-          <FormItem label="Research Type *">
+          <FormItem label="Type *">
             <Select v-model="data.type" placeholder="Select Type">
               <Option value="Article">Article</Option>
               <Option value="Conference Paper">Conference Paper</Option>
@@ -41,6 +41,7 @@
               <Option value="Presentation">Presentation</Option>
               <Option value="Preprint">Preprint</Option>
               <Option value="Poster">Poster</Option>
+              <Option value="Note">Note</Option>
             </Select>
             <span class="text-danger" v-if="errors.type">{{
               errors.type[0]
@@ -77,11 +78,7 @@
             </FormItem>
           </div>
           <FormItem label="Title *">
-            <Input
-              type="text"
-              v-model="data.title"
-              placeholder="Research Title"
-            />
+            <Input type="text" v-model="data.title" placeholder="Title" />
             <span class="text-danger" v-if="errors.title">{{
               errors.title[0]
             }}</span>
@@ -141,8 +138,8 @@
               :on-format-error="handleFormatError"
               :on-error="handleError"
               :on-exceeded-size="handleMaxSize"
-              :max-size="2048"
-              action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
+              :max-size="20048"
+              action="http://127.0.0.1:8000/api/upload"
             >
               <div style="padding: 5px 0">
                 <Icon
@@ -168,40 +165,64 @@
             </div>
           </FormItem>
           <FormItem label="Attachment">
-            <Upload
-              ref="upload"
-              :multiple="false"
-              :show-upload-list="false"
-              :on-success="handleSuccess"
-              :format="[
-                'jpg',
-                'jpeg',
-                'png',
-                'pdf',
-                'docx',
-                'txt',
-                'mp4',
-                'mp3',
-                'zip',
-              ]"
-              :on-format-error="handleFormatError"
-              :on-exceeded-size="handleMaxSize"
-              :on-remove="deleteAttachment"
-              type="drag"
-              action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
-            >
-              <div class="profile-main-btn">
-                <i class="fa-solid fa-cloud-arrow-up"></i>
-                Upload Attachment
-              </div>
-            </Upload>
-            <div v-if="this.attachmentName" class="attachmentName">
+            <div v-if="!attachmentName">
+              <Upload
+                ref="uploadAttachment"
+                :multiple="false"
+                :on-success="handleSuccess"
+                :format="['pdf', 'docx', 'txt', 'zip']"
+                :on-format-error="handleFormatError"
+                :on-exceeded-size="handleMaxSize"
+                :on-remove="deleteAttachment"
+                :max-size="60048"
+                type="drag"
+                action="http://127.0.0.1:8000/api/upload_attachment"
+              >
+                <div class="profile-main-btn">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  Upload Attachment
+                </div>
+              </Upload>
+            </div>
+            <div v-else-if="isAttachmentLoading" class="loader-sm">
+              <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+            </div>
+            <div v-else-if="attachmentName" class="attachmentName">
               <span class="c-pointer">{{ this.attachmentName }}</span>
               <span @click="deleteAttachment"
                 ><i class="lni lni-trash-can c-pointer"></i
               ></span>
             </div>
           </FormItem>
+          <div class="row">
+            <div class="col-6">
+              <FormItem label="Start Date">
+                <DatePicker
+                  type="month"
+                  v-model="data.start_date"
+                  placeholder="Start Date"
+                  class="d-block"
+                ></DatePicker>
+                <span class="text-danger" v-if="errors.start_date">{{
+                  errors.start_date[0]
+                }}</span>
+              </FormItem>
+            </div>
+
+            <div class="col-6">
+              <FormItem label="End Date (or expected)">
+                <DatePicker
+                  type="month"
+                  v-model="data.end_date"
+                  placeholder="End Date (or expected)"
+                  class="d-block"
+                ></DatePicker>
+                <span class="text-danger" v-if="errors.end_date">{{
+                  errors.end_date[0]
+                }}</span>
+              </FormItem>
+            </div>
+          </div>
         </Form>
         <div class="footer">
           <div></div>
@@ -265,6 +286,7 @@
                   <Option value="Presentation">Presentation</Option>
                   <Option value="Preprint">Preprint</Option>
                   <Option value="Poster">Poster</Option>
+                  <Option value="Note">Note</Option>
                 </Select>
                 <span class="text-danger" v-if="errors.type">{{
                   errors.type[0]
@@ -357,7 +379,7 @@
                   :on-error="handleError"
                   :on-exceeded-size="handleMaxSize"
                   :max-size="65535"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
+                  action="http://127.0.0.1:8000/api/upload"
                 >
                   <div style="padding: 5px 0">
                     <Icon
@@ -384,29 +406,65 @@
               </FormItem>
 
               <FormItem label="Attachment">
-                <Upload
-                  ref="upload"
-                  :multiple="false"
-                  :show-upload-list="false"
-                  :on-success="handleSuccess"
-                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
-                  :on-format-error="handleFormatError"
-                  :on-remove="handleRemove"
-                  type="drag"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
-                >
-                  <div class="profile-main-btn">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Upload Attachment
-                  </div>
-                </Upload>
-                <div v-if="attachmentName" class="attachmentName">
+                <div v-if="!attachmentName">
+                  <Upload
+                    ref="uploadAttachmentEdit"
+                    :multiple="false"
+                    :show-upload-list="false"
+                    :on-success="handleSuccess"
+                    :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
+                    :on-format-error="handleFormatError"
+                    :on-remove="handleRemove"
+                    :max-size="65535"
+                    type="drag"
+                    action="http://127.0.0.1:8000/api/upload_attachment"
+                  >
+                    <div class="profile-main-btn">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                      Upload Attachment
+                    </div>
+                  </Upload>
+                </div>
+                <div v-else-if="isAttachmentLoading" class="loader-sm">
+                  <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+                </div>
+                <div v-else-if="attachmentName" class="attachmentName">
                   <span class="c-pointer">{{ attachmentName }}</span>
                   <span @click="deleteAttachment"
                     ><i class="lni lni-trash-can c-pointer"></i
                   ></span>
                 </div>
               </FormItem>
+
+              <div class="row">
+                <div class="col-6">
+                  <FormItem label="Start Date">
+                    <DatePicker
+                      type="month"
+                      v-model="editData.start_date"
+                      placeholder="Start Date"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.start_date">{{
+                      errors.start_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+
+                <div class="col-6">
+                  <FormItem label="End Date (or expected)">
+                    <DatePicker
+                      type="month"
+                      v-model="editData.end_date"
+                      placeholder="End Date (or expected)"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.end_date">{{
+                      errors.end_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+              </div>
             </Form>
 
             <div class="footer">
@@ -507,119 +565,84 @@
             </p>
 
             <div v-if="research.authors.length">
-              <p
-                v-if="research.authors.length > 1 && research.type != 'Project'"
-                class="mt-2"
-              >
-                Authors:
-                <span v-for="author in research.authors">
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
-              <p
-                v-else-if="
-                  research.authors.length > 1 && research.type == 'Project'
-                "
-                class="mt-2"
-              >
-                Team Members:
-                <span v-for="author in research.authors">
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
-              <p
-                class="mt-2"
-                v-else-if="
-                  research.authors.length == 1 && research.type == 'Project'
-                "
-              >
-                Team Member:
-                <span v-for="author in research.authors">
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
-              <p
-                class="mt-2"
-                v-else-if="
-                  research.authors.length == 1 && research.type != 'Project'
-                "
-              >
-                Author:
-                <span v-for="author in research.authors">
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
-            </div>
-            <div
-              v-else-if="research.authors.length && research.type == 'Project'"
-            >
-              <p v-if="research.authors.length > 1" class="mt-2">
-                Team Members:
-                <span
-                  v-for="author in research.authors"
-                  v-if="research.authors.length"
+              <div v-if="research.authors.length > 1">
+                <p
+                  v-if="research.type == 'Project'"
+                  class="post-sub-title mt-2"
                 >
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
-              <p class="mt-2" v-else>
-                Team Member:
-                <span
-                  v-for="author in research.authors"
-                  v-if="research.authors.length"
+                  Team Members:
+                  <span v-for="(author, index) in research.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }} </nuxt-link
+                    ><span
+                      class="dot"
+                      v-if="research.authors.length - 1 > index"
+                      >•</span
+                    >
+                  </span>
+                </p>
+                <p v-else class="post-sub-title mt-2">
+                  Authors:
+                  <span v-for="(author, index) in research.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }} </nuxt-link
+                    ><span
+                      class="dot"
+                      v-if="research.authors.length - 1 > index"
+                      >•</span
+                    >
+                  </span>
+                </p>
+              </div>
+              <div v-else>
+                <p
+                  class="post-sub-title mt-2"
+                  v-if="research.type == 'Project'"
                 >
-                  <nuxt-link
-                    v-if="authUser"
-                    :to="`/profile/${author.slug}/overview`"
-                    class="authors"
-                    >{{ author.name }}
-                  </nuxt-link>
-                  <span v-else> {{ author.name }} . </span>
-                </span>
-              </p>
+                  Team Member:
+                  <span v-for="(author, index) in research.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}</nuxt-link
+                    ><span
+                      class="dot"
+                      v-if="research.authors.length - 1 > index"
+                      >•</span
+                    ></span
+                  >
+                </p>
+                <p class="post-sub-title mt-2" v-else>
+                  Author:
+                  <span v-for="(author, index) in research.authors">
+                    <nuxt-link
+                      :to="`/profile/${author.slug}/overview`"
+                      class="authors"
+                      >{{ author.name }}
+                    </nuxt-link>
+                    <span class="dot" v-if="research.authors.length - 1 > index"
+                      >•</span
+                    >
+                  </span>
+                </p>
+              </div>
             </div>
             <div class="post-sub-title">
               <p>
                 {{ research.formatedDateTime }}
-                <span class="dot">.</span>
+                <span class="dot">•</span>
                 <a v-if="research.read_count > 1"
                   >{{ research.read_count }} Reads</a
                 ><a v-else-if="research.read_count <= 1"
                   >{{ research.read_count }} Read</a
                 >
-                <span class="dot">.</span>
+                <span class="dot">•</span>
                 <a>{{ research.upVote }} UpVote</a>
-                <span class="dot">.</span>
+                <span class="dot">•</span>
                 <a>{{ research.downVote }} DownVote</a>
               </p>
             </div>
@@ -628,7 +651,7 @@
                 <a
                   v-if="research.attachment && authUser"
                   class="main-btn main-btn__bg px-lg-4"
-                  :href="`https://cameraworldapi.dreamsgallerybd.com/api/download_attachment/${research.attachment}`"
+                  :href="`${$config.BASE_URL}/api/download_attachment/${research.attachment}`"
                   >Download <i class="fa-solid fa-download"
                 /></a>
                 <a
@@ -668,7 +691,7 @@
         :closable="true"
       >
         <div class="comment-liked" v-for="user in likedUser">
-          <img :src="user.image" alt="img" />
+                    <img :src="`${http + user.image}`" alt="img" />
           <nuxt-link :to="`/profile/${user.user_slug}/overview`">
             {{ user.name }}
           </nuxt-link>
@@ -677,7 +700,7 @@
       </Modal>
       <Modal v-model="visible">
         <img :src="imgName" style="width: 100%" />
-        <div slot="footer">Figure: {{ index + 1 }}</div>
+        <div slot="footer"></div>
       </Modal>
     </div>
     <!--**** loader ****-->
@@ -775,6 +798,8 @@ export default {
         url: "",
         images: [],
         pdf: "",
+        start_date: "",
+        end_date: "",
         iconImage: "",
       },
       editData: {
@@ -792,17 +817,20 @@ export default {
         images: [],
         iconImage: "",
         id: "",
+        start_date: "",
+        end_date: "",
         index: "",
       },
       edit_id: "",
       index: "",
       isEditingItem: false,
       attachmentName: "",
+      isAttachmentLoading: false,
       isIconImageNew: false,
       iconImageName: "",
       imageName: [],
-
-      http: "https://cameraworldapi.dreamsgallerybd.com",
+      http: this.$config.IMAGE_URL,
+      socket: null,
     };
   },
 
@@ -875,6 +903,7 @@ export default {
     },
     async handleSuccess(res, file) {
       let attachment = this.attachmentName;
+      this.isAttachmentLoading = true;
       const res1 = await this.callApi("post", "/api/delete_attachment", {
         Name: attachment,
       });
@@ -882,10 +911,13 @@ export default {
       // this.data.attachment = `${res}`;
       if (this.edit_id != "") {
         this.editData.attachment = `${res}`;
+        this.$refs.uploadAttachmentEdit.clearFiles();
       } else {
         this.data.attachment = `${res}`;
+        this.$refs.uploadAttachment.clearFiles();
       }
       this.attachmentName = `${res}`;
+      this.isAttachmentLoading = false;
     },
     async handleRemove(file, fileList) {
       let attachment = this.attachmentName;
@@ -1235,6 +1267,11 @@ export default {
   },
 
   mounted() {
+    this.socket = io("http://localhost:5000", {
+      methods: ["GET", "POST"],
+      transports: ["websocket"],
+      credentials: true,
+    });
     // document.addEventListener("click", this.hideSearchbar);
     window.onscroll = () => {
       this.bottomOfWindow =

@@ -12,19 +12,45 @@
           v-for="(data, index) in dataBanner"
           :key="index"
           v-if="data.type == 'slider'"
-          :style="{ backgroundImage: `url(${data.image})` }"
+          :style="{ backgroundImage: `url(${http + data.image})` }"
         >
-          <!-- <div class="container">
-            <div class="hero-section__content">
-              <h4>{{ data.subTitle }}</h4>
-              <h1>{{ data.title }}</h1>
-              <button class="main-btn main-btn__border">
-                {{ data.btn_text }}
-              </button>
-            </div>
-          </div> -->
         </slide>
 
+        <!-- <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view1.jpeg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view2.jpeg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view3.jpeg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view4.jpeg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view5.jpg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view6.jpeg')` }"
+        >
+        </slide>
+        <slide
+          class="item hero-section__bg"
+          :style="{ backgroundImage: `url('/assets/images/view7.jpeg')` }"
+        >
+        </slide> -->
         <HooperPagination slot="hooper-addons"></HooperPagination>
       </hooper>
       <div class="right">
@@ -158,13 +184,14 @@ export default {
           },
         },
       },
+      http: this.$config.IMAGE_URL,
     };
   },
 
   methods: {},
   async asyncData({ app, store, redirect, params }) {
     try {
-      let [res] = await Promise.all([app.$axios.get(`/api/banners`)]);
+      let [res] = await Promise.all([app.$axios.get(`/api/landing_banners`)]);
       return {
         dataBanner: res.data.data,
       };

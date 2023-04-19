@@ -16,7 +16,7 @@
             placeholder="Email Address"
           />
           <span class="text-danger" v-if="errors.email">{{
-            errors.email[0]
+            errors.email
           }}</span>
         </div>
         <div class="mb-2">
@@ -27,7 +27,7 @@
             placeholder="Enter New Password"
           />
           <span class="w-full text-danger" v-if="errors.password"
-            >{{ errors.password[0] }}
+            >{{ errors.password }}
           </span>
         </div>
 
@@ -39,7 +39,7 @@
             placeholder="Confirm New Password"
           />
           <span class="w-full text-danger" v-if="errors.password_confirmation"
-            >{{ errors.password[0] }}
+            >{{ errors.password_confirmation }}
           </span>
         </div>
 
@@ -74,7 +74,7 @@ export default {
         email: "",
         password: "",
         password_confirmation: "",
-        token: "",
+        otp: "",
       },
       isSubmitting: false,
       errors: [],
@@ -90,16 +90,16 @@ export default {
   //All of its synchronous child components have been mounted (does not include async components or components inside <Suspense> trees).
   mounted() {
     this.data.email = this.passwordReset.email;
-    this.data.token = this.passwordReset.token;
+    this.data.otp = this.passwordReset.otp;
   },
 
   methods: {
     async submit() {
-      if (this.data.email.trim() == "") return this.e("Email is required");
-      if (this.data.password.trim() == "")
-        return this.e("Password is required");
-      if (this.data.password_confirmation.trim() == "")
-        return this.e("Confirm Password is required");
+      // if (this.data.email.trim() == "") return this.e("Email is required");
+      // if (this.data.password.trim() == "")
+      //   return this.e("Password is required");
+      // if (this.data.password_confirmation.trim() == "")
+      //   return this.e("Confirm Password is required");
 
       this.isSubmitting = true;
       const res = await this.callApi("post", "/api/reset_password", this.data);
@@ -114,9 +114,15 @@ export default {
         if (res.status == 401) {
           this.e(res.data.msg);
         } else if (res.status == 422) {
-          for (let i in res.data.errors) {
-            this.errors = res.data.errors;
-            // this.e(res.data.errors[i][0]);
+          if (res.data.email) {
+            this.errors.email = res.data.email[0];
+          }
+          if (res.data.password) {
+            this.errors.password = res.data.password[0];
+          }
+          if (res.data.password_confirmation) {
+            this.errors.password_confirmation =
+              res.data.password_confirmation[0];
           }
         } else {
           this.swr();

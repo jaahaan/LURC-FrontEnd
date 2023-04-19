@@ -22,6 +22,21 @@
       >
         <postHeader />
       </div>
+      <div
+        v-else-if="
+          $route.name == 'settings-account' ||
+          $route.name == 'settings-twoFactorAuth' ||
+          $route.name == 'settings-change_password' ||
+          $route.name == 'admin-banners' ||
+          $route.name == 'admin-order_banners' ||
+          $route.name == 'admin-admin' ||
+          $route.name == 'admin-theme'
+        "
+      >
+        <div class="container-fluid profile-header-bg main">
+          <Sidebar />
+        </div>
+      </div>
       <div v-else>
         <Nuxt />
       </div>
@@ -47,6 +62,8 @@ import BottomContainer from "/components/footer";
 import profileHeader from "/components/profileHeader";
 import ProfileNav from "/components/profileNav";
 import postHeader from "/components/postHeader";
+import Sidebar from "/components/sidebar";
+
 const { io } = require("socket.io-client");
 
 export default {
@@ -56,6 +73,7 @@ export default {
     ProfileNav,
     BottomContainer,
     postHeader,
+    Sidebar,
   },
   data() {
     return {
@@ -80,7 +98,11 @@ export default {
       if (
         this.$route.name == "register" ||
         this.$route.name == "login" ||
-        this.$route.name == "index"
+        this.$route.name == "index" ||
+        this.$route.name == "auth-account-activation" ||
+        this.$route.name == "auth-forgot_password" ||
+        this.$route.name == "auth-otp" ||
+        this.$route.name == "auth-reset_password"
       ) {
         this.isFooterShow = true;
       } else this.isFooterShow = false;
@@ -102,10 +124,16 @@ export default {
       this.isFooterShowChange();
     },
   },
-  // async created() {
-  //   // if (this.authUser) this.getNotificationItemsServer();
-  //   // console.log("auth", window.authUser);
-  //   // await this.$store.commit("setUpdateUser", window.authUser);
-  // },
+  async created() {
+    console.log("inside default");
+    const res = await this.callApi("get", "/api/get_theme");
+
+    if (res.status == 200) {
+      console.log("inside 200");
+      console.log(res.data);
+
+      this.$store.commit("setTheme", res.data);
+    }
+  },
 };
 </script>

@@ -14,6 +14,7 @@ export const state = () => ({
     allGlobalResearch:[],
     globalResearchLoading:true,
     allGlobalPost:[],
+    allComments:[],
     globalPostLoading:true,
     callNotificationOb:null,
     notification: [],
@@ -24,13 +25,16 @@ export const state = () => ({
     seenCount:0,
     unseenMsgCount:0,
     token: '',
-    passwordReset: { email: "" , token: ""},
+    passwordReset: { email: "" , otp: ""},
     unauthorizedCredential: { email: "",  password: ""},
     selectedUserInfo: {room_id: "", selectedUserId: "",selectedUserImage:"", selectedUserSlug:"",  selectedUserName: "" },
     commentId: "",
     selectedChat: [],
     chatNotification: [],
     chats:[],
+    isChatBox: false,
+    isTyping: false,
+    themeInfo: [],
 })
 // common getters
 export const getters = {
@@ -90,6 +94,9 @@ export const getters = {
   getSelectedChat (state) {
     return state.selectedChat
   },
+  getTheme (state) {
+    return state.themeInfo
+  },
   getChatNotification (state) {
     return state.chatNotification
   },
@@ -119,10 +126,18 @@ export const getters = {
   getAllGlobalPost (state) {
     return state.allGlobalPost
   },
+  getAllComments (state) {
+    return state.allComments
+  },
   getGlobalPostLoading (state) {
     return state.globalPostLoading
   },
-
+  getIsChatBox (state) {
+    return state.isChatBox
+  },
+  getIsTyping (state) {
+    return state.isTyping
+  },
 }
 //mutations for changing data from action
 export const mutations = {
@@ -185,6 +200,9 @@ export const mutations = {
   },
   setSelectedChat (state, data) {
     state.selectedChat = data
+  },
+  setTheme (state, data) {
+    state.themeInfo = data
   },
   setChatNotification (state, data) {
     state.chatNotification = data
@@ -266,7 +284,20 @@ export const mutations = {
   pushAllGlobalPost (state, data) {
     state.allGlobalPost.push(data)
   },
-  
+  setIsChatBox (state, data) {
+    state.isChatBox = data
+  },
+  setIsTyping (state, data) {
+    state.isTyping = data
+  },
+
+  setAllComments (state, data) {
+    state.allComments = data
+  },
+
+  pushAllComments (state, data) {
+    state.allComments.unshift(data)
+  },
 }
 
 // actionns for commiting mutations
@@ -282,6 +313,15 @@ export const actions = {
       console.log(department.data)
       if(department.status == 200){
         commit('setDepartmentInfo', department.data)
+      }
+      const theme = await $axios.get('/api/get_theme')
+
+      if (theme.status == 200) {
+        console.log("inside 200");
+        console.log(theme.data);
+
+        commit('setTheme', theme.data);
+        console.log(this.themeInfo);
       }
       const res  = await $axios.get('/api/auth_user')
       console.log(res.data)
@@ -330,6 +370,9 @@ export const actions = {
   },
   setDepartmentInfo ({ commit }, data) {
     commit('setDepartmentInfo', data)
+  },
+  setTheme ({ commit }, data) {
+    commit('setTheme', data)
   },
   setAuthInfo ({ commit }, data) { 
     commit('setAuthInfo', data)

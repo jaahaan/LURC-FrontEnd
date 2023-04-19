@@ -323,7 +323,7 @@
                 }}<span
                   class="dot"
                   v-if="profileInfo.user_skills.length - 1 > index"
-                  >.</span
+                  >•</span
                 ></span
               >
             </p>
@@ -333,19 +333,16 @@
       <!--**** Skills-section ends ****-->
 
       <div>
-        <div
-          class="navbar-notification--wrapper"
-          v-bind:class="{ active: isSidebar }"
-        >
-          <div class="navbar-notification">
-            <div class="navbar-notification--head">
+        <div class="navbar-add--wrapper" v-bind:class="{ active: isSidebar }">
+          <div class="navbar-add">
+            <div class="navbar-add--head">
               <!-- <a href="#"><img src="assets/images/logo.png" alt="Logo" /></a> -->
               <h5 class="d-inline">Add Your Information</h5>
               <button type="button" v-on:click="hideSidebar()">
                 <i class="lni lni-close"></i>
               </button>
             </div>
-            <ul class="navbar-notification--body">
+            <ul class="navbar-add--body">
               <li class="nav-item" @click="showAboutModal">
                 <a class="nav-link">About</a>
               </li>
@@ -358,11 +355,11 @@
               </li>
             </ul>
 
-            <div class="navbar-notification--head">
+            <div class="navbar-add--head">
               <!-- <a href="#"><img src="assets/images/logo.png" alt="Logo" /></a> -->
               <h5 class="d-inline">Add Your Research</h5>
             </div>
-            <ul class="navbar-notification--body">
+            <ul class="navbar-add--body">
               <li class="nav-item" @click="showProjectModal">
                 <a class="nav-link">Project</a>
               </li>
@@ -386,6 +383,9 @@
               </li>
               <li class="nav-item" @click="showResearchModal('Poster')">
                 <a class="nav-link">Poster</a>
+              </li>
+              <li class="nav-item" @click="showResearchModal('Note')">
+                <a class="nav-link">Note</a>
               </li>
             </ul>
           </div>
@@ -573,9 +573,9 @@
               <Button
                 class="main-btn main-btn__bg"
                 @click="saveSkills"
-                :disabled="isAdding"
-                :loading="isAdding"
-                >{{ isAdding ? "Saving.." : "Save" }}</Button
+                :disabled="isSkillAdding"
+                :loading="isSkillAdding"
+                >{{ isSkillAdding ? "Saving.." : "Save" }}</Button
               >
             </div>
           </div>
@@ -593,7 +593,7 @@
               </div>
             </h5>
             <Form label-position="top">
-              <FormItem label="Research Type *">
+              <FormItem label="Type *">
                 <Select v-model="researchData.type" placeholder="Select Type">
                   <Option value="Article">Article</Option>
                   <Option value="Conference Paper">Conference Paper</Option>
@@ -602,6 +602,7 @@
                   <Option value="Presentation">Presentation</Option>
                   <Option value="Preprint">Preprint</Option>
                   <Option value="Poster">Poster</Option>
+                  <Option value="Note">Note</Option>
                 </Select>
                 <span class="text-danger" v-if="errors.type">{{
                   errors.type[0]
@@ -636,7 +637,7 @@
                 <Input
                   type="text"
                   v-model="researchData.title"
-                  placeholder="Research Title"
+                  placeholder="Title"
                 />
                 <span class="text-danger" v-if="errors.title">{{
                   errors.title[0]
@@ -703,7 +704,7 @@
                   :on-exceeded-size="handleMaxSize"
                   :max-size="65535"
                   :on-format-error="handleFormatError"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
+                  action="http://127.0.0.1:8000/api/upload"
                 >
                   <div style="padding: 5px 0">
                     <Icon
@@ -729,36 +730,64 @@
                 </div>
               </FormItem>
               <FormItem label="Attachment">
-                <Upload
-                  :headers="{
-                    'x-csrf-token': token,
-                    'X-Requested-With': 'XMLHttpRequest',
-                  }"
-                  ref="upload"
-                  :multiple="false"
-                  :show-upload-list="false"
-                  :on-success="handleSuccess"
-                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
-                  :on-format-error="handleFormatError"
-                  :on-remove="handleRemove"
-                  type="drag"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
-                >
-                  <div class="profile-main-btn">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Upload Attachment
-                  </div>
-                </Upload>
-                <div v-if="this.attachmentName" class="attachmentName">
+                <div v-if="!attachmentName">
+                  <Upload
+                    ref="uploadAttachment"
+                    :multiple="false"
+                    :on-success="handleSuccess"
+                    :format="['pdf', 'docx', 'txt', 'zip']"
+                    :on-format-error="handleFormatError"
+                    :on-exceeded-size="handleMaxSize"
+                    :on-remove="deleteAttachment"
+                    :max-size="60048"
+                    type="drag"
+                    action="http://127.0.0.1:8000/api/upload_attachment"
+                  >
+                    <div class="profile-main-btn">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                      Upload Attachment
+                    </div>
+                  </Upload>
+                </div>
+                <div v-else-if="isAttachmentLoading" class="loader-sm">
+                  <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+                </div>
+                <div v-else-if="attachmentName" class="attachmentName">
                   <span class="c-pointer">{{ this.attachmentName }}</span>
                   <span @click="deleteAttachment"
                     ><i class="lni lni-trash-can c-pointer"></i
                   ></span>
                 </div>
-                <span class="text-danger" v-if="errors.url">{{
-                  errors.url[0]
-                }}</span>
               </FormItem>
+              <div class="row">
+                <div class="col-6">
+                  <FormItem label="Start Date">
+                    <DatePicker
+                      type="month"
+                      v-model="researchData.start_date"
+                      placeholder="Start Date"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.start_date">{{
+                      errors.start_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+
+                <div class="col-6">
+                  <FormItem label="End Date (or expected)">
+                    <DatePicker
+                      type="month"
+                      v-model="researchData.end_date"
+                      placeholder="End Date (or expected)"
+                      class="d-block"
+                    ></DatePicker>
+                    <span class="text-danger" v-if="errors.end_date">{{
+                      errors.end_date[0]
+                    }}</span>
+                  </FormItem>
+                </div>
+              </div>
             </Form>
           </div>
           <div slot="footer">
@@ -858,7 +887,7 @@
                   :on-exceeded-size="handleMaxSize"
                   :max-size="65535"
                   :on-format-error="handleFormatError"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload"
+                  action="http://127.0.0.1:8000/api/upload"
                 >
                   <div style="padding: 5px 0">
                     <Icon
@@ -884,24 +913,30 @@
                 </div>
               </FormItem>
               <FormItem label="Attachment">
-                <Upload
-                  ref="upload"
-                  :multiple="false"
-                  :show-upload-list="false"
-                  :on-success="handleSuccess"
-                  :format="['pdf', 'docx', 'txt', 'mp4', 'mp3', 'zip']"
-                  :on-format-error="handleFormatError"
-                  :on-remove="handleRemove"
-                  type="drag"
-                  action="https://cameraworldapi.dreamsgallerybd.com/api/upload_attachment"
-                >
-                  <div class="profile-main-btn">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    Upload Attachment
-                  </div>
-                </Upload>
-                <div v-if="attachmentName" class="attachmentName">
-                  <span class="c-pointer">{{ attachmentName }}</span>
+                <div v-if="!attachmentName">
+                  <Upload
+                    ref="uploadAttachment"
+                    :multiple="false"
+                    :on-success="handleSuccess"
+                    :format="['pdf', 'docx', 'txt', 'zip']"
+                    :on-format-error="handleFormatError"
+                    :on-exceeded-size="handleMaxSize"
+                    :on-remove="deleteAttachment"
+                    :max-size="60048"
+                    type="drag"
+                    action="http://127.0.0.1:8000/api/upload_attachment"
+                  >
+                    <div class="profile-main-btn">
+                      <i class="fa-solid fa-cloud-arrow-up"></i>
+                      Upload Attachment
+                    </div>
+                  </Upload>
+                </div>
+                <div v-else-if="isAttachmentLoading" class="loader-sm">
+                  <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+                </div>
+                <div v-else-if="attachmentName" class="attachmentName">
+                  <span class="c-pointer">{{ this.attachmentName }}</span>
                   <span @click="deleteAttachment"
                     ><i class="lni lni-trash-can c-pointer"></i
                   ></span>
@@ -1010,6 +1045,7 @@ export default {
       isSidebar: false,
       isLoading: true,
       isSkillLoading: false,
+      isSkillAdding: false,
       isAdding: false,
       deleting: false,
       edit_education: false,
@@ -1055,6 +1091,7 @@ export default {
       },
       index: -1,
       attachmentName: "",
+      isAttachmentLoading: false,
       researchData: {
         type: "",
         conference: "",
@@ -1090,7 +1127,7 @@ export default {
       isEditingItem: false,
       isIconImageNew: false,
       iconImageName: "",
-      http: "https://cameraworldapi.dreamsgallerybd.com",
+      http: this.$config.IMAGE_URL,
     };
   },
 
@@ -1142,14 +1179,16 @@ export default {
     },
     async handleSuccess(res, file) {
       let attachment = this.attachmentName;
+      this.isAttachmentLoading = true;
+
       const res1 = await this.callApi("post", "/api/delete_attachment", {
         Name: attachment,
       });
       console.log(this.data.attachment);
-      // this.data.attachment = `${res}`;
-
+      this.$refs.uploadAttachment.clearFiles();
       this.researchData.attachment = `${res}`;
       this.attachmentName = `${res}`;
+      this.isAttachmentLoading = false;
     },
     async handleRemove(file, fileList) {
       let attachment = this.attachmentName;
@@ -1219,8 +1258,8 @@ export default {
       }
     },
     async updateAbout() {
+      // if (this.editData.about == "") return this.e("required");
       this.isAdding = true;
-      if (this.editData.about.trim() == "") return this.e("required");
       const res = await this.callApi(
         "post",
         `/api/update_about`,
@@ -1261,6 +1300,13 @@ export default {
     showEducationModal() {
       this.errors = [];
       this.educationModal = true;
+      this.educationData.institute = "";
+      this.educationData.degree = "";
+      this.educationData.fieldOfStudy = "";
+      this.educationData.start_date = "";
+      this.educationData.end_date = "";
+      this.educationData.grade = "";
+      this.educationData.activities = "";
       this.hideSidebar();
     },
     async saveEducation() {
@@ -1274,6 +1320,13 @@ export default {
         // this.educationInfo.unshift(res.data);
         this.s("Education has been added successfully!");
         this.educationModal = false;
+        this.educationData.institute = "";
+        this.educationData.degree = "";
+        this.educationData.fieldOfStudy = "";
+        this.educationData.start_date = "";
+        this.educationData.end_date = "";
+        this.educationData.grade = "";
+        this.educationData.activities = "";
         this.reset();
       } else if (res.status == 422) {
         for (let i in res.data) {
@@ -1409,12 +1462,13 @@ export default {
     },
     showSkillsModal() {
       this.errors = [];
+      this.data.skill_id = [];
       this.skillsModal = true;
       this.hideSidebar();
     },
     async saveSkills() {
       if (this.data.skill_id == []) return this.e("Skill Required");
-      this.isAdding = true;
+      this.isSkillAdding = true;
       const res = await this.callApi("post", "/api/save_skills", this.data);
       if (res.status === 200) {
         this.data.skill_id = [];
@@ -1430,7 +1484,7 @@ export default {
           this.swr();
         }
       }
-      this.isAdding = false;
+      this.isSkillAdding = false;
     },
 
     async showEditSkills() {
@@ -1493,13 +1547,40 @@ export default {
     },
     showProjectModal() {
       this.errors = [];
+      this.researchData = {
+        type: "",
+        conference: "",
+        publication_date: "",
+        title: "",
+        author_id: [],
+        attachment: "",
+        abstract: "",
+        url: "",
+        images: [],
+        start_date: "",
+        end_date: "",
+      };
       this.researchData.type = "Project";
+      this.researchData.images = [];
       this.projectModal = true;
       this.hideSidebar();
     },
 
     async showResearchModal(type) {
       this.errors = [];
+      this.researchData = {
+        type: "",
+        conference: "",
+        publication_date: "",
+        title: "",
+        author_id: [],
+        attachment: "",
+        abstract: "",
+        url: "",
+        images: [],
+        start_date: "",
+        end_date: "",
+      };
       this.researchData.type = type;
       this.getAuthors(this.authUser.name);
       this.researchData.author_id.push(this.authUser.id);
@@ -1522,8 +1603,8 @@ export default {
       this.isAdding = true;
       if (res.status === 200) {
         this.s("Updated");
-        this.projectModal = false;
-        this.researchModal = false;
+
+        this.closeModal();
       } else {
         if (res.status == 422) {
           for (let i in res.data.errors) {
@@ -1565,22 +1646,35 @@ export default {
       this.projectModal = false;
       this.researchModal = false;
 
-      this.researchData.type = "";
-      this.researchData.title = "";
-      this.researchData.author_id = [];
-      this.researchData.attachment = "";
-      this.researchData.abstract = "";
-      this.researchData.start_date = "";
-      this.researchData.end_date = "";
-      this.researchData.url = "";
+      // this.researchData.type = "";
+      // this.researchData.title = "";
+      // this.researchData.author_id = [];
+      // this.researchData.attachment = "";
+      // this.researchData.abstract = "";
+      // this.researchData.start_date = "";
+      // this.researchData.end_date = "";
+      // this.researchData.url = "";
       this.attachmentName = "";
-
+      this.researchData = {
+        type: "",
+        conference: "",
+        publication_date: "",
+        title: "",
+        author_id: [],
+        attachment: "",
+        abstract: "",
+        url: "",
+        images: [],
+        start_date: "",
+        end_date: "",
+      };
       //
       this.user_slug = "";
       this.editData.about = "";
       this.about_id = "";
       this.editData.skill_id = [];
       this.skill_id = "";
+      this.data.skill_id = [];
     },
 
     async reset() {

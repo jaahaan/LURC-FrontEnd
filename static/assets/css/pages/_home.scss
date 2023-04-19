@@ -109,7 +109,10 @@
         // border-bottom: 2px dashed #e3e3e3;
         margin-bottom: 10px;
         a {
-          color: #000000;
+          color: $link;
+          &:hover {
+            text-decoration: underline;
+          }
         }
       }
       .header {
@@ -118,13 +121,23 @@
         border-bottom: 1px dashed $secondaryColor;
         padding-bottom: 15px;
         margin-bottom: 17px;
-        img {
+        align-items: center;
+        &--image {
+          width: 55px;
+          height: 55px;
+          text-align: center;
+          background: $bgWhite;
           border-radius: 50%;
-          width: 40px;
-          height: 40px;
+          overflow: hidden;
+          img {
+            width: auto;
+            height: 100%;
+            background-size: cover;
+            // border-radius: 50%;
+          }
         }
         &-content {
-          margin-left: 0.5rem !important;
+          margin-left: 0.75rem !important;
           a {
             color: #000000;
             font-size: 1.1em;
@@ -151,7 +164,7 @@
               margin-left: 0.25em !important;
               font-size: 1.25em;
               font-weight: 500;
-              color: $gray;
+              color: $secondary-text;
 
               img {
                 width: 1em;
@@ -167,7 +180,7 @@
         }
 
         .active {
-          color: $btnHover !important;
+          color: $link !important;
           font-weight: bolder;
         }
       }

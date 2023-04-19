@@ -11,7 +11,7 @@
                 {{ user.name }}
               </nuxt-link>
               <p>
-                {{ user.designation }}<span class="dot">.</span
+                {{ user.designation }}<span class="dot">•</span
                 >{{ user.department.department_name }}
               </p>
             </div>

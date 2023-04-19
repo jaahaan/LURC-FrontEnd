@@ -379,7 +379,7 @@ export default {
       }, timerLength);
     },
     async sendMsg() {
-      if (event.key === "Enter" && this.data.msg) {
+      if (this.data.msg) {
         this.socket.emit("stop typing", this.selectedUserInfo.room_id);
         if (this.data.msg.trim() == "") return;
         const msg = this.data.msg;

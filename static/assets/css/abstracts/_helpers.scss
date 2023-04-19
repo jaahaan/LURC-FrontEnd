@@ -8,11 +8,34 @@
 .bg-gray {
   background-color: #f8f8f8;
 }
+
 .t-clr__primary {
   background-color: $primaryColor !important;
 }
 .t-clr__secondary {
   color: $secondaryColor !important;
+}
+.t-clr__link {
+  color: $link !important;
+}
+.t_clr__green {
+  color: $upVote !important;
+  font-weight: bold;
+}
+.t_clr__red {
+  color: $downVote !important;
+  font-weight: bold;
+}
+.b-radius {
+  border-radius: 10px;
+}
+.b_bottom {
+  border-bottom: 1px solid $borderColor;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.mt-40 {
+  margin-top: 40px;
 }
 .pt-100 {
   padding-top: 100px;

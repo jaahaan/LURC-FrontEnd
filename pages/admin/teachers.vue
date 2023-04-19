@@ -10,6 +10,18 @@
                 Add New Member
               </button>
             </div>
+            <Form ref="formInline">
+              <FormItem prop="user">
+                <Input
+                  type="text"
+                  v-model="search"
+                  placeholder="Search Faculty Member"
+                  @on-keyup="filterTeachers"
+                >
+                  <Icon type="ios-search" slot="prepend"></Icon>
+                </Input>
+              </FormItem>
+            </Form>
             <table class="table table-bordered">
               <thead>
                 <tr>
@@ -92,8 +104,74 @@
                     </td>
                   </template>
                 </tr>
+                <div
+                  v-if="loadMoreLoading && !noTeacherRemaining"
+                  class="loader-lg"
+                >
+                  <i class="ivu-load-loop ivu-icon ivu-icon-ios-loading"></i>
+                </div>
               </tbody>
             </table>
+            <!-- <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                  <th scope="col"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+                <tr>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                  <td scope="col"></td>
+                </tr>
+              </tbody>
+            </table> -->
           </div>
         </div>
       </section>
@@ -113,7 +191,7 @@
               :required="true"
             >
               <Input
-                type="text"
+                type="email"
                 placeholder="email"
                 v-model="formValue.email"
               ></Input>
@@ -288,7 +366,11 @@ export default {
       isDataLoading: true,
       isAdding: false,
       sending: false,
+      loadMoreLoading: false,
+      noTeacherRemaining: false,
       teachersInfo: [],
+      limit: 10,
+      search: "",
       formValue: {
         email: "",
         designation: "",
@@ -329,9 +411,11 @@ export default {
 
   methods: {
     addTeacherButton() {
+      this.errors = [];
       this.addTeacherModal = true;
     },
     async closeModal() {
+      this.errors = [];
       this.addTeacherModal = false;
       const res = await this.callApi("get", "/api/get_teachers");
       if (res.status == 200) {
@@ -358,6 +442,7 @@ export default {
         });
     },
     async addTeacher() {
+      this.errors = [];
       let validation = true;
       this.clearErrorMessage();
       if (this.formValue.email.trim() == "") {
@@ -395,7 +480,9 @@ export default {
         }
       }
       this.isAdding = false;
+      this.errors = [];
     },
+
     showEdit(index) {
       if (this.teachersInfo[index].id) {
         this.UpdateValue.indexNumber = index;
@@ -412,6 +499,7 @@ export default {
       }
     },
     async updateTeacher() {
+      this.errors = [];
       let validation = true;
       this.clearErrorMessage();
       if (this.editObj.email.trim() == "") {
@@ -448,7 +536,9 @@ export default {
         }
       }
       this.sending = false;
+      this.errors = [];
     },
+
     showRemove(index) {
       this.deleteValue.email = this.teachersInfo[index].email;
       this.deleteValue.id = this.teachersInfo[index].id;
@@ -456,7 +546,7 @@ export default {
       this.deleteValue.indexNumber = index;
       this.deleteModal = true;
     },
-    async remove(index) {
+    async remove() {
       let ob = {
         id: this.deleteValue.id,
       };
@@ -475,9 +565,26 @@ export default {
       }
     },
 
+    async filterTeachers() {
+      // this.isFilter = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_teachers??search=${this.search}&limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        this.teachersInfo = res.data.data;
+      } else {
+        this.swr();
+      }
+      // this.isFilter = false;
+    },
+
     async getTeachers() {
       this.isDataLoading = true;
-      const res = await this.callApi("get", "/api/get_teachers");
+      const res = await this.callApi(
+        "get",
+        `/api/get_teachers??search=${this.search}&limit=${this.limit}`
+      );
       if (res.status == 200) {
         this.teachersInfo = res.data.data;
       } else {
@@ -485,15 +592,54 @@ export default {
       }
       this.isDataLoading = false;
     },
+
+    async loadMore(more) {
+      if (this.noTeacherRemaining) return;
+
+      this.limit = this.limit + more;
+      this.loadMoreLoading = true;
+      const res = await this.callApi(
+        "get",
+        `/api/get_teachers?limit=${this.limit}`
+      );
+      if (res.status == 200) {
+        let prevLength = this.teachersInfo.length;
+        if (this.teachersInfo.length == res.data.data.length) {
+          this.noTeacherRemaining = true;
+        }
+        for (let i in res.data.data) {
+          console.log("pushing data");
+          let d = res.data.data[i];
+          if (i >= prevLength) {
+            this.teachersInfo.push(d);
+          }
+        }
+      }
+      this.loadMoreLoading = false;
+    },
     async reset() {
       this.editObj.id = "";
       this.clearErrorMessage();
       this.getTeachers();
+      this.errors = [];
     },
   },
 
   async created() {
     this.getTeachers();
+  },
+  mounted() {
+    window.onscroll = () => {
+      this.bottomOfWindow =
+        window.pageYOffset + window.innerHeight >
+        document.body.scrollHeight - 100;
+
+      if (this.bottomOfWindow) {
+        if (!this.loadMoreLoading) {
+          this.loadMore(5);
+        }
+      }
+    };
   },
 };
 </script>

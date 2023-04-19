@@ -1,68 +1,99 @@
 <template>
   <div>
     <div class="alert alert-dark p-2" v-if="msg">{{ msg }}</div>
+
     <div class="mb-2">
       <input type="text" v-model="data.name" placeholder="Name" />
-      <span class="text-danger" v-if="errors.name">{{ errors.name[0] }}</span>
+      <span class="text-danger" v-if="errors.name">{{ errors.name }}</span>
     </div>
     <div class="mb-2">
       <input type="email" v-model="data.email" placeholder="Email" />
-      <span class="text-danger" v-if="errors.email">{{ errors.email[0] }}</span>
+      <span class="text-danger" v-if="errors.email">{{ errors.email }}</span>
     </div>
-    <div class="mb-2">
-      <input type="password" v-model="data.password" placeholder="Password" />
-      <span class="text-danger" v-if="errors.password">{{
-        errors.password[0]
-      }}</span>
-    </div>
-    <div class="mb-2">
-      <input
-        type="password"
-        v-model="data.password_confirmation"
-        placeholder="Comfirm Password"
-      />
-      <span class="text-danger" v-if="errors.password_confirmation">{{
-        errors.password_confirmation[0]
-      }}</span>
-    </div>
-    <div class="mb-2">
-      <input type="number" v-model="data.batch" placeholder="Batch" />
-      <span class="text-danger" v-if="errors.batch">{{ errors.batch[0] }}</span>
-    </div>
-    <div class="mb-2">
-      <Select v-model="data.department" placeholder="Department">
-        <Option
-          v-for="(department, index) in departmentInfo"
-          :key="index"
-          :value="department.id"
-          >{{ department.department_name }}</Option
+    <form autocomplete="off">
+      <div class="mb-2">
+        <div class="password">
+          <input
+            :type="passwordFieldType"
+            v-model="data.password"
+            placeholder="Password"
+          />
+          <div class="icon">
+            <i
+              @click="toggleShow"
+              class="fas"
+              :class="{
+                'fa-eye-slash': !showPassword,
+                'fa-eye': showPassword,
+              }"
+            ></i>
+          </div>
+        </div>
+        <span class="text-danger" v-if="errors.password">{{
+          errors.password
+        }}</span>
+      </div>
+      <div class="mb-2">
+        <div class="password">
+          <input
+            :type="conPasswordFieldType"
+            v-model="data.password_confirmation"
+            placeholder="Confirm Password"
+          />
+          <div class="icon">
+            <i
+              @click="toggleConPassShow"
+              class="fas"
+              :class="{
+                'fa-eye-slash': !showConPassword,
+                'fa-eye': showConPassword,
+              }"
+            ></i>
+          </div>
+        </div>
+        <span class="text-danger" v-if="errors.password_confirmation">{{
+          errors.password_confirmation
+        }}</span>
+      </div>
+      <div class="mb-2">
+        <input type="number" v-model="data.batch" placeholder="Batch" />
+        <span class="text-danger" v-if="errors.batch">{{ errors.batch }}</span>
+      </div>
+      <div class="mb-2">
+        <Select v-model="data.department" placeholder="Department">
+          <Option
+            v-for="(department, index) in departmentInfo"
+            :key="index"
+            :value="department.id"
+            >{{ department.department_name }}</Option
+          >
+        </Select>
+        <span class="text-danger" v-if="errors.department">{{
+          errors.department
+        }}</span>
+      </div>
+      <div class="mb-2">
+        <button
+          type="button"
+          :class="[
+            data.name &&
+            data.email &&
+            data.password &&
+            data.password_confirmation &&
+            data.batch &&
+            data.department
+              ? ' main-btn-change col-12'
+              : ' main-btn col-12',
+            ' main-btn col-12',
+          ]"
+          @click="register"
+          :disabled="isLoading"
+          :loading="isLoading"
         >
-      </Select>
-      <span class="text-danger" v-if="errors.department">{{
-        errors.department[0]
-      }}</span>
-    </div>
-    <div class="mb-2">
-      <button
-        type="button"
-        :class="[
-          data.name &&
-          data.email &&
-          data.password &&
-          data.password_confirmation &&
-          data.batch &&
-          data.department
-            ? ' main-btn-change col-12'
-            : ' main-btn col-12',
-          ' main-btn col-12',
-        ]"
-        @click="register"
-        :disabled="isLoading"
-        :loading="isLoading"
-      >
-        {{ isLoading ? "Registering.." : "Register" }}
-      </button>
-    </div>
+          {{ isLoading ? "Registering.." : "Register" }}
+        </button>
+      </div>
+    </form>
   </div>
 </template>
 
@@ -81,9 +112,23 @@ export default {
       isLoading: false,
       msg: "",
       errors: [],
+      showPassword: false,
+      showConPassword: false,
+      passwordFieldType: "password",
+      conPasswordFieldType: "password",
     };
   },
   methods: {
+    toggleShow() {
+      this.showPassword = !this.showPassword;
+      this.passwordFieldType =
+        this.passwordFieldType === "password" ? "text" : "password";
+    },
+    toggleConPassShow() {
+      this.showConPassword = !this.showConPassword;
+      this.conPasswordFieldType =
+        this.conPasswordFieldType === "password" ? "text" : "password";
+    },
     async register() {
       // if (this.data.name.trim() == "") return this.e("Name is required");
       // if (this.data.email.trim() == "")
@@ -121,10 +166,29 @@ export default {
         this.errors = [];
       } else {
         if (res.status == 422) {
-          for (let i in res.data.errors) {
-            this.errors = res.data.errors;
-            // this.e(res.data.errors[i][0]);
+          if (res.data.name) {
+            this.errors.name = res.data.name[0];
           }
+          if (res.data.email) {
+            this.errors.email = res.data.email[0];
+          }
+          if (res.data.password) {
+            this.errors.password = res.data.password[0];
+          }
+          if (res.data.password_confirmation) {
+            this.errors.password_confirmation =
+              res.data.password_confirmation[0];
+          }
+          if (res.data.batch) {
+            this.errors.batch = res.data.batch[0];
+          }
+          if (res.data.department) {
+            this.errors.department = res.data.department[0];
+          }
+          // for (let i in res.data.errors) {
+          //   this.errors = res.data.errors;
+          //   // this.e(res.data.errors[i][0]);
+          // }
         } else {
           this.swr();
         }

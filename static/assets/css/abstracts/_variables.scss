@@ -4,9 +4,9 @@
 :root {
   --nav-height: 60px;
 
-  @include breakpoint-max(767px) {
-    --nav-height: 60px;
-  }
+  // @include breakpoint-max(767px) {
+  //   --nav-height: 60px;
+  // }
 }
 
 $titleRed: #bc5d5d;
